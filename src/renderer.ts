@@ -4,8 +4,11 @@ import PrimeVue from "primevue/config";
 import Aura from "primevue/themes/aura";
 import "primeicons/primeicons.css";
 import "./index.css";
+import { router } from "./view/routes";
 
 const app = createApp(App);
+app.use(router);
+
 app.use(PrimeVue, {
   ripple: true,
   theme: {
@@ -17,4 +20,5 @@ app.use(PrimeVue, {
     },
   },
 });
+
 app.mount("#app");
