@@ -1,8 +1,8 @@
 import path from "path";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getLocalIPAddress } from "./service/utils";
-import { CrawlerImpl } from "./service/crawler/CrawlerImpl";
-import type { Crawler } from "./service/crawler/type";
+import { MainWindowHelper } from "./MainWindowHelper";
+import { screenshotService } from "./service/screenshot-service";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -28,6 +28,8 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  MainWindowHelper.registerMainWindow(mainWindow);
 };
 
 // This method will be called when Electron has finished
@@ -36,28 +38,7 @@ const createWindow = () => {
 app.on("ready", () => {
   ipcMain.handle("screenshot:getLocalIPAddress", () => getLocalIPAddress());
   ipcMain.handle("screenshot:startScreenshot", (_event, url: string) => {
-    const crawler: Crawler = CrawlerImpl.getInstance();
-    const start = Date.now();
-    crawler.getStoriesMetadata(url).then(x => {
-      if (x.success === true) {
-        const screenshotStart = Date.now();
-        console.log(x.storyMetadataList);
-        crawler
-          .screenshotStories(
-            url,
-            x.storyMetadataList,
-            {
-              width: 1920,
-              height: 1080,
-            },
-            8,
-          )
-          .then(_ => {
-            console.log(`Snapshot Time spent: ${Date.now() - screenshotStart}ms`);
-            console.log(`Total Time spent: ${Date.now() - start}ms`);
-          });
-      }
-    });
+    screenshotService(url);
   });
   createWindow();
 });

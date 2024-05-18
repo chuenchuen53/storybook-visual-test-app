@@ -11,15 +11,18 @@ export interface ContainerInfo {
 
 export class DockerContainer {
   private static readonly COMMON_PREFIX = "visual-test-app";
-  private static readonly instances: Map<DockerContainerType, DockerContainer> = new Map();
-  private static readonly portMap: Record<DockerContainerType, number> = Object.freeze({
+  private static readonly portMap: Record<DockerContainerType, number> = {
     metadata: 6100,
     screenshot: 6200,
-  });
+  };
+  private static readonly instances: Record<DockerContainerType, DockerContainer> = {
+    metadata: new DockerContainer("metadata"),
+    screenshot: new DockerContainer("screenshot"),
+  };
 
   private readonly containerNamePrefix: string;
   private readonly startPort: number;
-  private readonly containers: ContainerInfo[] = [];
+  private containers: ContainerInfo[] = [];
 
   private constructor(containerType: DockerContainerType) {
     this.containerNamePrefix = `${DockerContainer.COMMON_PREFIX}-${containerType}`;
@@ -27,11 +30,7 @@ export class DockerContainer {
   }
 
   public static getInstance(containerType: DockerContainerType): DockerContainer {
-    if (!this.instances.has(containerType)) {
-      this.instances.set(containerType, new DockerContainer(containerType));
-    }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.instances.get(containerType)!;
+    return DockerContainer.instances[containerType];
   }
 
   public getContainerInfo(): ContainerInfo[] {
@@ -50,27 +49,29 @@ export class DockerContainer {
     if (this.containers.length === 0) return;
     const allContainerIds = this.containers.map(x => x.id);
     await execa("docker", ["stop", ...allContainerIds]);
-    this.containers.splice(0, this.containers.length);
+    this.containers = [];
   }
 
+  /**
+   *
+   * @returns container id
+   */
   private async startDockerContainer(containerName: string, mapPort: number): Promise<string> {
-    const { stdout } =
-      // await execa`docker run --rm -d --shm-size=1024m --cap-add=SYS_ADMIN --name ${containerName} -p ${mapPort}:9222 ${CHROME_IMAGE} --disable-gpu --hide-scrollbars --no-first-run`;
-      await execa("docker", [
-        "run",
-        "--rm",
-        "-d",
-        "--shm-size=1024m",
-        "--cap-add=SYS_ADMIN",
-        "--name",
-        containerName,
-        "-p",
-        `${mapPort}:9222`,
-        CHROME_IMAGE,
-        "--disable-gpu",
-        "--hide-scrollbars",
-        "--no-first-run",
-      ]);
+    const { stdout } = await execa("docker", [
+      "run",
+      "--rm",
+      "-d",
+      "--shm-size=1024m",
+      "--cap-add=SYS_ADMIN",
+      "--name",
+      containerName,
+      "-p",
+      `${mapPort}:9222`,
+      CHROME_IMAGE,
+      "--disable-gpu",
+      "--hide-scrollbars",
+      "--no-first-run",
+    ]);
     return stdout;
   }
 }

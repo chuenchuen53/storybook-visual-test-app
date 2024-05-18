@@ -16,9 +16,9 @@
 <script setup lang="ts">
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
-import { useScreenshotStore } from "../../stores/ScreenshotStore";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
+import { useScreenshotStore } from "../../stores/ScreenshotStore";
 
 const store = useScreenshotStore();
 const { storybookUrl, processing } = storeToRefs(store);

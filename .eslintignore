@@ -1,0 +1,6 @@
+.vite/build/
+forge.env.d.ts
+vite.base.config.ts
+vite.main.config.ts
+vite.preload.config.ts
+vite.renderer.config.ts

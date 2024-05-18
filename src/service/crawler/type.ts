@@ -1,14 +1,4 @@
-export interface StoryScreenshot {
-  id: string;
-  timeSpent: number;
-  storyErr: boolean;
-}
-
-export interface ScreenshotStoriesResult {
-  success: boolean;
-  viewport: { width: number; height: number };
-  storyScreenshotList: StoryScreenshot[];
-}
+import type { StoryState } from "../../MainWindowHelper";
 
 export interface StoryMetadata {
   id: string;
@@ -22,32 +12,43 @@ export interface StoryMetadata {
 
 export interface GetStoriesMetadataResult {
   success: boolean;
-  storyMetadataList: StoryMetadata[];
+  storyMetadataList: StoryMetadata[] | null;
 }
 
-export interface SavedStoryMetadata {
-  id: string;
-  componentId: string;
-  title: string;
-  kind: string;
-  tags: string[];
-  name: string;
-  story: string;
-  timeSpent: number;
+export interface Viewport {
+  width: number;
+  height: number;
+}
+
+export interface StoryScreenshotMetadata extends StoryMetadata {
   storyErr: boolean;
 }
 
 export interface SavedMetadata {
+  uuid: string;
   createAt: string;
-  storyMetadataList: SavedStoryMetadata[];
+  viewport: Viewport;
+  storyMetadataList: StoryScreenshotMetadata[];
+}
+
+export interface ScreenshotStoriesResult {
+  success: boolean;
+  data: SavedMetadata | null;
 }
 
 export interface Crawler {
-  getStoriesMetadata(url: string): Promise<GetStoriesMetadataResult>;
+  getStoriesMetadata(
+    storybookUrl: string,
+    onStartingBrowser: () => void,
+    onComputingMetadata: () => void,
+    onError: (errorMsg: string) => void,
+  ): Promise<GetStoriesMetadataResult>;
+
   screenshotStories(
-    url: string,
+    storybookUrl: string,
     storyMetadataList: StoryMetadata[],
-    viewport: { width: number; height: number },
+    viewport: Viewport,
     parallel: number,
+    onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void,
   ): Promise<ScreenshotStoriesResult>;
 }

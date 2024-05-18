@@ -1,16 +1,20 @@
+import path from "path";
 import puppeteer from "puppeteer-core";
 import fs from "fs-extra";
+import { v4 as uuidv4 } from "uuid";
 import { DockerContainer } from "../docker-helper/DockerContainer";
 import { sleep } from "../utils";
+import { screenshotDir, screenshotMetadataFilename } from "../Filepath";
 import { ScreenshotManager } from "./ScreenshotManager";
-import type { ExtendedBrowser } from "./ScreenshotManager";
+import type { StoryState } from "../../MainWindowHelper";
+import type { NamedBrowser } from "./ScreenshotManager";
 import type {
   Crawler,
   GetStoriesMetadataResult,
+  SavedMetadata,
   ScreenshotStoriesResult,
   StoryMetadata,
-  SavedStoryMetadata,
-  SavedMetadata,
+  Viewport,
 } from "./type";
 import type { Browser } from "puppeteer-core";
 
@@ -25,11 +29,21 @@ export class CrawlerImpl implements Crawler {
     return CrawlerImpl.instance;
   }
 
-  public async getStoriesMetadata(url: string): Promise<GetStoriesMetadataResult> {
+  /**
+   * only work in storybook v8
+   * */
+  public async getStoriesMetadata(
+    storybookUrl: string,
+    onStartingBrowser: () => void,
+    onComputingMetadata: () => void,
+    onError: (errorMsg: string) => void,
+  ): Promise<GetStoriesMetadataResult> {
     let container: DockerContainer | undefined = undefined;
     let browser: Browser | undefined = undefined;
 
     try {
+      onStartingBrowser();
+
       container = DockerContainer.getInstance("metadata");
       await container.start();
       const containerInfo = container.getContainerInfo()[0];
@@ -39,10 +53,12 @@ export class CrawlerImpl implements Crawler {
         browserURL: `http://localhost:${containerInfo.port}`,
       });
       const page = await browser.newPage();
-      await page.goto(url + "/iframe.html?selectedKind=story-crawler-kind&selectedStory=story-crawler-story", {
+      await page.goto(storybookUrl + "/iframe.html?selectedKind=story-crawler-kind&selectedStory=story-crawler-story", {
         timeout: 30000,
         waitUntil: "networkidle0",
       });
+
+      onComputingMetadata();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await page.waitForFunction(() => (window as any).__STORYBOOK_PREVIEW__?.storyStoreValue, {
@@ -57,6 +73,7 @@ export class CrawlerImpl implements Crawler {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const api = (window as any).__STORYBOOK_PREVIEW__;
         const rawData = await api.storyStoreValue.extract();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return Object.values(rawData).map((x: any) => ({
           id: x.id,
           componentId: x.componentId,
@@ -70,8 +87,8 @@ export class CrawlerImpl implements Crawler {
 
       return { success: true, storyMetadataList: result };
     } catch (error) {
-      console.error(error);
-      return { success: false, storyMetadataList: [] };
+      onError(error.message);
+      return { success: false, storyMetadataList: null };
     } finally {
       try {
         if (browser) await browser.disconnect();
@@ -82,17 +99,19 @@ export class CrawlerImpl implements Crawler {
   }
 
   public async screenshotStories(
-    url: string,
+    storybookUrl: string,
     storyMetadataList: StoryMetadata[],
-    viewport: { width: number; height: number },
+    viewport: Viewport,
     parallel: number,
+    onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void,
   ): Promise<ScreenshotStoriesResult> {
     let container: DockerContainer | undefined = undefined;
-    const browsers: ExtendedBrowser[] = [];
+    const browsers: NamedBrowser[] = [];
 
     try {
       container = DockerContainer.getInstance("screenshot");
 
+      // todo: test if ok to parallel start
       for (let i = 0; i < parallel; i++) {
         await container.start();
       }
@@ -109,39 +128,35 @@ export class CrawlerImpl implements Crawler {
 
           browsers[i] = {
             browser,
-            dockerContainerId: containerInfo[i].id,
-            connectionURL: `http://localhost:${containerInfo[i].port}`,
+            name: `browser-${i}`,
           };
         }),
       );
 
-      const screenshotManager = new ScreenshotManager(browsers);
-      const result = await screenshotManager.startScreenshot(
-        storyMetadataList.map(x => ({ storyId: x.id, url, viewport })),
+      const screenshotManager = new ScreenshotManager(
+        storybookUrl,
+        browsers,
+        storyMetadataList,
+        viewport,
+        onStoryStateChange,
       );
+      const result = await screenshotManager.startScreenshot();
 
-      const metadataFilePath = "./temp/test-screenshot/metadata.json";
-      const list: SavedStoryMetadata[] = storyMetadataList.map((x, i) => ({
-        id: x.id,
-        componentId: x.componentId,
-        title: x.title,
-        kind: x.kind,
-        tags: x.tags,
-        name: x.name,
-        story: x.story,
-        timeSpent: result[i].timeSpent,
-        storyErr: result[i].storyErr,
-      }));
+      const metadataFilePath = path.join(screenshotDir, screenshotMetadataFilename);
+      const uuid = uuidv4();
+
       const saveMetaData: SavedMetadata = {
+        uuid,
         createAt: new Date().toISOString(),
-        storyMetadataList: list,
+        viewport,
+        storyMetadataList: result,
       };
       fs.writeFileSync(metadataFilePath, JSON.stringify(saveMetaData));
 
-      return { success: true, viewport, storyScreenshotList: result };
+      return { success: true, data: saveMetaData };
     } catch (error) {
       console.error(error);
-      return { success: false, viewport, storyScreenshotList: [] };
+      return { success: false, data: null };
     } finally {
       try {
         if (browsers.length > 0) {

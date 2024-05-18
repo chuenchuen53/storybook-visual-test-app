@@ -1,36 +1,39 @@
+import path from "path";
 import { sleep } from "../utils";
-import type { StoryScreenshot } from "./type";
+import { StoryState } from "../../MainWindowHelper";
+import { screenshotDir } from "../Filepath";
+import type { StoryMetadata, StoryScreenshotMetadata, Viewport } from "./type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
-function storyUrl(url: string, storyId: string) {
-  return `${url}/iframe.html?args=&id=${storyId}`;
-}
-
-export interface ExtendedBrowser {
+export interface NamedBrowser {
   browser: Browser;
-  dockerContainerId: string;
-  connectionURL: string;
-}
-
-export interface ScreenshotJob {
-  storyId: string;
-  url: string;
-  viewport: { width: number; height: number };
+  name: string;
 }
 
 export class ScreenshotManager {
-  private browsers: ExtendedBrowser[];
-  private jobs: ScreenshotJob[] = [];
+  private readonly storybookUrl: string;
+  private readonly browsers: NamedBrowser[];
+  private readonly storyMetadataList: StoryMetadata[];
+  private readonly viewport: Viewport;
+  private readonly onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void;
 
-  constructor(browsers: ExtendedBrowser[]) {
+  private readonly result: StoryScreenshotMetadata[] = [];
+
+  constructor(
+    storybookUrl: string,
+    browsers: NamedBrowser[],
+    storyMetadataList: StoryMetadata[],
+    viewport: Viewport,
+    onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void,
+  ) {
+    this.storybookUrl = storybookUrl;
     this.browsers = browsers;
-    console.log(browsers.map(x => x.connectionURL));
+    this.storyMetadataList = storyMetadataList;
+    this.viewport = viewport;
+    this.onStoryStateChange = onStoryStateChange;
   }
 
-  async startScreenshot(jobs: ScreenshotJob[]): Promise<StoryScreenshot[]> {
-    this.jobs = jobs;
-    const results: StoryScreenshot[] = [];
-
+  async startScreenshot(): Promise<StoryScreenshotMetadata[]> {
     let nextJobIndex = this.browsers.length;
 
     await Promise.all(
@@ -38,11 +41,11 @@ export class ScreenshotManager {
         return new Promise<void>((resolve, reject) => {
           (async () => {
             try {
-              if (!(index + 1 > this.jobs.length)) {
-                await this.screenshot(browser, index, results);
-                while (nextJobIndex < this.jobs.length) {
+              if (!(index + 1 > this.storyMetadataList.length)) {
+                await this.screenshot(browser, index);
+                while (nextJobIndex < this.storyMetadataList.length) {
                   const jobIndex = nextJobIndex++;
-                  await this.screenshot(browser, jobIndex, results);
+                  await this.screenshot(browser, jobIndex);
                 }
               }
               resolve();
@@ -54,17 +57,21 @@ export class ScreenshotManager {
       }),
     );
 
-    return results;
+    return this.result;
   }
 
-  private async screenshot(browser: ExtendedBrowser, jobIndex: number, results: StoryScreenshot[]) {
-    console.log(`Screenshot ${this.jobs[jobIndex].storyId} by browser with connection url ${browser.connectionURL}`);
+  private storyUrl(url: string, storyId: string) {
+    return `${url}/iframe.html?args=&id=${storyId}`;
+  }
 
-    const job = this.jobs[jobIndex];
-    const start = Date.now();
+  private async screenshot(browser: NamedBrowser, jobIndex: number) {
+    const story = this.storyMetadataList[jobIndex];
+
+    this.onStoryStateChange(story.id, StoryState.CAPTURING, browser.name);
+
     const page = await browser.browser.newPage();
-    await page.setViewport({ width: 1280, height: 720 });
-    await page.goto(storyUrl(job.url, job.storyId), {
+    await page.setViewport(this.viewport);
+    await page.goto(this.storyUrl(this.storybookUrl, story.id), {
       timeout: 30000,
       waitUntil: "networkidle0",
     });
@@ -72,7 +79,7 @@ export class ScreenshotManager {
     const errorStack = await page.$("#error-stack");
     const storyErr = errorStack ? await page.evaluate(el => el.textContent.trim().length > 0, errorStack) : false;
 
-    const filepath = `temp/test-screenshot/${job.storyId}.png`;
+    const filepath = path.join(screenshotDir, `${story.id}.png`);
 
     const rootElementSelector = "#storybook-root";
     // Wait for the root element to be available
@@ -112,7 +119,7 @@ export class ScreenshotManager {
 
       if (trialTimes === maxTrials) {
         // todo: this case are mostly happen when the story have element that is absolute or fixed, like modal, tooltip, etc
-        console.log("[Warning]: Element is not visible " + job.storyId);
+        console.log("[Warning]: Element is not visible " + story.id);
         await page.screenshot({ path: filepath });
       } else {
         await captureElement.screenshot({ path: filepath });
@@ -122,10 +129,17 @@ export class ScreenshotManager {
     }
 
     await page.close();
-    results[jobIndex] = {
-      id: job.storyId,
-      timeSpent: Date.now() - start,
+    this.result[jobIndex] = {
+      id: story.id,
+      componentId: story.componentId,
+      kind: story.kind,
+      name: story.name,
+      story: story.story,
+      tags: story.tags,
+      title: story.title,
       storyErr,
     };
+
+    this.onStoryStateChange(story.id, StoryState.FINISHED, browser.name);
   }
 }
