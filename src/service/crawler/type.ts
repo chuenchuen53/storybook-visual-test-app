@@ -1,5 +1,3 @@
-import type { StoryState } from "../../MainWindowHelper";
-
 export interface StoryMetadata {
   id: string;
   componentId: string;
@@ -36,6 +34,13 @@ export interface ScreenshotStoriesResult {
   data: SavedMetadata | null;
 }
 
+export enum StoryState {
+  WAITING = "WAITING",
+  CAPTURING = "CAPTURING",
+  FINISHED = "FINISHED",
+  FAILED = "FAILED",
+}
+
 export interface Crawler {
   getStoriesMetadata(
     storybookUrl: string,
@@ -49,6 +54,7 @@ export interface Crawler {
     storyMetadataList: StoryMetadata[],
     viewport: Viewport,
     parallel: number,
-    onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void,
+    onStartScreenshot: () => void,
+    onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ): Promise<ScreenshotStoriesResult>;
 }

@@ -6,16 +6,16 @@ import { DockerContainer } from "../docker-helper/DockerContainer";
 import { sleep } from "../utils";
 import { screenshotDir, screenshotMetadataFilename } from "../Filepath";
 import { ScreenshotManager } from "./ScreenshotManager";
-import type { StoryState } from "../../MainWindowHelper";
-import type { NamedBrowser } from "./ScreenshotManager";
 import type {
   Crawler,
   GetStoriesMetadataResult,
   SavedMetadata,
   ScreenshotStoriesResult,
   StoryMetadata,
+  StoryState,
   Viewport,
 } from "./type";
+import type { NamedBrowser } from "./ScreenshotManager";
 import type { Browser } from "puppeteer-core";
 
 export class CrawlerImpl implements Crawler {
@@ -103,7 +103,8 @@ export class CrawlerImpl implements Crawler {
     storyMetadataList: StoryMetadata[],
     viewport: Viewport,
     parallel: number,
-    onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void,
+    onStartScreenshot: () => void,
+    onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ): Promise<ScreenshotStoriesResult> {
     let container: DockerContainer | undefined = undefined;
     const browsers: NamedBrowser[] = [];
@@ -120,6 +121,7 @@ export class CrawlerImpl implements Crawler {
       // wait for chrome in container to start
       await sleep(2000);
 
+      onStartScreenshot();
       await Promise.all(
         Array.from({ length: parallel }, async (_, i) => {
           const browser = await puppeteer.connect({

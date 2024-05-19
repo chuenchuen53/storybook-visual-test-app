@@ -1,12 +1,12 @@
 <template>
   <div class="flex-grow">
-    <div class="fixed bottom-0 left-0 top-[50px] z-10 w-[300px]">
+    <div class="fixed bottom-0 left-0 top-[50px] z-10 w-[450px]">
       <StoryTreeExplorer />
     </div>
 
-    <div class="justify-content-center ml-[300px]">
+    <div class="justify-content-center ml-[450px]">
       <div class="w-full p-6">
-        <Steps v-model:activeStep="activeStep" :model="items" class="mb-6" />
+        <Steps :active-step="activeStep" :model="items" class="mb-6"> </Steps>
         <MetadataCrawler />
       </div>
     </div>
@@ -21,8 +21,15 @@ import { useScreenshotStore } from "../stores/ScreenshotStore";
 import StoryTreeExplorer from "../components/StoryTreeExplorer.vue";
 
 const store = useScreenshotStore();
-const { activeStep } = storeToRefs(store);
-const {} = store;
+const { state, activeStep } = storeToRefs(store);
 
-const items = [{ label: "Metadata" }, { label: "Screenshot" }];
+const items = [
+  { label: "Idle" },
+  { label: "Checking" },
+  { label: "Preparing" },
+  { label: "Metadata" },
+  { label: "Preparing" },
+  { label: "Screenshot" },
+  { label: "Finished" },
+];
 </script>

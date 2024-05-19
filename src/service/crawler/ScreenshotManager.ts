@@ -1,7 +1,7 @@
 import path from "path";
 import { sleep } from "../utils";
-import { StoryState } from "../../MainWindowHelper";
 import { screenshotDir } from "../Filepath";
+import { StoryState } from "./type";
 import type { StoryMetadata, StoryScreenshotMetadata, Viewport } from "./type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
@@ -15,7 +15,12 @@ export class ScreenshotManager {
   private readonly browsers: NamedBrowser[];
   private readonly storyMetadataList: StoryMetadata[];
   private readonly viewport: Viewport;
-  private readonly onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void;
+  private readonly onStoryStateChange: (
+    storyId: string,
+    state: StoryState,
+    browserName: string,
+    storyErr: boolean | null,
+  ) => void;
 
   private readonly result: StoryScreenshotMetadata[] = [];
 
@@ -24,7 +29,7 @@ export class ScreenshotManager {
     browsers: NamedBrowser[],
     storyMetadataList: StoryMetadata[],
     viewport: Viewport,
-    onStoryStateChange: (storyId: string, state: StoryState, browserName: string) => void,
+    onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ) {
     this.storybookUrl = storybookUrl;
     this.browsers = browsers;
@@ -67,7 +72,7 @@ export class ScreenshotManager {
   private async screenshot(browser: NamedBrowser, jobIndex: number) {
     const story = this.storyMetadataList[jobIndex];
 
-    this.onStoryStateChange(story.id, StoryState.CAPTURING, browser.name);
+    this.onStoryStateChange(story.id, StoryState.CAPTURING, browser.name, null);
 
     const page = await browser.browser.newPage();
     await page.setViewport(this.viewport);
@@ -140,6 +145,6 @@ export class ScreenshotManager {
       storyErr,
     };
 
-    this.onStoryStateChange(story.id, StoryState.FINISHED, browser.name);
+    this.onStoryStateChange(story.id, StoryState.FINISHED, browser.name, storyErr);
   }
 }

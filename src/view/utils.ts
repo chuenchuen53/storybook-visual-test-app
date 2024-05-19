@@ -1,11 +1,19 @@
 import type { TreeNode } from "primevue/treenode";
-import type { StoryMetadata } from "src/service/crawler/type";
+import type { StoryMetadata, StoryState } from "src/service/crawler/type";
+
+export interface StoryMetadataInExplorer extends StoryMetadata {
+  state: StoryState;
+  browserName: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  storyErr: boolean | null;
+}
 
 export type StoryTree = {
-  [key: string]: StoryMetadata | StoryTree;
+  [key: string]: StoryMetadataInExplorer | StoryTree;
 };
 
-export function treeOfStoryMetadata(metadataArr: StoryMetadata[]): StoryTree {
+export function treeOfStoryMetadata(metadataArr: StoryMetadataInExplorer[]): StoryTree {
   const result: StoryTree = {};
 
   for (const metadata of metadataArr) {
@@ -29,7 +37,7 @@ export function treeOfStoryMetadata(metadataArr: StoryMetadata[]): StoryTree {
 function isLeftNode(node: StoryTree): boolean {
   const keys = Object.keys(node);
   const leftKeys = ["id", "componentId", "title", "kind", "tags", "name", "story"];
-  return keys.every(key => leftKeys.includes(key));
+  return leftKeys.every(key => keys.includes(key));
 }
 
 export function treeNodesForPrimevue(storyTree: StoryTree, parentKey = ""): TreeNode[] {
@@ -40,9 +48,12 @@ export function treeNodesForPrimevue(storyTree: StoryTree, parentKey = ""): Tree
     const node: TreeNode = {
       key: parentKey ? `${parentKey}-${key}` : key,
       label: key,
+      styleClass: "fking",
     };
 
-    if (!isLeftNode(value as StoryTree)) {
+    if (isLeftNode(value as StoryTree)) {
+      node.data = value;
+    } else {
       node.children = treeNodesForPrimevue(value as StoryTree, node.key);
     }
 

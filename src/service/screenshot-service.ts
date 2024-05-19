@@ -1,4 +1,5 @@
-import { MainWindowHelper, ScreenshotState } from "../MainWindowHelper";
+import { MainWindowHelper } from "../MainWindowHelper";
+import { ScreenshotState } from "../typing";
 import { CrawlerImpl } from "./crawler/CrawlerImpl";
 import { isDockerAvailable } from "./docker-helper/is-docker-available";
 import { checkDockerImage, CHROME_IMAGE, pullDockerImage } from "./docker-helper/docker-image";
@@ -34,8 +35,7 @@ export async function screenshotService(url: string) {
     const crawler: Crawler = CrawlerImpl.getInstance();
     const metadataResult = await crawler.getStoriesMetadata(
       url,
-      () =>
-        MainWindowHelper.sendScreenshotInfo({ type: "status", status: ScreenshotState.PREPARING_SCREENSHOT_BROWSER }),
+      () => MainWindowHelper.sendScreenshotInfo({ type: "status", status: ScreenshotState.PREPARING_METADATA_BROWSER }),
       () => MainWindowHelper.sendScreenshotInfo({ type: "status", status: ScreenshotState.COMPUTING_METADATA }),
       (x: string) =>
         MainWindowHelper.sendScreenshotInfo({ type: "error", errorMsg: "Failed to get stories metadata.\n" + x }),
@@ -43,6 +43,7 @@ export async function screenshotService(url: string) {
     MainWindowHelper.sendScreenshotInfo({ type: "new-metadata", storyMetadataList: metadataResult.storyMetadataList });
 
     if (metadataResult.success === true && metadataResult.storyMetadataList !== null) {
+      MainWindowHelper.sendScreenshotInfo({ type: "status", status: ScreenshotState.PREPARING_SCREENSHOT_BROWSER });
       const result = await crawler.screenshotStories(
         url,
         metadataResult.storyMetadataList,
@@ -51,8 +52,9 @@ export async function screenshotService(url: string) {
           height: 1080,
         },
         8,
-        (storyId, state, browserName) =>
-          MainWindowHelper.sendScreenshotInfo({ type: "update-story-state", storyId, state, browserName }),
+        () => MainWindowHelper.sendScreenshotInfo({ type: "status", status: ScreenshotState.CAPTURING_SCREENSHOT }),
+        (storyId, state, browserName, storyErr) =>
+          MainWindowHelper.sendScreenshotInfo({ type: "update-story-state", storyId, state, browserName, storyErr }),
       );
       if (result.success === false) {
         sendFailStatusAndErrMsg("Failed to take screenshot");
