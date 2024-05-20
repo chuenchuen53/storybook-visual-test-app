@@ -58,6 +58,8 @@
       </div>
     </div>
   </div>
+
+  <SaveCompareResultDialog />
 </template>
 
 <script setup lang="ts">
@@ -70,6 +72,7 @@ import Button from "primevue/button";
 import CompareResultExplorer from "../components/compare/CompareResultExplorer.vue";
 import CompareSetting from "../components/compare/CompareSetting.vue";
 import { useCompareStore } from "../stores/CompareStore";
+import SaveCompareResultDialog from "../components/compare/SaveCompareResultDialog.vue";
 
 const store = useCompareStore();
 const { currentDisplayingImgType, displayingSingleImg, displaySameImg, displayingDiffImg } = storeToRefs(store);

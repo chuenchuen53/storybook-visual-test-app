@@ -8,8 +8,10 @@ import {
   addedImgFolder,
   appDataRootDir,
   compareDir,
+  compareMetadataFilename,
   diffImgFolder,
   removedImgFolder,
+  savedComparisonDir,
   savedInfoFilename,
   savedReferenceDir,
   savedTestDir,
@@ -186,6 +188,21 @@ app.on("ready", () => {
       return await getImg(filepath);
     },
   );
+
+  ipcMain.handle("compare:saveComparisonResult", async () => {
+    try {
+      const srcDir = compareDir;
+      const metadata = await fs.readJSON(path.join(srcDir, compareMetadataFilename));
+      const { uuid, project } = metadata;
+
+      const destDir = path.join(savedComparisonDir, project, uuid);
+      await fs.copy(srcDir, destDir, { overwrite: true });
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return { success: false, errMsg: e.message };
+    }
+  });
 
   createWindow();
 });

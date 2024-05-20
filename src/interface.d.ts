@@ -8,6 +8,11 @@ export interface SavedScreenshotResponse {
   errMsg?: string;
 }
 
+export interface SavedScreenshotResponse {
+  success: boolean;
+  errMsg?: string;
+}
+
 export interface CompareResponse {
   uuid: string;
   createAt: string;
@@ -61,6 +66,7 @@ export interface CompareApi {
   getAvailableSets: (projectName: string) => Promise<GetAvailableSetResponse>;
   compare: (relativeRefDir: string, relativeTestDir: string) => Promise<CompareResponse>;
   openInExplorer: () => void;
+  saveComparisonResult: () => Promise<SavedScreenshotResponse>;
 }
 
 declare global {

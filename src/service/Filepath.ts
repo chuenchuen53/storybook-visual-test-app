@@ -18,12 +18,14 @@ const compareMetadataFilename = "metadata.json";
 
 const savedReferenceDir = path.join(savedDir, "reference");
 const savedTestDir = path.join(savedDir, "test");
+const savedComparisonDir = path.join(savedDir, "comparison");
 const savedInfoFilename = "saved-info.json";
 
 export {
   appDataRootDir,
   screenshotDir,
   screenshotMetadataFilename,
+  savedComparisonDir,
   savedReferenceDir,
   savedTestDir,
   savedInfoFilename,

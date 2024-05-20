@@ -12,7 +12,7 @@
           @click="openInExplorer"
         />
         <Button
-          v-if="true"
+          v-if="compareResult !== null"
           v-tooltip.bottom="'Save'"
           :disabled="false"
           icon="pi pi-save"
@@ -20,7 +20,7 @@
           text
           rounded
           size="small"
-          @click="console.log('todo')"
+          @click="openSaveDialog"
         />
       </div>
       <div class="flex gap-2">
@@ -112,7 +112,15 @@ import type { TreeNode } from "primevue/treenode";
 const store = useCompareStore();
 
 const { compareResult } = storeToRefs(store);
-const { openInExplorer, getAddedImg, getRemovedImg, getSameImg, getDiffImg, setCurrentDisplayingImgType } = store;
+const {
+  openInExplorer,
+  getAddedImg,
+  getRemovedImg,
+  getSameImg,
+  getDiffImg,
+  setCurrentDisplayingImgType,
+  openSaveDialog,
+} = store;
 
 const expandedKeys = ref<TreeExpandedKeys>({});
 const selectedKey = ref(null);

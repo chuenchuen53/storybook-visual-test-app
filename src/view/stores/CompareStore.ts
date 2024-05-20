@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { useToast } from "primevue/usetoast";
 import type { CompareResponse, GetAvailableSetResponse } from "../../interface";
 
 interface CompareSet {
@@ -16,6 +17,8 @@ interface ImgState {
 type CurrentDisplayingImgType = "same" | "added" | "removed" | "diff" | null;
 
 export const useCompareStore = defineStore("compare", () => {
+  const toast = useToast();
+
   const project = ref<string | null>(null);
 
   const availableProjects = ref<string[]>([]);
@@ -45,6 +48,9 @@ export const useCompareStore = defineStore("compare", () => {
     test: { loading: false, isExist: null, base64: null },
     diff: { loading: false, isExist: null, base64: null },
   });
+
+  const savingDialogOpen = ref(false);
+  const isSaving = ref(false);
 
   const compare = async () => {
     isComparing.value = true;
@@ -206,6 +212,29 @@ export const useCompareStore = defineStore("compare", () => {
     currentDisplayingImgType.value = type;
   };
 
+  const saveScreenshot = async () => {
+    isSaving.value = true;
+    const result = await window.compareApi.saveComparisonResult();
+    isSaving.value = false;
+
+    if (result.success) {
+      toast.add({
+        severity: "success",
+        summary: "Success",
+        detail: "Successfully saved the comparison result",
+        life: 5000,
+      });
+      savingDialogOpen.value = false;
+    } else {
+      toast.add({ severity: "error", summary: "Error", detail: "Fail to saved the comparison result", life: 5000 });
+      console.log(result.errMsg);
+    }
+  };
+
+  const openSaveDialog = () => {
+    savingDialogOpen.value = true;
+  };
+
   return {
     isComparing,
     project,
@@ -218,6 +247,8 @@ export const useCompareStore = defineStore("compare", () => {
     displayingDiffImg,
     displaySameImg,
     displayingSingleImg,
+    isSaving,
+    savingDialogOpen,
     updateProject,
     compare,
     refreshData,
@@ -231,5 +262,7 @@ export const useCompareStore = defineStore("compare", () => {
     getSameImg,
     getDiffImg,
     setCurrentDisplayingImgType,
+    saveScreenshot,
+    openSaveDialog,
   };
 });

@@ -26,4 +26,5 @@ contextBridge.exposeInMainWorld("compareApi", {
   compare: (relativeRefDir: string, relativeTestDir: string) =>
     ipcRenderer.invoke("compare:compare", relativeRefDir, relativeTestDir),
   openInExplorer: () => ipcRenderer.send("compare:openInExplorer"),
+  saveComparisonResult: () => ipcRenderer.invoke("compare:saveComparisonResult"),
 });
