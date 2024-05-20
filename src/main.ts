@@ -1,11 +1,30 @@
 import path from "path";
 import fs from "fs-extra";
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getLocalIPAddress, openInExplorer } from "./service/utils";
+import { getAllFolders, getLocalIPAddress, openInExplorer } from "./service/utils";
 import { MainWindowHelper } from "./MainWindowHelper";
 import { screenshotService } from "./service/screenshot-service";
-import { appDataRootDir, savedInfoFilename, savedReferenceDir, savedTestDir, screenshotDir } from "./service/Filepath";
-import type { SavedScreenshotResponse, SaveScreenshotType } from "./interface";
+import {
+  addedImgFolder,
+  appDataRootDir,
+  compareDir,
+  diffImgFolder,
+  removedImgFolder,
+  savedInfoFilename,
+  savedReferenceDir,
+  savedTestDir,
+  screenshotDir,
+  screenshotMetadataFilename,
+} from "./service/Filepath";
+import { compareService } from "./service/compare-service";
+import type {
+  CompareResponse,
+  GetAvailableSetResponse,
+  GetImgResponse,
+  SavedScreenshotResponse,
+  SaveScreenshotType,
+  SetData,
+} from "./interface";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -43,12 +62,7 @@ app.on("ready", () => {
   ipcMain.handle("screenshot:startScreenshot", (_event, url: string) => {
     screenshotService(url);
   });
-  ipcMain.handle("img:getScreenshotImg", (_event, id: string) => {
-    const filepath = screenshotDir + "/" + id + ".png";
-    const isExist = fs.existsSync(filepath);
-    const base64 = isExist ? fs.readFileSync(filepath).toString("base64") : null;
-    return { base64, isExist };
-  });
+
   ipcMain.on("screenshot:openInExplorer", () => {
     openInExplorer(screenshotDir);
   });
@@ -66,6 +80,7 @@ app.on("ready", () => {
         await fs.ensureDir(destDir);
         await fs.copy(srcDir, destDir, { overwrite: true });
         const savedInfo = {
+          uuid,
           type,
           project,
           branch,
@@ -79,6 +94,99 @@ app.on("ready", () => {
       }
     },
   );
+
+  ipcMain.handle("compare:getAvailableProjects", async () => {
+    return getAllFolders(savedReferenceDir);
+  });
+
+  ipcMain.handle("compare:getAvailableSets", async (_event, projectName: string) => {
+    const getSetsFromDir = async (dir: string): Promise<SetData[]> => {
+      const branches = await getAllFolders(dir);
+      return await Promise.all(
+        branches.map(async branch => {
+          const branchDir = path.join(dir, branch);
+          const setList = await getAllFolders(branchDir);
+          return {
+            branch,
+            setList: await Promise.all(
+              setList.map(async uuid => {
+                const metadata = await fs.readJSON(path.join(branchDir, uuid, screenshotMetadataFilename));
+                return {
+                  uuid,
+                  createAt: metadata.createAt,
+                  viewport: metadata.viewport,
+                };
+              }),
+            ),
+          };
+        }),
+      );
+    };
+
+    const result: GetAvailableSetResponse = {
+      ref: [],
+      test: [],
+    };
+
+    const refDir = path.join(savedReferenceDir, projectName);
+    const testDir = path.join(savedTestDir, projectName);
+
+    const refExists = await fs.pathExists(refDir);
+    const testExists = await fs.pathExists(testDir);
+
+    if (refExists) result.ref = await getSetsFromDir(refDir);
+    if (testExists) result.test = await getSetsFromDir(testDir);
+
+    return result;
+  });
+
+  ipcMain.handle("compare:compare", async (_event, relativeRefDir: string, relativeTestDir: string) => {
+    const refDir = path.join(appDataRootDir, relativeRefDir);
+    const testDir = path.join(appDataRootDir, relativeTestDir);
+    const result: CompareResponse = await compareService(refDir, testDir);
+    return result;
+  });
+
+  ipcMain.on("compare:openInExplorer", () => {
+    openInExplorer(compareDir);
+  });
+
+  const getImg = async (filepath: string): Promise<GetImgResponse> => {
+    const isExist = await fs.pathExists(filepath);
+    const base64 = isExist ? fs.readFileSync(filepath).toString("base64") : null;
+    return { base64, isExist };
+  };
+
+  ipcMain.handle("img:getScreenshotImg", async (_event, id: string) => {
+    const filepath = path.join(screenshotDir, id + ".png");
+    return await getImg(filepath);
+  });
+
+  ipcMain.handle("img:getCompareAddImg", async (_event, id: string) => {
+    const filepath = path.join(compareDir, addedImgFolder, id + ".png");
+    return await getImg(filepath);
+  });
+
+  ipcMain.handle("img:getCompareRemovedImg", async (_event, id: string) => {
+    const filepath = path.join(compareDir, removedImgFolder, id + ".png");
+    console.log(filepath);
+    return await getImg(filepath);
+  });
+
+  ipcMain.handle("img:getCompareDiffImg", async (_event, id: string) => {
+    const filepath = path.join(compareDir, diffImgFolder, id + ".png");
+    return await getImg(filepath);
+  });
+
+  ipcMain.handle(
+    "img:getSavedImg",
+    async (_event, type: SaveScreenshotType, project: string, branch: string, uuid: string, id: string) => {
+      const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
+      const filepath = path.join(typeDir, project, branch, uuid, id + ".png");
+      return await getImg(filepath);
+    },
+  );
+
   createWindow();
 });
 

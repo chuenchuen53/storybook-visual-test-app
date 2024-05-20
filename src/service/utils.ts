@@ -1,5 +1,7 @@
 import os from "os";
 import { exec } from "child_process";
+import path from "path";
+import fs from "fs-extra";
 
 export async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -64,4 +66,20 @@ export function openInExplorer(dir: string) {
     // Default to Windows if OS is not detected
     exec(`explorer "${dir.replace(/\//g, "\\")}"`);
   }
+}
+
+export async function getAllFolders(dir: string): Promise<string[]> {
+  const entries = await fs.readdir(dir);
+  const folders = [];
+  for (const entry of entries) {
+    if (!entry.startsWith(".")) {
+      // Ignore hidden folders
+      const entryPath = path.join(dir, entry);
+      const stat = await fs.stat(entryPath);
+      if (stat.isDirectory()) {
+        folders.push(entry);
+      }
+    }
+  }
+  return folders;
 }

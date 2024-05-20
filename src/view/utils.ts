@@ -1,3 +1,4 @@
+import type { CompareResponse } from "../interface";
 import type { TreeNode } from "primevue/treenode";
 import type { StoryMetadata, StoryState } from "src/service/crawler/type";
 
@@ -11,6 +12,15 @@ export interface StoryMetadataInExplorer extends StoryMetadata {
 
 export type StoryTree = {
   [key: string]: StoryMetadataInExplorer | StoryTree;
+};
+
+export type CompareResultTreeLeaf = {
+  storyId: string;
+  resultType: "same" | "added" | "removed" | "diff";
+};
+
+export type CompareResultTree = {
+  [key: string]: CompareResultTreeLeaf | CompareResultTree;
 };
 
 export function treeOfStoryMetadata(metadataArr: StoryMetadataInExplorer[]): StoryTree {
@@ -34,13 +44,66 @@ export function treeOfStoryMetadata(metadataArr: StoryMetadataInExplorer[]): Sto
   return result;
 }
 
-function isLeftNode(node: StoryTree): boolean {
+export function treeOfCompareResult(compareResult: CompareResponse): CompareResultTree {
+  const obj: {
+    same: CompareResultTreeLeaf[];
+    added: CompareResultTreeLeaf[];
+    removed: CompareResultTreeLeaf[];
+    diff: CompareResultTreeLeaf[];
+  } = {
+    same: compareResult.result.same.map(storyId => ({ storyId, resultType: "same" })),
+    added: compareResult.result.added.map(storyId => ({ storyId, resultType: "added" })),
+    removed: compareResult.result.removed.map(storyId => ({ storyId, resultType: "removed" })),
+    diff: compareResult.result.diff.map(storyId => ({ storyId, resultType: "diff" })),
+  };
+  console.log(obj);
+
+  const computeTreeNode = (leafs: CompareResultTreeLeaf[]): CompareResultTree => {
+    const root: CompareResultTree = {};
+
+    for (const leaf of leafs) {
+      let currentLayer = root;
+      const [multiLayer, name] = leaf.storyId.includes("--") ? leaf.storyId.split("--") : [leaf.storyId, ""];
+      const layers = multiLayer.split("-");
+
+      layers.forEach(layer => {
+        if (!currentLayer[layer]) {
+          currentLayer[layer] = {};
+        }
+        currentLayer = currentLayer[layer] as CompareResultTree;
+      });
+
+      currentLayer[name] = leaf;
+    }
+
+    return root;
+  };
+
+  return {
+    same: computeTreeNode(obj.same),
+    added: computeTreeNode(obj.added),
+    removed: computeTreeNode(obj.removed),
+    diff: computeTreeNode(obj.diff),
+  };
+}
+
+export function isLeftNode(node: StoryTree): boolean {
   const keys = Object.keys(node);
   const leftKeys = ["id", "componentId", "title", "kind", "tags", "name", "story"];
   return leftKeys.every(key => keys.includes(key));
 }
 
-export function treeNodesForPrimevue(storyTree: StoryTree, parentKey = ""): TreeNode[] {
+export function isCompareResultLeaf(node: CompareResultTree): boolean {
+  const keys = Object.keys(node);
+  const leftKeys = ["storyId"];
+  return leftKeys.every(key => keys.includes(key));
+}
+
+export function treeNodesForPrimevue<T>(
+  storyTree: T,
+  isLeftNodePredicate: (x: T) => boolean,
+  parentKey = "",
+): TreeNode[] {
   const result: TreeNode[] = [];
 
   const entries = Object.entries(storyTree);
@@ -48,13 +111,12 @@ export function treeNodesForPrimevue(storyTree: StoryTree, parentKey = ""): Tree
     const node: TreeNode = {
       key: parentKey ? `${parentKey}-${key}` : key,
       label: key,
-      styleClass: "fking",
     };
 
-    if (isLeftNode(value as StoryTree)) {
+    if (isLeftNodePredicate(value as T)) {
       node.data = value;
     } else {
-      node.children = treeNodesForPrimevue(value as StoryTree, node.key);
+      node.children = treeNodesForPrimevue(value as T, isLeftNodePredicate, node.key);
     }
 
     result.push(node);

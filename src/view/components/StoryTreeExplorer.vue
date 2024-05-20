@@ -133,10 +133,11 @@ import Tree from "primevue/tree";
 import Button from "primevue/button";
 import Menu from "primevue/menu";
 import { computed, ref } from "vue";
-import { treeNodesForPrimevue, treeOfStoryMetadata } from "../utils";
+import { isLeftNode, treeNodesForPrimevue, treeOfStoryMetadata } from "../utils";
 import { useScreenshotStore } from "../stores/ScreenshotStore";
 import { StoryState } from "../../service/crawler/type";
 import { ScreenshotState } from "../../typing";
+import type { StoryTree } from "../utils";
 import type { TreeNode } from "primevue/treenode";
 import type { TreeExpandedKeys } from "primevue/tree";
 
@@ -145,7 +146,9 @@ const { metadata, storyTypeFilter, state } = storeToRefs(store);
 const { setStoryTypeFilter, updateDisplayingImg, openInExplorer, openSaveDialog } = store;
 
 const nodes = computed(() => {
-  return metadata.value === null ? [] : treeNodesForPrimevue(treeOfStoryMetadata(metadata.value));
+  return metadata.value === null
+    ? []
+    : treeNodesForPrimevue<StoryTree>(treeOfStoryMetadata(metadata.value), isLeftNode);
 });
 
 const expandedKeys = ref<TreeExpandedKeys>({});

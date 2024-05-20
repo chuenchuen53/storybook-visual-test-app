@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import { PixelmatchDiffer } from "../img-differ/PixelmatchDiffer";
 import { computeArrDiff } from "../utils";
+import { addedImgFolder, diffImgFolder, removedImgFolder } from "../Filepath";
 import type { StoriesDiffer, StoriesDiffResult } from "./StoriesDiffer";
 import type { SavedMetadata } from "../crawler/type";
 import type { ImgDiffer } from "../img-differ/ImgDiffer";
@@ -36,12 +37,24 @@ export class StoriesDifferImpl implements StoriesDiffer {
     result.added = [...addedIds];
     result.removed = [...removedIds];
 
+    for (const id of addedIds) {
+      const oriImg = path.join(testDir, id + ".png");
+      const destImg = path.join(diffDir, addedImgFolder, id + ".png");
+      await fs.copy(oriImg, destImg);
+    }
+
+    for (const id of removedIds) {
+      const oriImg = path.join(refDir, id + ".png");
+      const destImg = path.join(diffDir, removedImgFolder, id + ".png");
+      await fs.copy(oriImg, destImg);
+    }
+
     const imgDiffer: ImgDiffer = new PixelmatchDiffer();
 
     for (const id of sameIds) {
       const refPath = path.join(refDir, id + ".png");
       const testPath = path.join(testDir, id + ".png");
-      const diffPath = path.join(diffDir, id + ".png");
+      const diffPath = path.join(diffDir, diffImgFolder, id + ".png");
 
       const isSame = await imgDiffer.isSame(refPath, testPath, diffPath, tolerance);
       if (isSame) {
