@@ -8,20 +8,36 @@
       <div class="w-full p-6">
         <Steps :active-step="activeStep" :model="items" class="mb-6"> </Steps>
         <MetadataCrawler />
+        <div class="mt-4 flex w-full justify-center">
+          <div v-if="displayingImg.loading">
+            <ProgressSpinner />
+          </div>
+          <div v-else>
+            <div v-if="displayingImg.isExist && displayingImg.base64">
+              <Image :src="'data:image/png;base64,' + displayingImg.base64" alt="screenshot" preview />
+            </div>
+            <div v-else class="text-center text-gray-400">Image not exist</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <SaveDialog />
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import Steps from "primevue/steps";
+import ProgressSpinner from "primevue/progressspinner";
+import Image from "primevue/image";
 import MetadataCrawler from "../components/screenshot/MetadataCrawler.vue";
 import { useScreenshotStore } from "../stores/ScreenshotStore";
 import StoryTreeExplorer from "../components/StoryTreeExplorer.vue";
+import SaveDialog from "../components/screenshot/SaveDialog.vue";
 
 const store = useScreenshotStore();
-const { state, activeStep } = storeToRefs(store);
+const { state, activeStep, displayingImg } = storeToRefs(store);
 
 const items = [
   { label: "Idle" },

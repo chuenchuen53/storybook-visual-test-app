@@ -1,8 +1,10 @@
+import fs from "fs-extra";
 import { MainWindowHelper } from "../MainWindowHelper";
 import { ScreenshotState } from "../typing";
 import { CrawlerImpl } from "./crawler/CrawlerImpl";
 import { isDockerAvailable } from "./docker-helper/is-docker-available";
 import { checkDockerImage, CHROME_IMAGE, pullDockerImage } from "./docker-helper/docker-image";
+import { screenshotDir } from "./Filepath";
 import type { Crawler } from "./crawler/type";
 
 function sendFailStatusAndErrMsg(errorMsg: string) {
@@ -32,6 +34,9 @@ export async function screenshotService(url: string) {
   }
 
   try {
+    await fs.remove(screenshotDir);
+    await fs.ensureDir(screenshotDir);
+
     const crawler: Crawler = CrawlerImpl.getInstance();
     const metadataResult = await crawler.getStoriesMetadata(
       url,

@@ -1,4 +1,5 @@
 import os from "os";
+import { exec } from "child_process";
 
 export async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -51,4 +52,16 @@ export function computeArrDiff(
     removed: removedIds,
     same: sameIds,
   };
+}
+
+export function openInExplorer(dir: string) {
+  const platform = os.platform();
+
+  if (platform === "darwin") {
+    // macOS
+    exec(`open "${dir}"`);
+  } else {
+    // Default to Windows if OS is not detected
+    exec(`explorer "${dir.replace(/\//g, "\\")}"`);
+  }
 }

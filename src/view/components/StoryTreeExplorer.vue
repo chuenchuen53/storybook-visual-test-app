@@ -1,36 +1,60 @@
 <template>
   <div class="relative flex h-full flex-col bg-[--p-content-background]">
-    <div class="flex justify-end gap-2 px-2">
-      <Button
-        icon="pi pi-arrow-up-right-and-arrow-down-left-from-center"
-        severity="secondary"
-        text
-        rounded
-        size="small"
-        @click="expandAll"
-      />
-      <Button
-        icon="pi pi-arrow-down-left-and-arrow-up-right-to-center"
-        severity="secondary"
-        text
-        rounded
-        size="small"
-        @click="collapseAll"
-      />
+    <div class="flex justify-between gap-2 px-2">
       <div>
-        <Button icon="pi pi-filter" severity="secondary" text rounded size="small" @click="toggle" />
-        <Menu ref="menu" :model="items" :popup="true" :pt="{ root: { style: { transform: 'translateX(-165px)' } } }">
-          <template #item="{ item, props }">
-            <div
-              class="align-center flex"
-              :class="{ 'active-menu-item': item.key === storyTypeFilter }"
-              v-bind="props.action"
-            >
-              <span :class="item.icon" />
-              <span class="ml-2">{{ item.label }}</span>
-            </div>
-          </template>
-        </Menu>
+        <Button
+          v-tooltip.bottom="'Open in explorer'"
+          icon="pi pi-folder-open"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          @click="openInExplorer"
+        />
+        <Button
+          v-if="state === ScreenshotState.FINISHED"
+          v-tooltip.bottom="'Save'"
+          :disabled="false"
+          icon="pi pi-save"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          @click="openSaveDialog"
+        />
+      </div>
+      <div class="flex gap-2">
+        <Button
+          icon="pi pi-arrow-up-right-and-arrow-down-left-from-center"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          @click="expandAll"
+        />
+        <Button
+          icon="pi pi-arrow-down-left-and-arrow-up-right-to-center"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          @click="collapseAll"
+        />
+        <div>
+          <Button icon="pi pi-filter" severity="secondary" text rounded size="small" @click="toggle" />
+          <Menu ref="menu" :model="items" :popup="true" :pt="{ root: { style: { transform: 'translateX(-165px)' } } }">
+            <template #item="{ item, props }">
+              <div
+                class="align-center flex"
+                :class="{ 'active-menu-item': item.key === storyTypeFilter }"
+                v-bind="props.action"
+              >
+                <span :class="item.icon" />
+                <span class="ml-2">{{ item.label }}</span>
+              </div>
+            </template>
+          </Menu>
+        </div>
       </div>
     </div>
     <Tree
@@ -112,12 +136,13 @@ import { computed, ref } from "vue";
 import { treeNodesForPrimevue, treeOfStoryMetadata } from "../utils";
 import { useScreenshotStore } from "../stores/ScreenshotStore";
 import { StoryState } from "../../service/crawler/type";
+import { ScreenshotState } from "../../typing";
 import type { TreeNode } from "primevue/treenode";
 import type { TreeExpandedKeys } from "primevue/tree";
 
 const store = useScreenshotStore();
-const { metadata, storyTypeFilter } = storeToRefs(store);
-const { setStoryTypeFilter } = store;
+const { metadata, storyTypeFilter, state } = storeToRefs(store);
+const { setStoryTypeFilter, updateDisplayingImg, openInExplorer, openSaveDialog } = store;
 
 const nodes = computed(() => {
   return metadata.value === null ? [] : treeNodesForPrimevue(treeOfStoryMetadata(metadata.value));
@@ -149,10 +174,8 @@ const collapseAll = () => {
 };
 
 const onNodeSelect = (node: TreeNode) => {
-  console.log(node.data);
   if (node.data) {
-    console.log(node.data);
-    console.log(node.key);
+    updateDisplayingImg(node.data.id);
   }
 };
 

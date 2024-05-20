@@ -1,8 +1,11 @@
 import path from "path";
+import fs from "fs-extra";
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getLocalIPAddress } from "./service/utils";
+import { getLocalIPAddress, openInExplorer } from "./service/utils";
 import { MainWindowHelper } from "./MainWindowHelper";
 import { screenshotService } from "./service/screenshot-service";
+import { appDataRootDir, savedInfoFilename, savedReferenceDir, savedTestDir, screenshotDir } from "./service/Filepath";
+import type { SavedScreenshotResponse, SaveScreenshotType } from "./interface";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -40,6 +43,42 @@ app.on("ready", () => {
   ipcMain.handle("screenshot:startScreenshot", (_event, url: string) => {
     screenshotService(url);
   });
+  ipcMain.handle("img:getScreenshotImg", (_event, id: string) => {
+    const filepath = screenshotDir + "/" + id + ".png";
+    const isExist = fs.existsSync(filepath);
+    const base64 = isExist ? fs.readFileSync(filepath).toString("base64") : null;
+    return { base64, isExist };
+  });
+  ipcMain.on("screenshot:openInExplorer", () => {
+    openInExplorer(screenshotDir);
+  });
+  ipcMain.handle(
+    "screenshot:save",
+    async (_event, project: string, branch: string, type: SaveScreenshotType): Promise<SavedScreenshotResponse> => {
+      try {
+        const srcDir = screenshotDir;
+
+        const metadata = await fs.readJSON(path.join(srcDir, "metadata.json"));
+        const uuid = metadata.uuid;
+
+        const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
+        const destDir = path.join(typeDir, project, branch, uuid);
+        await fs.ensureDir(destDir);
+        await fs.copy(srcDir, destDir, { overwrite: true });
+        const savedInfo = {
+          type,
+          project,
+          branch,
+        };
+        const savedInfoPath = path.join(destDir, savedInfoFilename);
+        await fs.writeJson(savedInfoPath, savedInfo);
+        return { success: true };
+      } catch (e) {
+        console.error(e);
+        return { success: false, errMsg: e.message };
+      }
+    },
+  );
   createWindow();
 });
 

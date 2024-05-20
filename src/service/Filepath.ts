@@ -3,11 +3,23 @@ import path from "path";
 import fs from "fs-extra";
 
 const home = os.homedir();
-const rootDir = path.join(home, "visual-test-app");
+const appDataRootDir = path.join(home, "visual-test-app");
 
-const screenshotDir = path.join(rootDir, "screenshots");
+const screenshotDir = path.join(appDataRootDir, "screenshots");
 const screenshotMetadataFilename = "metadata.json";
+
+const savedReferenceDir = path.join(appDataRootDir, "reference");
+const savedTestDir = path.join(appDataRootDir, "test");
+
+const savedInfoFilename = "saved-info.json";
 
 fs.ensureDirSync(screenshotDir);
 
-export { screenshotDir, screenshotMetadataFilename };
+export {
+  appDataRootDir,
+  screenshotDir,
+  screenshotMetadataFilename,
+  savedReferenceDir,
+  savedTestDir,
+  savedInfoFilename,
+};
