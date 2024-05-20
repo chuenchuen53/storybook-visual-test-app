@@ -141,8 +141,8 @@ app.on("ready", () => {
   });
 
   ipcMain.handle("compare:compare", async (_event, relativeRefDir: string, relativeTestDir: string) => {
-    const refDir = path.join(appDataRootDir, relativeRefDir);
-    const testDir = path.join(appDataRootDir, relativeTestDir);
+    const refDir = path.join(savedReferenceDir, relativeRefDir);
+    const testDir = path.join(savedTestDir, relativeTestDir);
     const result: CompareResponse = await compareService(refDir, testDir);
     return result;
   });

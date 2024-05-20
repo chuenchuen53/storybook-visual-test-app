@@ -48,8 +48,8 @@ export const useCompareStore = defineStore("compare", () => {
 
   const compare = async () => {
     isComparing.value = true;
-    const relativeRefDir = `reference/${project.value}/${refSet.value.branch}/${refSet.value.uuid}`;
-    const relativeTestDir = `test/${project.value}/${testSet.value.branch}/${testSet.value.uuid}`;
+    const relativeRefDir = `${project.value}/${refSet.value.branch}/${refSet.value.uuid}`;
+    const relativeTestDir = `${project.value}/${testSet.value.branch}/${testSet.value.uuid}`;
     compareResult.value = await window.compareApi.compare(relativeRefDir, relativeTestDir);
 
     isComparing.value = false;
