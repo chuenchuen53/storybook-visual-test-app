@@ -2,7 +2,7 @@ import type { CompareResponse, GetAvailableSetResponse, SavedScreenshotResponse 
 
 export interface CompareService {
   getAvailableProjects(): Promise<string[]>;
-  getAvailableSets(projectName: string): Promise<GetAvailableSetResponse>;
+  getAvailableSets(project: string): Promise<GetAvailableSetResponse>;
   compare(refDir: string, testDir: string): Promise<CompareResponse>;
   saveComparison(): Promise<SavedScreenshotResponse>;
 }

@@ -16,30 +16,29 @@ contextBridge.exposeInMainWorld("imgApi", {
 });
 
 contextBridge.exposeInMainWorld("screenshotApi", {
-  getLocalIPAddress: () => ipcRenderer.invoke("screenshot:getLocalIPAddress"),
-  startScreenshot: (url: string) => ipcRenderer.invoke("screenshot:startScreenshot", url),
-  onReceiveScreenshotInfo: (callback: (params: any) => void) =>
-    ipcRenderer.on("screenshot:info", (_event, params) => callback(params)),
-  openInExplorer: () => ipcRenderer.send("screenshot:openInExplorer"),
-  saveScreenshot: (project: string, branch: string, type: SaveScreenshotType) =>
-    ipcRenderer.invoke("screenshot:save", project, branch, type),
-  onUpdateStatus: (callback: (status: ScreenshotState) => void) =>
-    ipcRenderer.on("screenshot:updateStatus", (_event, status) => callback(status)),
-  onNewMetadata: (callback: (storyMetadataList: StoryMetadata[]) => void) =>
-    ipcRenderer.on("screenshot:newMetadata", (_event, storyMetadataList) => callback(storyMetadataList)),
+  onUpdateStatus: (cb: (status: ScreenshotState) => void) =>
+    ipcRenderer.on("screenshot:updateStatus", (_event, status) => cb(status)),
+  onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) =>
+    ipcRenderer.on("screenshot:newMetadata", (_event, storyMetadataList) => cb(storyMetadataList)),
   onUpdateStoryState: (
-    callback: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
+    cb: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
   ) =>
     ipcRenderer.on("screenshot:updateStoryState", (_event, storyId, state, browserName, storyErr) =>
-      callback(storyId, state, browserName, storyErr),
+      cb(storyId, state, browserName, storyErr),
     ),
+
+  openInExplorer: () => ipcRenderer.send("screenshot:openInExplorer"),
+  getLocalIPAddress: () => ipcRenderer.invoke("screenshot:getLocalIPAddress"),
+  startScreenshot: (url: string) => ipcRenderer.invoke("screenshot:startScreenshot", url),
+  saveScreenshot: (project: string, branch: string, type: SaveScreenshotType) =>
+    ipcRenderer.invoke("screenshot:save", project, branch, type),
 });
 
 contextBridge.exposeInMainWorld("compareApi", {
+  openInExplorer: () => ipcRenderer.send("compare:openInExplorer"),
   getAvailableProjects: () => ipcRenderer.invoke("compare:getAvailableProjects"),
-  getAvailableSets: (projectName: string) => ipcRenderer.invoke("compare:getAvailableSets", projectName),
+  getAvailableSets: (project: string) => ipcRenderer.invoke("compare:getAvailableSets", project),
   compare: (relativeRefDir: string, relativeTestDir: string) =>
     ipcRenderer.invoke("compare:compare", relativeRefDir, relativeTestDir),
-  openInExplorer: () => ipcRenderer.send("compare:openInExplorer"),
-  saveComparisonResult: () => ipcRenderer.invoke("compare:saveComparisonResult"),
+  saveComparisonResult: () => ipcRenderer.invoke("compare:saveComparison"),
 });

@@ -2,10 +2,17 @@ import type {
   CompareResponse,
   GetAvailableSetResponse,
   GetImgResponse,
+  GlobalMessage,
   SavedScreenshotResponse,
   SaveScreenshotType,
+  ScreenshotState,
+  StoryMetadata,
   StoryState,
 } from "./shared/type";
+
+export interface GlobalApi {
+  onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) => void;
+}
 
 export interface ImgApi {
   getScreenshotImg: (id: string) => Promise<GetImgResponse>;
@@ -21,27 +28,24 @@ export interface ImgApi {
   ) => Promise<GetImgResponse>;
 }
 
-export interface GlobalApi {
-  onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) => void;
-}
-
 export interface ScreenshotApi {
+  onUpdateStatus: (cb: (status: ScreenshotState) => void) => void;
+  onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) => void;
+  onUpdateStoryState: (
+    cb: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
+  ) => void;
+
+  openInExplorer: () => void;
   getLocalIPAddress: () => Promise<string> | Promise<undefined>;
   startScreenshot: (url: string) => Promise<void>;
-  openInExplorer: () => void;
   saveScreenshot: (project: string, branch: string, type: SaveScreenshotType) => Promise<SavedScreenshotResponse>;
-  onUpdateStatus: (callback: (status: ScreenshotState) => void) => void;
-  onNewMetadata: (callback: (storyMetadataList: StoryMetadata[]) => void) => void;
-  onUpdateStoryState: (
-    callback: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
-  ) => void;
 }
 
 export interface CompareApi {
+  openInExplorer: () => void;
   getAvailableProjects: () => Promise<string[]>;
   getAvailableSets: (projectName: string) => Promise<GetAvailableSetResponse>;
   compare: (relativeRefDir: string, relativeTestDir: string) => Promise<CompareResponse>;
-  openInExplorer: () => void;
   saveComparisonResult: () => Promise<SavedScreenshotResponse>;
 }
 

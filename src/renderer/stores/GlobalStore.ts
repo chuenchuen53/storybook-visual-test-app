@@ -10,7 +10,7 @@ export const useGlobalStore = defineStore("global", () => {
 
   window.globalApi.onReceiveGlobalMessage(msg => {
     toast.add({
-      severity: msg.type,
+      severity: msg.title || msg.type,
       summary: msg.type,
       detail: msg.message,
       life: 5000,

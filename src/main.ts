@@ -1,22 +1,22 @@
 import path from "path";
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAllFolders, openInExplorer } from "./main/utils";
-import { MainWindowHelper } from "./MainWindowHelper";
+import { MainWindow } from "./MainWindow";
 import { ScreenshotServiceImpl } from "./main/service/ScreenshotServiceImpl";
-import { compareDir, savedReferenceDir, savedTestDir, screenshotDir } from "./main/Filepath";
 import { CompareServiceImpl } from "./main/service/CompareServiceImpl";
 import { logger } from "./main/logger";
 import { ImgServiceImpl } from "./main/service/ImgServiceImpl";
-import type { SavedScreenshotResponse, SaveScreenshotType } from "./shared/type";
+import { registerScreenshotHandlers } from "./main/ipc-handlers/screenshot-handlers";
+import { registerCompareHandlers } from "./main/ipc-handlers/compare-handlers";
+import { registerImgHandlers } from "./main/ipc-handlers/img-handlers";
 import type { CompareService } from "./main/service/CompareService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
 import type { ImgService } from "./main/service/ImgService";
 
 logger.info("app start");
 
-const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
-const compareServiceImpl: CompareService = CompareServiceImpl.getInstance();
 const imgService: ImgService = ImgServiceImpl.getInstance();
+const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
+const compareService: CompareService = CompareServiceImpl.getInstance();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -43,76 +43,30 @@ const createWindow = () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  MainWindowHelper.registerMainWindow(mainWindow);
+  MainWindow.registerMainWindow(mainWindow);
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", () => {
-  ipcMain.handle("screenshot:getLocalIPAddress", () => screenshotService.getLocalIPAddress());
-  ipcMain.handle("screenshot:startScreenshot", (_event, url: string) => {
-    void screenshotService.newScreenshotSet(url);
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", (event, commandLine, workingDirectory, additionalData) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (MainWindow.instance !== null) {
+      if (MainWindow.instance.isMinimized()) MainWindow.instance.restore();
+      MainWindow.instance.focus();
+    }
   });
 
-  ipcMain.on("screenshot:openInExplorer", () => {
-    openInExplorer(screenshotDir);
+  app.on("ready", () => {
+    registerImgHandlers(imgService);
+    registerScreenshotHandlers(screenshotService);
+    registerCompareHandlers(compareService);
+
+    createWindow();
   });
-
-  ipcMain.handle(
-    "screenshot:save",
-    async (_event, project: string, branch: string, type: SaveScreenshotType): Promise<SavedScreenshotResponse> => {
-      return await screenshotService.saveScreenshot(project, branch, type);
-    },
-  );
-
-  ipcMain.handle("compare:getAvailableProjects", async () => {
-    return await compareServiceImpl.getAvailableProjects();
-  });
-
-  ipcMain.handle("compare:getAvailableSets", async (_event, projectName: string) => {
-    return await compareServiceImpl.getAvailableSets(projectName);
-  });
-
-  ipcMain.handle("compare:compare", async (_event, relativeRefDir: string, relativeTestDir: string) => {
-    const refDir = path.join(savedReferenceDir, relativeRefDir);
-    const testDir = path.join(savedTestDir, relativeTestDir);
-    return await compareServiceImpl.compare(refDir, testDir);
-  });
-
-  ipcMain.handle("compare:saveComparisonResult", async () => {
-    return await compareServiceImpl.saveComparison();
-  });
-
-  ipcMain.on("compare:openInExplorer", () => {
-    openInExplorer(compareDir);
-  });
-
-  ipcMain.handle("img:getScreenshotImg", async (_event, id: string) => {
-    return await imgService.getScreenshotImg(id);
-  });
-
-  ipcMain.handle("img:getCompareAddImg", async (_event, id: string) => {
-    return await imgService.getCompareAddedImg(id);
-  });
-
-  ipcMain.handle("img:getCompareRemovedImg", async (_event, id: string) => {
-    return await imgService.getCompareRemovedImg(id);
-  });
-
-  ipcMain.handle("img:getCompareDiffImg", async (_event, id: string) => {
-    return await imgService.getCompareDiffImg(id);
-  });
-
-  ipcMain.handle(
-    "img:getSavedImg",
-    async (_event, type: SaveScreenshotType, project: string, branch: string, uuid: string, id: string) => {
-      return await imgService.getSavedImg(type, project, branch, uuid, id);
-    },
-  );
-
-  createWindow();
-});
+}
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

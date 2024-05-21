@@ -41,14 +41,14 @@ export class CompareServiceImpl implements CompareService {
     return getAllFolders(savedReferenceDir);
   }
 
-  public async getAvailableSets(projectName: string): Promise<GetAvailableSetResponse> {
+  public async getAvailableSets(project: string): Promise<GetAvailableSetResponse> {
     const result: GetAvailableSetResponse = {
       ref: [],
       test: [],
     };
 
-    const refDir = path.join(savedReferenceDir, projectName);
-    const testDir = path.join(savedTestDir, projectName);
+    const refDir = path.join(savedReferenceDir, project);
+    const testDir = path.join(savedTestDir, project);
 
     const refExists = await fs.pathExists(refDir);
     const testExists = await fs.pathExists(testDir);

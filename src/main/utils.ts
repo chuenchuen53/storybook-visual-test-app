@@ -57,7 +57,7 @@ export function openInExplorer(dir: string) {
 
 export async function getAllFolders(dir: string): Promise<string[]> {
   const entries = await fs.readdir(dir);
-  const folders = [];
+  const folders: string[] = [];
   for (const entry of entries) {
     if (!entry.startsWith(".")) {
       // Ignore hidden folders

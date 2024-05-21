@@ -34,6 +34,7 @@ export enum ScreenshotState {
 export interface GlobalMessage {
   type: "success" | "info" | "warn" | "error";
   message: string;
+  title?: string;
 }
 
 export interface SavedScreenshotResponse {

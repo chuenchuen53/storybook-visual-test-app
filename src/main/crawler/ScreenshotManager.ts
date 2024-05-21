@@ -3,7 +3,7 @@ import { sleep } from "../utils";
 import { screenshotDir } from "../Filepath";
 import { StoryState } from "../../shared/type";
 import { logger } from "../logger";
-import { GlobalChannel } from "../../MainWindowHelper";
+import { GlobalChannel } from "../message-emitter/GlobalChannel";
 import type { Viewport, StoryMetadata } from "../../shared/type";
 import type { StoryScreenshotMetadata } from "./type";
 import type { Browser, ElementHandle } from "puppeteer-core";

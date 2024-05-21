@@ -1,7 +1,6 @@
 import os from "os";
 import path from "path";
 import fs from "fs-extra";
-import { GlobalChannel, ScreenshotChannel } from "../../MainWindowHelper";
 import { CrawlerImpl } from "../crawler/CrawlerImpl";
 import { isDockerAvailable } from "../docker-helper/is-docker-available";
 import { checkDockerImage, CHROME_IMAGE, pullDockerImage } from "../docker-helper/docker-image";
@@ -14,6 +13,8 @@ import {
 } from "../Filepath";
 import { ScreenshotState } from "../../shared/type";
 import { logger } from "../logger";
+import { GlobalChannel } from "../message-emitter/GlobalChannel";
+import { ScreenshotChannel } from "../message-emitter/ScreenshotChannel";
 import type { SavedScreenshotResponse, SaveScreenshotType } from "../../shared/type";
 import type { ScreenshotService } from "./ScreenshotService";
 import type { Crawler } from "../crawler/Crawler";
