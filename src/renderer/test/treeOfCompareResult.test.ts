@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { treeOfCompareResult } from "../renderer/utils";
+import { treeOfCompareResult } from "../utils";
 
-import type { CompareResponse } from "../shared/type";
+import type { CompareResponse } from "../../shared/type";
 
 describe("treeOfCompareResult", () => {
   // Function handles empty result arrays for same, added, removed, and diff without errors

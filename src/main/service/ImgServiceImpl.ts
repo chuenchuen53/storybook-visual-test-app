@@ -14,12 +14,12 @@ import type { ImgService } from "./ImgService";
 export class ImgServiceImpl implements ImgService {
   private static instance: ImgService = new ImgServiceImpl();
 
-  public static getInstance(): ImgService {
-    return ImgServiceImpl.instance;
-  }
-
   private constructor() {
     // singleton
+  }
+
+  public static getInstance(): ImgService {
+    return ImgServiceImpl.instance;
   }
 
   public async getScreenshotImg(id: string): Promise<GetImgResponse> {

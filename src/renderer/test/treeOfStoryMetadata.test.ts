@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { treeOfStoryMetadata } from "../renderer/utils";
-import type { StoryMetadata } from "../shared/type";
-import type { StoryTree } from "../renderer/utils";
+import { treeOfStoryMetadata } from "../utils";
+import type { StoryMetadata } from "../../shared/type";
+import type { StoryTree } from "../utils";
 
 describe("treeOfStoryMetadata", () => {
   it("should return an empty object when given an empty array", () => {
