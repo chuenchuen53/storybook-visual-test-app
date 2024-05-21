@@ -1,36 +1,22 @@
 import path from "path";
-import fs from "fs-extra";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAllFolders, openInExplorer } from "./main/utils";
 import { MainWindowHelper } from "./MainWindowHelper";
 import { ScreenshotServiceImpl } from "./main/service/ScreenshotServiceImpl";
-import {
-  compareAddedDir,
-  compareDiffDir,
-  compareDir,
-  compareMetadataFilename,
-  compareRemovedDir,
-  savedComparisonDir,
-  savedReferenceDir,
-  savedTestDir,
-  screenshotDir,
-  screenshotMetadataFilename,
-} from "./main/Filepath";
+import { compareDir, savedReferenceDir, savedTestDir, screenshotDir } from "./main/Filepath";
 import { CompareServiceImpl } from "./main/service/CompareServiceImpl";
 import { logger } from "./main/logger";
+import { ImgServiceImpl } from "./main/service/ImgServiceImpl";
+import type { CompareService } from "./main/service/CompareService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
-import type {
-  GetAvailableSetResponse,
-  GetImgResponse,
-  SavedScreenshotResponse,
-  SaveScreenshotType,
-  SetData,
-} from "./interface";
+import type { SavedScreenshotResponse, SaveScreenshotType } from "./interface";
+import type { ImgService } from "./main/service/ImgService";
 
 logger.info("app start");
 
 const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
-const compareServiceImpl = CompareServiceImpl.getInstance();
+const compareServiceImpl: CompareService = CompareServiceImpl.getInstance();
+const imgService: ImgService = ImgServiceImpl.getInstance();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -81,48 +67,11 @@ app.on("ready", () => {
   );
 
   ipcMain.handle("compare:getAvailableProjects", async () => {
-    return getAllFolders(savedReferenceDir);
+    return await compareServiceImpl.getAvailableProjects();
   });
 
   ipcMain.handle("compare:getAvailableSets", async (_event, projectName: string) => {
-    const getSetsFromDir = async (dir: string): Promise<SetData[]> => {
-      const branches = await getAllFolders(dir);
-      return await Promise.all(
-        branches.map(async branch => {
-          const branchDir = path.join(dir, branch);
-          const setList = await getAllFolders(branchDir);
-          return {
-            branch,
-            setList: await Promise.all(
-              setList.map(async uuid => {
-                const metadata = await fs.readJSON(path.join(branchDir, uuid, screenshotMetadataFilename));
-                return {
-                  uuid,
-                  createAt: metadata.createAt,
-                  viewport: metadata.viewport,
-                };
-              }),
-            ),
-          };
-        }),
-      );
-    };
-
-    const result: GetAvailableSetResponse = {
-      ref: [],
-      test: [],
-    };
-
-    const refDir = path.join(savedReferenceDir, projectName);
-    const testDir = path.join(savedTestDir, projectName);
-
-    const refExists = await fs.pathExists(refDir);
-    const testExists = await fs.pathExists(testDir);
-
-    if (refExists) result.ref = await getSetsFromDir(refDir);
-    if (testExists) result.test = await getSetsFromDir(testDir);
-
-    return result;
+    return await compareServiceImpl.getAvailableSets(projectName);
   });
 
   ipcMain.handle("compare:compare", async (_event, relativeRefDir: string, relativeTestDir: string) => {
@@ -131,60 +80,36 @@ app.on("ready", () => {
     return await compareServiceImpl.compare(refDir, testDir);
   });
 
+  ipcMain.handle("compare:saveComparisonResult", async () => {
+    return await compareServiceImpl.saveComparison();
+  });
+
   ipcMain.on("compare:openInExplorer", () => {
     openInExplorer(compareDir);
   });
 
-  const getImg = async (filepath: string): Promise<GetImgResponse> => {
-    const isExist = await fs.pathExists(filepath);
-    const base64 = isExist ? fs.readFileSync(filepath).toString("base64") : null;
-    return { base64, isExist };
-  };
-
   ipcMain.handle("img:getScreenshotImg", async (_event, id: string) => {
-    const filepath = path.join(screenshotDir, id + ".png");
-    return await getImg(filepath);
+    return await imgService.getScreenshotImg(id);
   });
 
   ipcMain.handle("img:getCompareAddImg", async (_event, id: string) => {
-    const filepath = path.join(compareAddedDir, id + ".png");
-    return await getImg(filepath);
+    return await imgService.getCompareAddedImg(id);
   });
 
   ipcMain.handle("img:getCompareRemovedImg", async (_event, id: string) => {
-    const filepath = path.join(compareRemovedDir, id + ".png");
-    console.log(filepath);
-    return await getImg(filepath);
+    return await imgService.getCompareRemovedImg(id);
   });
 
   ipcMain.handle("img:getCompareDiffImg", async (_event, id: string) => {
-    const filepath = path.join(compareDiffDir, id + ".png");
-    return await getImg(filepath);
+    return await imgService.getCompareDiffImg(id);
   });
 
   ipcMain.handle(
     "img:getSavedImg",
     async (_event, type: SaveScreenshotType, project: string, branch: string, uuid: string, id: string) => {
-      const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
-      const filepath = path.join(typeDir, project, branch, uuid, id + ".png");
-      return await getImg(filepath);
+      return await imgService.getSavedImg(type, project, branch, uuid, id);
     },
   );
-
-  ipcMain.handle("compare:saveComparisonResult", async () => {
-    try {
-      const srcDir = compareDir;
-      const metadata = await fs.readJSON(path.join(srcDir, compareMetadataFilename));
-      const { uuid, project } = metadata;
-
-      const destDir = path.join(savedComparisonDir, project, uuid);
-      await fs.copy(srcDir, destDir, { overwrite: true });
-      return { success: true };
-    } catch (e) {
-      console.error(e);
-      return { success: false, errMsg: e.message };
-    }
-  });
 
   createWindow();
 });

@@ -8,15 +8,26 @@ import {
   compareDir,
   compareMetadataFilename,
   compareRemovedDir,
+  savedComparisonDir,
   savedInfoFilename,
+  savedReferenceDir,
+  savedTestDir,
+  screenshotMetadataFilename,
 } from "../Filepath";
 import { logger } from "../logger";
+import { getAllFolders } from "../utils";
+import type {
+  CompareResponse,
+  CompareResponse$Data,
+  GetAvailableSetResponse,
+  SavedScreenshotResponse,
+  BranchScreenshotSet,
+} from "../../interface";
 import type { CompareService } from "./CompareService";
-import type { CompareResponse } from "../../interface";
 import type { StoriesDiffer } from "../differ/stories-differ/StoriesDiffer";
 
 export class CompareServiceImpl implements CompareService {
-  public static instance = new CompareServiceImpl();
+  public static instance: CompareService = new CompareServiceImpl();
 
   private constructor() {
     // singleton
@@ -26,52 +37,118 @@ export class CompareServiceImpl implements CompareService {
     return this.instance;
   }
 
-  public async compare(refDir: string, testDir: string) {
-    const uuid = uuidv4();
-    const now = new Date();
+  public async getAvailableProjects(): Promise<string[]> {
+    return getAllFolders(savedReferenceDir);
+  }
 
-    logger.info("Start new comparison");
-
-    const refSavedInfoFilepath = path.join(refDir, savedInfoFilename);
-    const refSavedInfo = await fs.readJSON(refSavedInfoFilepath);
-    const testSetSavedInfoFilepath = path.join(testDir, savedInfoFilename);
-    const testSetSavedInfo = await fs.readJSON(testSetSavedInfoFilepath);
-
-    // todo: change naming
-    const refId = refSavedInfo.uuid;
-    const testSetId = testSetSavedInfo.uuid;
-
-    const project = testSetSavedInfo.project;
-
-    const refBranch = refSavedInfo.branch;
-    const testBranch = testSetSavedInfo.branch;
-
-    await fs.remove(compareDir);
-
-    await fs.ensureDir(compareDir);
-    await fs.ensureDir(compareDiffDir);
-    await fs.ensureDir(compareRemovedDir);
-    await fs.ensureDir(compareAddedDir);
-
-    const differ: StoriesDiffer = new StoriesDifferImpl();
-    const tolerance = 5;
-    const result = await differ.computeDiff(refDir, testDir, tolerance);
-    const metadata: CompareResponse = {
-      uuid,
-      // todo naming
-      createAt: now.toISOString(),
-      project,
-      refBranch,
-      testBranch,
-      refId,
-      testSetId,
-      result,
+  public async getAvailableSets(projectName: string): Promise<GetAvailableSetResponse> {
+    const result: GetAvailableSetResponse = {
+      ref: [],
+      test: [],
     };
-    const metadataFilepath = path.join(compareDir, compareMetadataFilename);
-    await fs.writeJson(metadataFilepath, metadata);
 
-    logger.info("Comparison finished");
+    const refDir = path.join(savedReferenceDir, projectName);
+    const testDir = path.join(savedTestDir, projectName);
 
-    return metadata;
+    const refExists = await fs.pathExists(refDir);
+    const testExists = await fs.pathExists(testDir);
+
+    if (refExists) result.ref = await this.getSetsFromDir(refDir);
+    if (testExists) result.test = await this.getSetsFromDir(testDir);
+
+    return result;
+  }
+
+  public async compare(refDir: string, testDir: string): Promise<CompareResponse> {
+    try {
+      const uuid = uuidv4();
+      const now = new Date();
+
+      logger.info("Start new comparison");
+
+      const refSavedInfoFilepath = path.join(refDir, savedInfoFilename);
+      const refSavedInfo = await fs.readJSON(refSavedInfoFilepath);
+      const testSetSavedInfoFilepath = path.join(testDir, savedInfoFilename);
+      const testSetSavedInfo = await fs.readJSON(testSetSavedInfoFilepath);
+
+      // todo: change naming
+      const refId = refSavedInfo.uuid;
+      const testSetId = testSetSavedInfo.uuid;
+
+      const project = testSetSavedInfo.project;
+
+      const refBranch = refSavedInfo.branch;
+      const testBranch = testSetSavedInfo.branch;
+
+      await fs.remove(compareDir);
+
+      await fs.ensureDir(compareDir);
+      await fs.ensureDir(compareDiffDir);
+      await fs.ensureDir(compareRemovedDir);
+      await fs.ensureDir(compareAddedDir);
+
+      const differ: StoriesDiffer = new StoriesDifferImpl();
+      const tolerance = 5;
+      const result = await differ.computeDiff(refDir, testDir, tolerance);
+      const metadata: CompareResponse$Data = {
+        uuid,
+        // todo naming
+        createAt: now.toISOString(),
+        project,
+        refBranch,
+        testBranch,
+        refId,
+        testSetId,
+        result,
+      };
+      const metadataFilepath = path.join(compareDir, compareMetadataFilename);
+      await fs.writeJson(metadataFilepath, metadata);
+
+      logger.info("Comparison finished");
+
+      return { success: true, data: metadata };
+    } catch (e) {
+      logger.error(e);
+      return { success: false, data: null };
+    }
+  }
+
+  public async saveComparison(): Promise<SavedScreenshotResponse> {
+    try {
+      const metadata = await fs.readJSON(path.join(compareDir, compareMetadataFilename));
+      const { uuid, project } = metadata;
+
+      const destDir = path.join(savedComparisonDir, project, uuid);
+      await fs.copy(compareDir, destDir, { overwrite: true });
+      return { success: true };
+    } catch (e) {
+      logger.error(e);
+      return { success: false, errMsg: e.message };
+    }
+  }
+
+  private async getSetsFromDir(dir: string): Promise<BranchScreenshotSet[]> {
+    const branches = await getAllFolders(dir);
+
+    return await Promise.all(
+      branches.map(async branch => {
+        const branchDir = path.join(dir, branch);
+        const setList = await getAllFolders(branchDir);
+        return {
+          branch,
+          setList: await Promise.all(
+            setList.map(async uuid => {
+              const metadata = await fs.readJSON(path.join(branchDir, uuid, screenshotMetadataFilename));
+              return {
+                uuid,
+                // todo rename
+                createAt: metadata.createAt,
+                viewport: metadata.viewport,
+              };
+            }),
+          ),
+        };
+      }),
+    );
   }
 }

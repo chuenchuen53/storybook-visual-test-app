@@ -14,7 +14,7 @@ export interface SavedScreenshotResponse {
   errMsg?: string;
 }
 
-export interface CompareResponse {
+export interface CompareResponse$Data {
   uuid: string;
   createAt: string;
   project: string;
@@ -25,14 +25,19 @@ export interface CompareResponse {
   result: StoriesDiffResult;
 }
 
-export interface SetData {
+export interface CompareResponse {
+  success: boolean;
+  data: CompareResponse$Data | null;
+}
+
+export interface BranchScreenshotSet {
   branch: string;
   setList: { uuid: string; createAt: string; viewport: { width: number; height: number } }[];
 }
 
 export interface GetAvailableSetResponse {
-  ref: SetData[];
-  test: SetData[];
+  ref: BranchScreenshotSet[];
+  test: BranchScreenshotSet[];
 }
 
 export interface GetImgResponse {

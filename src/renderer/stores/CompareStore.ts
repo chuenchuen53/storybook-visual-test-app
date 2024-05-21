@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import type { CompareResponse, GetAvailableSetResponse } from "../../interface";
+import type { CompareResponse, CompareResponse$Data, GetAvailableSetResponse } from "../../interface";
 
 interface CompareSet {
   branch: string | null;
@@ -27,7 +27,7 @@ export const useCompareStore = defineStore("compare", () => {
     test: [],
   });
 
-  const compareResult = ref<null | CompareResponse>(null);
+  const compareResult = ref<null | CompareResponse$Data>(null);
   const isComparing = ref(false);
 
   const currentDisplayingImgType = ref<CurrentDisplayingImgType>(null);
@@ -56,11 +56,15 @@ export const useCompareStore = defineStore("compare", () => {
     isComparing.value = true;
     const relativeRefDir = `${project.value}/${refSet.value.branch}/${refSet.value.uuid}`;
     const relativeTestDir = `${project.value}/${testSet.value.branch}/${testSet.value.uuid}`;
-    compareResult.value = await window.compareApi.compare(relativeRefDir, relativeTestDir);
+    const response = await window.compareApi.compare(relativeRefDir, relativeTestDir);
+
+    if (response.success) {
+      compareResult.value = response.data;
+    } else {
+      // todo
+    }
 
     isComparing.value = false;
-
-    console.log(compareResult.value);
   };
 
   const refreshData = async () => {
