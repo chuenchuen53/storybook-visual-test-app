@@ -9,4 +9,7 @@
 import { RouterView } from "vue-router";
 import Toast from "primevue/toast";
 import AppLayout from "./AppLayout.vue";
+import { useGlobalStore } from "./stores/GlobalStore";
+
+useGlobalStore();
 </script>

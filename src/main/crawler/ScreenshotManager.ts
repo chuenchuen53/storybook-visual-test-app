@@ -1,8 +1,8 @@
 import path from "path";
 import { sleep } from "../utils";
 import { screenshotDir } from "../Filepath";
-import { StoryState } from "../../shared/typing";
-import type { Viewport, StoryMetadata } from "../../shared/typing";
+import { StoryState } from "../../shared/type";
+import type { Viewport, StoryMetadata } from "../../shared/type";
 import type { StoryScreenshotMetadata } from "./type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 

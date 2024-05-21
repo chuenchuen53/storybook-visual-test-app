@@ -1,4 +1,4 @@
-import type { StoryMetadata, Viewport } from "../../shared/typing";
+import type { StoryMetadata, Viewport } from "../../shared/type";
 
 export interface GetStoriesMetadataResult {
   success: boolean;

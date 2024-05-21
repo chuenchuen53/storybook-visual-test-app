@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getAllFolders, getLocalIPAddress, openInExplorer } from "./main/utils";
 import { MainWindowHelper } from "./MainWindowHelper";
-import { screenshotService } from "./main/screenshot-service";
+import { screenshotService } from "./main/service/screenshot-service";
 import {
   compareAddedDir,
   compareDiffDir,
@@ -17,7 +17,7 @@ import {
   screenshotDir,
   screenshotMetadataFilename,
 } from "./main/Filepath";
-import { compareService } from "./main/compare-service";
+import { compareService } from "./main/service/compare-service";
 import { logger } from "./main/logger";
 import type {
   CompareResponse,

@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
-import { StoriesDifferImpl } from "./stories-differ/StoriesDifferImpl";
+import { StoriesDifferImpl } from "../stories-differ/StoriesDifferImpl";
 import {
   compareAddedDir,
   compareDiffDir,
@@ -9,9 +9,9 @@ import {
   compareMetadataFilename,
   compareRemovedDir,
   savedInfoFilename,
-} from "./Filepath";
-import type { CompareResponse } from "../interface";
-import type { StoriesDiffer } from "./stories-differ/StoriesDiffer";
+} from "../Filepath";
+import type { CompareResponse } from "../../interface";
+import type { StoriesDiffer } from "../stories-differ/StoriesDiffer";
 
 export async function compareService(refDir: string, testDir: string) {
   const uuid = uuidv4();

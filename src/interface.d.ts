@@ -1,5 +1,6 @@
 import type { SendScreenshotInfoParams } from "./MainWindowHelper";
 import type { StoriesDiffResult } from "./main/stories-differ/StoriesDiffer";
+import type { StoryState } from "./shared/type";
 
 export type SaveScreenshotType = "reference" | "test";
 
@@ -53,12 +54,20 @@ export interface ImgApi {
   ) => Promise<GetImgResponse>;
 }
 
+export interface GlobalApi {
+  onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) => void;
+}
+
 export interface ScreenshotApi {
   getLocalIPAddress: () => Promise<string> | Promise<undefined>;
   startScreenshot: (url: string) => Promise<void>;
-  onReceiveScreenshotInfo: (callback: (params: SendScreenshotInfoParams) => void) => void;
   openInExplorer: () => void;
   saveScreenshot: (project: string, branch: string, type: SaveScreenshotType) => Promise<SavedScreenshotResponse>;
+  onUpdateStatus: (callback: (status: ScreenshotState) => void) => void;
+  onNewMetadata: (callback: (storyMetadataList: StoryMetadata[]) => void) => void;
+  onUpdateStoryState: (
+    callback: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
+  ) => void;
 }
 
 export interface CompareApi {
@@ -71,6 +80,7 @@ export interface CompareApi {
 
 declare global {
   interface Window {
+    globalApi: GlobalApi;
     imgApi: ImgApi;
     screenshotApi: ScreenshotApi;
     compareApi: CompareApi;

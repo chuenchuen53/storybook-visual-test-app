@@ -1,4 +1,4 @@
-import type { StoryMetadata, StoryState, Viewport } from "../../shared/typing";
+import type { StoryMetadata, StoryState, Viewport } from "../../shared/type";
 import type { GetStoriesMetadataResult, ScreenshotStoriesResult } from "./type";
 
 export interface Crawler {
@@ -6,7 +6,7 @@ export interface Crawler {
     storybookUrl: string,
     onStartingBrowser: () => void,
     onComputingMetadata: () => void,
-    onError: (errorMsg: string) => void,
+    onError: (err: Error) => void,
   ): Promise<GetStoriesMetadataResult>;
 
   screenshotStories(

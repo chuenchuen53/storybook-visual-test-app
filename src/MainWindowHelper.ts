@@ -1,5 +1,30 @@
 import { BrowserWindow } from "electron";
-import type { SendScreenshotInfoParams } from "./type";
+import type { ScreenshotState, StoryMetadata, StoryState } from "./shared/type";
+
+export class GlobalChannel {
+  public static sendGlobalMessage(type: "success" | "info" | "warn" | "error", message: string) {
+    MainWindowHelper.send("global:message", { type, message });
+  }
+}
+
+export class ScreenshotChannel {
+  public static updateStatus(status: ScreenshotState) {
+    MainWindowHelper.send("screenshot:updateStatus", status);
+  }
+
+  public static newMetadata(storyMetadataList: StoryMetadata[]) {
+    MainWindowHelper.send("screenshot:newMetadata", storyMetadataList);
+  }
+
+  public static updateStoryState(
+    storyId: string,
+    state: StoryState,
+    browserName: string | null,
+    storyErr: boolean | null,
+  ) {
+    MainWindowHelper.send("screenshot:updateStoryState", storyId, state, browserName, storyErr);
+  }
+}
 
 export class MainWindowHelper extends BrowserWindow {
   private static instance: BrowserWindow | null = null;
@@ -12,11 +37,7 @@ export class MainWindowHelper extends BrowserWindow {
     MainWindowHelper.instance = x;
   }
 
-  public static sendScreenshotInfo(params: SendScreenshotInfoParams) {
-    MainWindowHelper.send("screenshot:info", params);
-  }
-
-  private static send(channel: string, ...args: any[]) {
+  public static send(channel: string, ...args: any[]) {
     if (MainWindowHelper.instance === null) {
       console.log("[WARN]: send is called before MainWindow registered");
     }

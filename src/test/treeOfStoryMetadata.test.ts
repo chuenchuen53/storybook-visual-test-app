@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { treeOfStoryMetadata } from "../renderer/utils";
-import type { StoryMetadata } from "../shared/typing";
+import type { StoryMetadata } from "../shared/type";
 import type { StoryTree } from "../renderer/utils";
 
 describe("treeOfStoryMetadata", () => {

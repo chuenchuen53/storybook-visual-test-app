@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import { ScreenshotState } from "../../type";
-import { StoryState } from "../../shared/typing";
+import { ScreenshotState, StoryState } from "../../shared/type";
 import type { StoryMetadataInExplorer } from "../utils";
 
 export type StoryTypeFilter = "all" | "error";
@@ -93,48 +92,39 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     displayingImg.value = { loading: false, isExist: result.isExist, base64: result.base64 };
   };
 
-  window.screenshotApi.onReceiveScreenshotInfo(params => {
-    switch (params.type) {
-      case "status":
-        state.value = params.status;
-        break;
-      case "error":
-        // todo
-        console.log(params.error);
-        break;
-      case "new-metadata": {
-        const storyMetadataInExplorer: StoryMetadataInExplorer[] = params.storyMetadataList.map((x: any) => ({
-          id: x.id,
-          componentId: x.componentId,
-          title: x.title,
-          kind: x.kind,
-          tags: x.tags,
-          name: x.name,
-          story: x.story,
-          state: StoryState.WAITING,
-          browserName: null,
-          startTime: null,
-          endTime: null,
-          storyErr: null,
-        }));
-        _metadata.value = storyMetadataInExplorer;
-        break;
+  window.screenshotApi.onUpdateStatus(status => {
+    state.value = status;
+  });
+
+  window.screenshotApi.onNewMetadata(storyMetadataList => {
+    _metadata.value = storyMetadataList.map((x: any) => ({
+      id: x.id,
+      componentId: x.componentId,
+      title: x.title,
+      kind: x.kind,
+      tags: x.tags,
+      name: x.name,
+      story: x.story,
+      state: StoryState.WAITING,
+      browserName: null,
+      startTime: null,
+      endTime: null,
+      storyErr: null,
+    }));
+  });
+
+  window.screenshotApi.onUpdateStoryState((storyId, state, browserName, storyErr) => {
+    const story = _metadata.value?.find(item => item.id === storyId);
+    if (story) {
+      story.state = state;
+      story.browserName = browserName;
+      if (storyErr !== null) {
+        story.storyErr = storyErr;
       }
-      case "update-story-state": {
-        const story = _metadata.value?.find(item => item.id === params.storyId);
-        if (story) {
-          story.state = params.state;
-          story.browserName = params.browserName;
-          if (params.storyErr !== null) {
-            story.storyErr = params.storyErr;
-          }
-          if (params.state === StoryState.CAPTURING) {
-            story.startTime = new Date().toISOString();
-          } else if (params.state === StoryState.FINISHED) {
-            story.endTime = new Date().toISOString();
-          }
-        }
-        break;
+      if (state === StoryState.CAPTURING) {
+        story.startTime = new Date().toISOString();
+      } else if (state === StoryState.FINISHED) {
+        story.endTime = new Date().toISOString();
       }
     }
   });

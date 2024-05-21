@@ -5,8 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import { DockerContainer } from "../docker-helper/DockerContainer";
 import { sleep } from "../utils";
 import { screenshotDir, screenshotMetadataFilename } from "../Filepath";
+import { logger } from "../logger";
 import { ScreenshotManager } from "./ScreenshotManager";
-import type { StoryMetadata, StoryState, Viewport } from "../../shared/typing";
+import type { StoryMetadata, StoryState, Viewport } from "../../shared/type";
 import type { Crawler } from "./Crawler";
 import type { GetStoriesMetadataResult, SavedMetadata, ScreenshotStoriesResult } from "./type";
 import type { NamedBrowser } from "./ScreenshotManager";
@@ -30,7 +31,7 @@ export class CrawlerImpl implements Crawler {
     storybookUrl: string,
     onStartingBrowser: () => void,
     onComputingMetadata: () => void,
-    onError: (errorMsg: string) => void,
+    onError: (err: Error) => void,
   ): Promise<GetStoriesMetadataResult> {
     let container: DockerContainer | undefined = undefined;
     let browser: Browser | undefined = undefined;
@@ -38,11 +39,19 @@ export class CrawlerImpl implements Crawler {
     try {
       onStartingBrowser();
 
+      logger.info("Starting metadata container");
+
       container = DockerContainer.getInstance("metadata");
       await container.start();
       const containerInfo = container.getContainerInfo()[0];
+
+      logger.info("Successfully started metadata container");
+
       // wait for chrome in container to start
       await sleep(2000);
+
+      logger.info("Connecting to storybook");
+
       browser = await puppeteer.connect({
         browserURL: `http://localhost:${containerInfo.port}`,
       });
@@ -51,6 +60,9 @@ export class CrawlerImpl implements Crawler {
         timeout: 30000,
         waitUntil: "networkidle0",
       });
+
+      logger.info("Successfully connected to storybook");
+      logger.info("Computing metadata");
 
       onComputingMetadata();
 
@@ -79,10 +91,11 @@ export class CrawlerImpl implements Crawler {
         }));
       });
 
+      logger.info("Successfully computed metadata");
+
       return { success: true, storyMetadataList: result };
     } catch (error) {
-      onError(error.message);
-      console.log(error);
+      onError(error);
       return { success: false, storyMetadataList: null };
     } finally {
       try {
@@ -105,6 +118,8 @@ export class CrawlerImpl implements Crawler {
     const browsers: NamedBrowser[] = [];
 
     try {
+      logger.info("Starting screenshot containers");
+
       container = DockerContainer.getInstance("screenshot");
 
       for (let i = 0; i < parallel; i++) {
@@ -112,8 +127,13 @@ export class CrawlerImpl implements Crawler {
       }
 
       const containerInfo = container.getContainerInfo();
+
+      logger.info("Successfully started screenshot containers");
+
       // wait for chrome in container to start
       await sleep(2000);
+
+      logger.info("Connecting to browser");
 
       onStartScreenshot();
       await Promise.all(
@@ -128,6 +148,10 @@ export class CrawlerImpl implements Crawler {
           };
         }),
       );
+
+      logger.info("Successfully connected to browser");
+
+      logger.info("Starting screenshot");
 
       const screenshotManager = new ScreenshotManager(
         storybookUrl,
@@ -148,6 +172,8 @@ export class CrawlerImpl implements Crawler {
         storyMetadataList: result,
       };
       fs.writeFileSync(metadataFilePath, JSON.stringify(saveMetaData));
+
+      logger.info("Successful screenshot all stories");
 
       return { success: true, data: saveMetaData };
     } catch (error) {

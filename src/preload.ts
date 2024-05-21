@@ -1,5 +1,11 @@
 import { contextBridge, ipcRenderer } from "electron";
+import type { GlobalMessage, ScreenshotState, StoryMetadata, StoryState } from "./shared/type";
 import type { SaveScreenshotType } from "./interface";
+
+contextBridge.exposeInMainWorld("globalApi", {
+  onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) =>
+    ipcRenderer.on("global:message", (_event, msg) => cb(msg)),
+});
 
 contextBridge.exposeInMainWorld("imgApi", {
   getScreenshotImg: (id: string) => ipcRenderer.invoke("img:getScreenshotImg", id),
@@ -18,6 +24,16 @@ contextBridge.exposeInMainWorld("screenshotApi", {
   openInExplorer: () => ipcRenderer.send("screenshot:openInExplorer"),
   saveScreenshot: (project: string, branch: string, type: SaveScreenshotType) =>
     ipcRenderer.invoke("screenshot:save", project, branch, type),
+  onUpdateStatus: (callback: (status: ScreenshotState) => void) =>
+    ipcRenderer.on("screenshot:updateStatus", (_event, status) => callback(status)),
+  onNewMetadata: (callback: (storyMetadataList: StoryMetadata[]) => void) =>
+    ipcRenderer.on("screenshot:newMetadata", (_event, storyMetadataList) => callback(storyMetadataList)),
+  onUpdateStoryState: (
+    callback: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
+  ) =>
+    ipcRenderer.on("screenshot:updateStoryState", (_event, storyId, state, browserName, storyErr) =>
+      callback(storyId, state, browserName, storyErr),
+    ),
 });
 
 contextBridge.exposeInMainWorld("compareApi", {
