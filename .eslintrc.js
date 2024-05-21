@@ -38,14 +38,14 @@ module.exports = {
       {
         zones: [
           {
-            target: "./src/view/",
-            from: "./src/service/",
-            message: "Client should not import service code",
+            target: "./src/renderer/",
+            from: "./src/main/",
+            message: "renderer should not import main code",
           },
           {
-            target: "./src/service/",
-            from: "./src/view/",
-            message: "Service should not import client code",
+            target: "./src/main/",
+            from: "./src/renderer/",
+            message: "main should not import renderer code",
           },
         ],
       },
