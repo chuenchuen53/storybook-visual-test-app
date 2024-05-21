@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { treeOfCompareResult } from "../view/utils";
+import { treeOfCompareResult } from "../renderer/utils";
 import type { CompareResponse } from "src/interface";
 
 describe("treeOfCompareResult", () => {

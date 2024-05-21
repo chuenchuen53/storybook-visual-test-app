@@ -1,10 +1,9 @@
 import path from "path";
 import fs from "fs-extra";
 import { app, BrowserWindow, ipcMain } from "electron";
-import { a } from "vitest/dist/suite-IbNSsUWN";
-import { getAllFolders, getLocalIPAddress, openInExplorer } from "./service/utils";
+import { getAllFolders, getLocalIPAddress, openInExplorer } from "./main/utils";
 import { MainWindowHelper } from "./MainWindowHelper";
-import { screenshotService } from "./service/screenshot-service";
+import { screenshotService } from "./main/screenshot-service";
 import {
   compareAddedDir,
   compareDiffDir,
@@ -17,9 +16,9 @@ import {
   savedTestDir,
   screenshotDir,
   screenshotMetadataFilename,
-} from "./service/Filepath";
-import { compareService } from "./service/compare-service";
-import { logger } from "./service/logger";
+} from "./main/Filepath";
+import { compareService } from "./main/compare-service";
+import { logger } from "./main/logger";
 import type {
   CompareResponse,
   GetAvailableSetResponse,

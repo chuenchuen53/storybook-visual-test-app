@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { treeNodesForPrimevue } from "src/view/utils";
-import type { StoryTree } from "src/view/utils";
+import { treeNodesForPrimevue } from "src/renderer/utils";
+import type { StoryTree } from "src/renderer/utils";
 import type { TreeNode } from "primevue/treenode";
 
 describe("treeOfStoryMetadata", () => {

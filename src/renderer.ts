@@ -1,13 +1,13 @@
 import { createApp } from "vue";
 import PrimeVue from "primevue/config";
 import Aura from "primevue/themes/Aura";
-import "primeicons/primeicons.css";
-import "./view/index.css";
 import { createPinia } from "pinia";
 import Tooltip from "primevue/tooltip";
 import ToastService from "primevue/toastservice";
-import App from "./view/App.vue";
-import { router } from "./view/routes";
+import App from "./renderer/App.vue";
+import { router } from "./renderer/routes";
+import "primeicons/primeicons.css";
+import "./renderer/index.css";
 
 const pinia = createPinia();
 

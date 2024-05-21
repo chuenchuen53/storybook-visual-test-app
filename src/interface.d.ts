@@ -1,5 +1,5 @@
 import type { SendScreenshotInfoParams } from "./MainWindowHelper";
-import type { StoriesDiffResult } from "./service/stories-differ/StoriesDiffer";
+import type { StoriesDiffResult } from "./main/stories-differ/StoriesDiffer";
 
 export type SaveScreenshotType = "reference" | "test";
 
