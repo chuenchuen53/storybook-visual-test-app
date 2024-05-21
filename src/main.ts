@@ -1,9 +1,9 @@
 import path from "path";
 import fs from "fs-extra";
 import { app, BrowserWindow, ipcMain } from "electron";
-import { getAllFolders, getLocalIPAddress, openInExplorer } from "./main/utils";
+import { getAllFolders, openInExplorer } from "./main/utils";
 import { MainWindowHelper } from "./MainWindowHelper";
-import { screenshotService } from "./main/service/screenshot-service";
+import { ScreenshotServiceImpl } from "./main/service/ScreenshotServiceImpl";
 import {
   compareAddedDir,
   compareDiffDir,
@@ -11,7 +11,6 @@ import {
   compareMetadataFilename,
   compareRemovedDir,
   savedComparisonDir,
-  savedInfoFilename,
   savedReferenceDir,
   savedTestDir,
   screenshotDir,
@@ -19,6 +18,7 @@ import {
 } from "./main/Filepath";
 import { compareService } from "./main/service/compare-service";
 import { logger } from "./main/logger";
+import type { ScreenshotService } from "./main/service/ScreenshotService";
 import type {
   CompareResponse,
   GetAvailableSetResponse,
@@ -29,6 +29,8 @@ import type {
 } from "./interface";
 
 logger.info("app start");
+
+const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -62,40 +64,19 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", () => {
-  ipcMain.handle("screenshot:getLocalIPAddress", () => getLocalIPAddress());
+  ipcMain.handle("screenshot:getLocalIPAddress", () => screenshotService.getLocalIPAddress());
   ipcMain.handle("screenshot:startScreenshot", (_event, url: string) => {
-    screenshotService(url);
+    void screenshotService.newScreenshotSet(url);
   });
 
   ipcMain.on("screenshot:openInExplorer", () => {
     openInExplorer(screenshotDir);
   });
+
   ipcMain.handle(
     "screenshot:save",
     async (_event, project: string, branch: string, type: SaveScreenshotType): Promise<SavedScreenshotResponse> => {
-      try {
-        const srcDir = screenshotDir;
-
-        const metadata = await fs.readJSON(path.join(srcDir, "metadata.json"));
-        const uuid = metadata.uuid;
-
-        const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
-        const destDir = path.join(typeDir, project, branch, uuid);
-        await fs.ensureDir(destDir);
-        await fs.copy(srcDir, destDir, { overwrite: true });
-        const savedInfo = {
-          uuid,
-          type,
-          project,
-          branch,
-        };
-        const savedInfoPath = path.join(destDir, savedInfoFilename);
-        await fs.writeJson(savedInfoPath, savedInfo);
-        return { success: true };
-      } catch (e) {
-        console.error(e);
-        return { success: false, errMsg: e.message };
-      }
+      return await screenshotService.saveScreenshot(project, branch, type);
     },
   );
 

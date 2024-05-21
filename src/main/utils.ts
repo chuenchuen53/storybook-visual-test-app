@@ -7,19 +7,6 @@ export async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function getLocalIPAddress(): string | undefined {
-  const interfaces = os.networkInterfaces();
-  const ips = Object.keys(interfaces)
-    .map(
-      key =>
-        interfaces[key]
-          ?.filter(({ family, internal }) => family === "IPv4" && !internal)
-          .map(({ address }) => address) ?? [],
-    )
-    .reduce((acc, current) => acc.concat(current), []);
-  return ips[0];
-}
-
 export function computeArrDiff(
   oriArr: string[],
   newArr: string[],
