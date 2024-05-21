@@ -2,6 +2,8 @@ import path from "path";
 import { sleep } from "../utils";
 import { screenshotDir } from "../Filepath";
 import { StoryState } from "../../shared/type";
+import { logger } from "../logger";
+import { GlobalChannel } from "../../MainWindowHelper";
 import type { Viewport, StoryMetadata } from "../../shared/type";
 import type { StoryScreenshotMetadata } from "./type";
 import type { Browser, ElementHandle } from "puppeteer-core";
@@ -11,33 +13,23 @@ export interface NamedBrowser {
   name: string;
 }
 
-export class ScreenshotManager {
-  private readonly storybookUrl: string;
-  private readonly browsers: NamedBrowser[];
-  private readonly storyMetadataList: StoryMetadata[];
-  private readonly viewport: Viewport;
-  private readonly onStoryStateChange: (
-    storyId: string,
-    state: StoryState,
-    browserName: string,
-    storyErr: boolean | null,
-  ) => void;
+export type OnStoryStateChange = (
+  storyId: string,
+  state: StoryState,
+  browserName: string,
+  storyErr: boolean | null,
+) => void;
 
+export class ScreenshotManager {
   private readonly result: StoryScreenshotMetadata[] = [];
 
   constructor(
-    storybookUrl: string,
-    browsers: NamedBrowser[],
-    storyMetadataList: StoryMetadata[],
-    viewport: Viewport,
-    onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
-  ) {
-    this.storybookUrl = storybookUrl;
-    this.browsers = browsers;
-    this.storyMetadataList = storyMetadataList;
-    this.viewport = viewport;
-    this.onStoryStateChange = onStoryStateChange;
-  }
+    private readonly storybookUrl: string,
+    private readonly browsers: NamedBrowser[],
+    private readonly storyMetadataList: StoryMetadata[],
+    private readonly viewport: Viewport,
+    private readonly onStoryStateChange: OnStoryStateChange,
+  ) {}
 
   async startScreenshot(): Promise<StoryScreenshotMetadata[]> {
     let nextJobIndex = this.browsers.length;
@@ -82,8 +74,10 @@ export class ScreenshotManager {
       waitUntil: "networkidle0",
     });
 
-    const errorStack = await page.$("#error-stack");
-    const storyErr = errorStack ? await page.evaluate(el => el.textContent.trim().length > 0, errorStack) : false;
+    const storyErr = await page.evaluate(() => {
+      const errorStack = document.querySelector("#error-stack");
+      return errorStack && errorStack.textContent.trim().length > 0;
+    });
 
     const filepath = path.join(screenshotDir, `${story.id}.png`);
 
@@ -125,7 +119,11 @@ export class ScreenshotManager {
 
       if (trialTimes === maxTrials) {
         // todo: this case are mostly happen when the story have element that is absolute or fixed, like modal, tooltip, etc
-        console.log("[Warning]: Element is not visible " + story.id);
+        logger.warn("Cannot detect size of story " + story.id);
+        GlobalChannel.sendGlobalMessage(
+          "warn",
+          `Cannot detect size of story ${story.id}\nscreenshotting the whole page instead`,
+        );
         await page.screenshot({ path: filepath });
       } else {
         await captureElement.screenshot({ path: filepath });
