@@ -34,6 +34,7 @@
     "autoprefixer": "^10.4.19",
     "electron": "30.0.4",
     "eslint": "8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-vue": "^9.26.0",
     "pixelmatch": "5.3.0",

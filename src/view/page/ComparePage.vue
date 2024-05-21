@@ -65,7 +65,6 @@
 <script setup lang="ts">
 import ProgressSpinner from "primevue/progressspinner";
 import Image from "primevue/image";
-import Steps from "primevue/steps";
 import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 import Button from "primevue/button";

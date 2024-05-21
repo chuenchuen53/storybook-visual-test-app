@@ -18,6 +18,11 @@ module.exports = {
     browser: true,
     node: true,
   },
+  settings: {
+    "import/resolver": {
+      typescript: true,
+    },
+  },
   rules: {
     "object-shorthand": 1,
     "import/no-duplicates": "error",
@@ -26,6 +31,23 @@ module.exports = {
       "warn",
       {
         groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+      },
+    ],
+    "import/no-restricted-paths": [
+      "error",
+      {
+        zones: [
+          {
+            target: "./src/view/",
+            from: "./src/service/",
+            message: "Client should not import service code",
+          },
+          {
+            target: "./src/service/",
+            from: "./src/view/",
+            message: "Service should not import client code",
+          },
+        ],
       },
     ],
     "@typescript-eslint/consistent-type-imports": [

@@ -1,5 +1,5 @@
 import { BrowserWindow } from "electron";
-import type { SendScreenshotInfoParams } from "./typing";
+import type { SendScreenshotInfoParams } from "./type";
 
 export class MainWindowHelper extends BrowserWindow {
   private static instance: BrowserWindow | null = null;

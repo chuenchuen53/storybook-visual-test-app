@@ -37,7 +37,7 @@ import StoryTreeExplorer from "../components/StoryTreeExplorer.vue";
 import SaveDialog from "../components/screenshot/SaveDialog.vue";
 
 const store = useScreenshotStore();
-const { state, activeStep, displayingImg } = storeToRefs(store);
+const { activeStep, displayingImg } = storeToRefs(store);
 
 const items = [
   { label: "Idle" },

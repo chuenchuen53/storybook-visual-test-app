@@ -1,11 +1,12 @@
 import fs from "fs-extra";
 import { MainWindowHelper } from "../MainWindowHelper";
-import { ScreenshotState } from "../typing";
+import { ScreenshotState } from "../type";
 import { CrawlerImpl } from "./crawler/CrawlerImpl";
 import { isDockerAvailable } from "./docker-helper/is-docker-available";
 import { checkDockerImage, CHROME_IMAGE, pullDockerImage } from "./docker-helper/docker-image";
 import { screenshotDir } from "./Filepath";
-import type { Crawler } from "./crawler/type";
+
+import type { Crawler } from "./crawler/Crawler";
 
 function sendFailStatusAndErrMsg(errorMsg: string) {
   MainWindowHelper.sendScreenshotInfo({ type: "error", errorMsg });

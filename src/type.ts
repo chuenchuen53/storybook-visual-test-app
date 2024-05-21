@@ -1,4 +1,4 @@
-import type { StoryState, StoryMetadata } from "./service/crawler/type";
+import type { StoryMetadata, StoryState } from "./shared/typing";
 
 export enum ScreenshotState {
   IDLE = "IDLE",

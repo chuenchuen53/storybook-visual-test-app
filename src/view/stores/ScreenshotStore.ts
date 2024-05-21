@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { useToast } from "primevue/usetoast";
-import { ScreenshotState } from "../../typing";
-import { StoryState } from "../../service/crawler/type";
+import { ScreenshotState } from "../../type";
+import { StoryState } from "../../shared/typing";
 import type { StoryMetadataInExplorer } from "../utils";
 
 export type StoryTypeFilter = "all" | "error";

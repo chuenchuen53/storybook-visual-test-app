@@ -6,15 +6,9 @@ import { DockerContainer } from "../docker-helper/DockerContainer";
 import { sleep } from "../utils";
 import { screenshotDir, screenshotMetadataFilename } from "../Filepath";
 import { ScreenshotManager } from "./ScreenshotManager";
-import type {
-  Crawler,
-  GetStoriesMetadataResult,
-  SavedMetadata,
-  ScreenshotStoriesResult,
-  StoryMetadata,
-  StoryState,
-  Viewport,
-} from "./type";
+import type { StoryMetadata, StoryState, Viewport } from "../../shared/typing";
+import type { Crawler } from "./Crawler";
+import type { GetStoriesMetadataResult, SavedMetadata, ScreenshotStoriesResult } from "./type";
 import type { NamedBrowser } from "./ScreenshotManager";
 import type { Browser } from "puppeteer-core";
 
@@ -22,7 +16,7 @@ export class CrawlerImpl implements Crawler {
   private static instance: CrawlerImpl = new CrawlerImpl();
 
   private constructor() {
-    // do nothing
+    // singleton
   }
 
   public static getInstance(): CrawlerImpl {

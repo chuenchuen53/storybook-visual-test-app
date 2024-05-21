@@ -100,7 +100,7 @@ import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useCompareStore } from "../../stores/CompareStore";
 import { isCompareResultLeaf, treeNodesForPrimevue, treeOfCompareResult } from "../../utils";
-import type { StoryTree, CompareResultTree } from "../../utils";
+import type { CompareResultTree } from "../../utils";
 import type { TreeNode } from "primevue/treenode";
 
 const store = useCompareStore();

@@ -1,8 +1,9 @@
 import path from "path";
 import { sleep } from "../utils";
 import { screenshotDir } from "../Filepath";
-import { StoryState } from "./type";
-import type { StoryMetadata, StoryScreenshotMetadata, Viewport } from "./type";
+import { StoryState } from "../../shared/typing";
+import type { Viewport, StoryMetadata } from "../../shared/typing";
+import type { StoryScreenshotMetadata } from "./type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
 export interface NamedBrowser {
