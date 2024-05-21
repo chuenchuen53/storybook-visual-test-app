@@ -16,6 +16,7 @@ const compareDir = path.join(tempDir, "compare");
 const compareDiffDir = path.join(compareDir, "diff");
 const compareRemovedDir = path.join(compareDir, "removed");
 const compareAddedDir = path.join(compareDir, "added");
+const compareResultFilename = "result.json";
 const compareMetadataFilename = "metadata.json";
 
 const savedReferenceDir = path.join(savedDir, "reference");
@@ -31,6 +32,7 @@ export {
   compareDiffDir,
   compareRemovedDir,
   compareAddedDir,
+  compareResultFilename,
   compareMetadataFilename,
   savedReferenceDir,
   savedTestDir,

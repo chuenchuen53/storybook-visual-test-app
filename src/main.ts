@@ -16,11 +16,10 @@ import {
   screenshotDir,
   screenshotMetadataFilename,
 } from "./main/Filepath";
-import { compareService } from "./main/service/compare-service";
+import { CompareServiceImpl } from "./main/service/CompareServiceImpl";
 import { logger } from "./main/logger";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
 import type {
-  CompareResponse,
   GetAvailableSetResponse,
   GetImgResponse,
   SavedScreenshotResponse,
@@ -31,6 +30,7 @@ import type {
 logger.info("app start");
 
 const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
+const compareServiceImpl = CompareServiceImpl.getInstance();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -128,8 +128,7 @@ app.on("ready", () => {
   ipcMain.handle("compare:compare", async (_event, relativeRefDir: string, relativeTestDir: string) => {
     const refDir = path.join(savedReferenceDir, relativeRefDir);
     const testDir = path.join(savedTestDir, relativeTestDir);
-    const result: CompareResponse = await compareService(refDir, testDir);
-    return result;
+    return await compareServiceImpl.compare(refDir, testDir);
   });
 
   ipcMain.on("compare:openInExplorer", () => {
