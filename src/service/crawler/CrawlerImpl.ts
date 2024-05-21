@@ -88,6 +88,7 @@ export class CrawlerImpl implements Crawler {
       return { success: true, storyMetadataList: result };
     } catch (error) {
       onError(error.message);
+      console.log(error);
       return { success: false, storyMetadataList: null };
     } finally {
       try {

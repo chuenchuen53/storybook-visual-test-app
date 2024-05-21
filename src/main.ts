@@ -6,6 +6,7 @@ import { MainWindowHelper } from "./MainWindowHelper";
 import { screenshotService } from "./service/screenshot-service";
 import {
   compareAddedDir,
+  compareDiffDir,
   compareDir,
   compareMetadataFilename,
   compareRemovedDir,
@@ -174,7 +175,7 @@ app.on("ready", () => {
   });
 
   ipcMain.handle("img:getCompareDiffImg", async (_event, id: string) => {
-    const filepath = path.join(compareDir, id + ".png");
+    const filepath = path.join(compareDiffDir, id + ".png");
     return await getImg(filepath);
   });
 

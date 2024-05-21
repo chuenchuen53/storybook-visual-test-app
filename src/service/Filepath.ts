@@ -29,8 +29,8 @@ export {
   compareRemovedDir,
   compareAddedDir,
   compareMetadataFilename,
-  savedComparisonDir,
   savedReferenceDir,
   savedTestDir,
   savedInfoFilename,
+  savedComparisonDir,
 };
