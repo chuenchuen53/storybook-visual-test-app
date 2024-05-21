@@ -59,6 +59,8 @@
     "electron-squirrel-startup": "^1.0.1",
     "execa": "5.1.1",
     "pinia": "^2.1.7",
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.0.0",
     "pngjs": "^7.0.0",
     "puppeteer-core": "22.8.1",
     "shelljs": "^0.8.5",

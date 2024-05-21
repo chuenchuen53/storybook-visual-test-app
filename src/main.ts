@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs-extra";
 import { app, BrowserWindow, ipcMain } from "electron";
+import { a } from "vitest/dist/suite-IbNSsUWN";
 import { getAllFolders, getLocalIPAddress, openInExplorer } from "./service/utils";
 import { MainWindowHelper } from "./MainWindowHelper";
 import { screenshotService } from "./service/screenshot-service";
@@ -18,6 +19,7 @@ import {
   screenshotMetadataFilename,
 } from "./service/Filepath";
 import { compareService } from "./service/compare-service";
+import { logger } from "./service/logger";
 import type {
   CompareResponse,
   GetAvailableSetResponse,
@@ -26,6 +28,8 @@ import type {
   SaveScreenshotType,
   SetData,
 } from "./interface";
+
+logger.info("app start");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -225,3 +229,7 @@ app.on("activate", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+process.on("uncaughtException", err => {
+  logger.fatal(err, "uncaught exception detected");
+});

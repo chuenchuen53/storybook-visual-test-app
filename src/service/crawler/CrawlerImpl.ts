@@ -107,7 +107,6 @@ export class CrawlerImpl implements Crawler {
     try {
       container = DockerContainer.getInstance("screenshot");
 
-      // todo: test if ok to parallel start
       for (let i = 0; i < parallel; i++) {
         await container.start();
       }

@@ -7,6 +7,8 @@ const appDataRootDir = path.join(home, "visual-test-app");
 const tempDir = path.join(appDataRootDir, "temp");
 const savedDir = path.join(appDataRootDir, "saved");
 
+const appLogFilepath = path.join(tempDir, "app.log");
+
 const screenshotDir = path.join(tempDir, "screenshots");
 const screenshotMetadataFilename = "metadata.json";
 
@@ -22,6 +24,7 @@ const savedComparisonDir = path.join(savedDir, "comparison");
 const savedInfoFilename = "saved-info.json";
 
 export {
+  appLogFilepath,
   screenshotDir,
   screenshotMetadataFilename,
   compareDir,
