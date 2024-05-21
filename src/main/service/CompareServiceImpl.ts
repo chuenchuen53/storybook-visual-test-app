@@ -17,12 +17,12 @@ import {
 import { logger } from "../logger";
 import { getAllFolders } from "../utils";
 import type {
+  BranchScreenshotSet,
   CompareResponse,
   CompareResponse$Data,
   GetAvailableSetResponse,
   SavedScreenshotResponse,
-  BranchScreenshotSet,
-} from "../../interface";
+} from "../../shared/type";
 import type { CompareService } from "./CompareService";
 import type { StoriesDiffer } from "../differ/stories-differ/StoriesDiffer";
 

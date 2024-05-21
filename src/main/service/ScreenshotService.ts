@@ -1,4 +1,4 @@
-import type { SavedScreenshotResponse, SaveScreenshotType } from "../../interface";
+import type { SavedScreenshotResponse, SaveScreenshotType } from "../../shared/type";
 
 export interface ScreenshotService {
   getLocalIPAddress(): string;

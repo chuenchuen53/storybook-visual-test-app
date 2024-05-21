@@ -1,6 +1,5 @@
 import type { TreeNode } from "primevue/treenode";
-import type { StoryMetadata, StoryState } from "../shared/type";
-import type { CompareResponse } from "../interface";
+import type { CompareResponse, StoryMetadata, StoryState } from "../shared/type";
 
 export interface StoryMetadataInExplorer extends StoryMetadata {
   state: StoryState;

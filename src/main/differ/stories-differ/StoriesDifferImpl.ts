@@ -10,7 +10,8 @@ import {
   compareResultFilename,
   screenshotMetadataFilename,
 } from "../../Filepath";
-import type { StoriesDiffer, StoriesDiffResult } from "./StoriesDiffer";
+import type { StoriesDiffResult } from "../../../shared/type";
+import type { StoriesDiffer } from "./StoriesDiffer";
 import type { SavedMetadata } from "../../crawler/type";
 import type { ImgDiffer } from "../img-differ/ImgDiffer";
 

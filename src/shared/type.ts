@@ -35,3 +35,48 @@ export interface GlobalMessage {
   type: "success" | "info" | "warn" | "error";
   message: string;
 }
+
+export interface SavedScreenshotResponse {
+  success: boolean;
+  errMsg?: string;
+}
+
+export type SaveScreenshotType = "reference" | "test";
+
+export interface StoriesDiffResult {
+  same: string[];
+  added: string[];
+  removed: string[];
+  diff: string[];
+}
+
+export interface CompareResponse$Data {
+  uuid: string;
+  createAt: string;
+  project: string;
+  refBranch: string;
+  testBranch: string;
+  refId: string;
+  testSetId: string;
+  result: StoriesDiffResult;
+}
+
+export interface CompareResponse {
+  success: boolean;
+  data: CompareResponse$Data | null;
+}
+
+export interface BranchScreenshotSet {
+  branch: string;
+  setList: { uuid: string; createAt: string; viewport: { width: number; height: number } }[];
+}
+
+export interface GetAvailableSetResponse {
+  ref: BranchScreenshotSet[];
+  test: BranchScreenshotSet[];
+}
+
+export interface GetImgResponse {
+  isExist: boolean;
+  base64: string | null;
+}

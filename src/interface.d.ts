@@ -1,49 +1,11 @@
-import type { SendScreenshotInfoParams } from "./MainWindowHelper";
-import type { StoriesDiffResult } from "./main/differ/stories-differ/StoriesDiffer";
-import type { StoryState } from "./shared/type";
-
-export type SaveScreenshotType = "reference" | "test";
-
-export interface SavedScreenshotResponse {
-  success: boolean;
-  errMsg?: string;
-}
-
-export interface SavedScreenshotResponse {
-  success: boolean;
-  errMsg?: string;
-}
-
-export interface CompareResponse$Data {
-  uuid: string;
-  createAt: string;
-  project: string;
-  refBranch: string;
-  testBranch: string;
-  refId: string;
-  testSetId: string;
-  result: StoriesDiffResult;
-}
-
-export interface CompareResponse {
-  success: boolean;
-  data: CompareResponse$Data | null;
-}
-
-export interface BranchScreenshotSet {
-  branch: string;
-  setList: { uuid: string; createAt: string; viewport: { width: number; height: number } }[];
-}
-
-export interface GetAvailableSetResponse {
-  ref: BranchScreenshotSet[];
-  test: BranchScreenshotSet[];
-}
-
-export interface GetImgResponse {
-  isExist: boolean;
-  base64: string | null;
-}
+import type {
+  CompareResponse,
+  GetAvailableSetResponse,
+  GetImgResponse,
+  SavedScreenshotResponse,
+  SaveScreenshotType,
+  StoryState,
+} from "./shared/type";
 
 export interface ImgApi {
   getScreenshotImg: (id: string) => Promise<GetImgResponse>;

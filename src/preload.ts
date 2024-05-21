@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { GlobalMessage, ScreenshotState, StoryMetadata, StoryState } from "./shared/type";
-import type { SaveScreenshotType } from "./interface";
+import type { GlobalMessage, SaveScreenshotType, ScreenshotState, StoryMetadata, StoryState } from "./shared/type";
 
 contextBridge.exposeInMainWorld("globalApi", {
   onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) =>

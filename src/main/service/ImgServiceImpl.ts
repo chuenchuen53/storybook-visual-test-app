@@ -8,8 +8,8 @@ import {
   savedTestDir,
   screenshotDir,
 } from "../Filepath";
+import type { GetImgResponse, SaveScreenshotType } from "../../shared/type";
 import type { ImgService } from "./ImgService";
-import type { GetImgResponse, SaveScreenshotType } from "../../interface";
 
 export class ImgServiceImpl implements ImgService {
   private static instance: ImgService = new ImgServiceImpl();

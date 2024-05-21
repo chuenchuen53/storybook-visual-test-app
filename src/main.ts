@@ -7,9 +7,9 @@ import { compareDir, savedReferenceDir, savedTestDir, screenshotDir } from "./ma
 import { CompareServiceImpl } from "./main/service/CompareServiceImpl";
 import { logger } from "./main/logger";
 import { ImgServiceImpl } from "./main/service/ImgServiceImpl";
+import type { SavedScreenshotResponse, SaveScreenshotType } from "./shared/type";
 import type { CompareService } from "./main/service/CompareService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
-import type { SavedScreenshotResponse, SaveScreenshotType } from "./interface";
 import type { ImgService } from "./main/service/ImgService";
 
 logger.info("app start");

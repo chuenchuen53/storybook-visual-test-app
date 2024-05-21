@@ -14,7 +14,7 @@ import {
 } from "../Filepath";
 import { ScreenshotState } from "../../shared/type";
 import { logger } from "../logger";
-import type { SavedScreenshotResponse, SaveScreenshotType } from "../../interface";
+import type { SavedScreenshotResponse, SaveScreenshotType } from "../../shared/type";
 import type { ScreenshotService } from "./ScreenshotService";
 import type { Crawler } from "../crawler/Crawler";
 

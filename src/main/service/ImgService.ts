@@ -1,4 +1,4 @@
-import type { GetImgResponse, SaveScreenshotType } from "../../interface";
+import type { GetImgResponse, SaveScreenshotType } from "../../shared/type";
 
 export interface ImgService {
   getScreenshotImg(id: string): Promise<GetImgResponse>;

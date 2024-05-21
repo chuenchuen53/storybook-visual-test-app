@@ -1,4 +1,4 @@
-import type { CompareResponse, GetAvailableSetResponse, SavedScreenshotResponse } from "../../interface";
+import type { CompareResponse, GetAvailableSetResponse, SavedScreenshotResponse } from "../../shared/type";
 
 export interface CompareService {
   getAvailableProjects(): Promise<string[]>;

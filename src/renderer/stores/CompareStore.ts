@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import type { CompareResponse, CompareResponse$Data, GetAvailableSetResponse } from "../../interface";
+import { CompareResponse } from "../../shared/type";
+import type { CompareResponse$Data, GetAvailableSetResponse } from "../../shared/type";
 
 interface CompareSet {
   branch: string | null;
