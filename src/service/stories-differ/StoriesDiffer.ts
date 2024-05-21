@@ -6,10 +6,5 @@ export interface StoriesDiffResult {
 }
 
 export interface StoriesDiffer {
-  computeDiff(
-    refDir: string,
-    testDir: string,
-    diffDir: string,
-    tolerance: number,
-  ): Promise<StoriesDiffResult>;
+  computeDiff(refDir: string, testDir: string, tolerance: number): Promise<StoriesDiffResult>;
 }

@@ -1,4 +1,3 @@
-import type { StoriesDiffResult } from "./service/stories-differ/StoriesDiffer";
 import type { StoryState, StoryMetadata } from "./service/crawler/type";
 
 export enum ScreenshotState {

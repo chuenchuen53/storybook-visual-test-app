@@ -99,13 +99,7 @@ import Button from "primevue/button";
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useCompareStore } from "../../stores/CompareStore";
-import {
-  isCompareResultLeaf,
-  isLeftNode,
-  treeNodesForPrimevue,
-  treeOfCompareResult,
-  treeOfStoryMetadata,
-} from "../../utils";
+import { isCompareResultLeaf, treeNodesForPrimevue, treeOfCompareResult } from "../../utils";
 import type { StoryTree, CompareResultTree } from "../../utils";
 import type { TreeNode } from "primevue/treenode";
 

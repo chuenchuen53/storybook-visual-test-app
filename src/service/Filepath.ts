@@ -11,9 +11,9 @@ const screenshotDir = path.join(tempDir, "screenshots");
 const screenshotMetadataFilename = "metadata.json";
 
 const compareDir = path.join(tempDir, "compare");
-const diffImgFolder = "diff";
-const removedImgFolder = "removed";
-const addedImgFolder = "added";
+const compareDiffDir = path.join(compareDir, "diff");
+const compareRemovedDir = path.join(compareDir, "removed");
+const compareAddedDir = path.join(compareDir, "added");
 const compareMetadataFilename = "metadata.json";
 
 const savedReferenceDir = path.join(savedDir, "reference");
@@ -22,16 +22,15 @@ const savedComparisonDir = path.join(savedDir, "comparison");
 const savedInfoFilename = "saved-info.json";
 
 export {
-  appDataRootDir,
   screenshotDir,
   screenshotMetadataFilename,
+  compareDir,
+  compareDiffDir,
+  compareRemovedDir,
+  compareAddedDir,
+  compareMetadataFilename,
   savedComparisonDir,
   savedReferenceDir,
   savedTestDir,
   savedInfoFilename,
-  compareDir,
-  compareMetadataFilename,
-  diffImgFolder,
-  removedImgFolder,
-  addedImgFolder,
 };

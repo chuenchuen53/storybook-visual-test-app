@@ -5,12 +5,10 @@ import { getAllFolders, getLocalIPAddress, openInExplorer } from "./service/util
 import { MainWindowHelper } from "./MainWindowHelper";
 import { screenshotService } from "./service/screenshot-service";
 import {
-  addedImgFolder,
-  appDataRootDir,
+  compareAddedDir,
   compareDir,
   compareMetadataFilename,
-  diffImgFolder,
-  removedImgFolder,
+  compareRemovedDir,
   savedComparisonDir,
   savedInfoFilename,
   savedReferenceDir,
@@ -165,18 +163,18 @@ app.on("ready", () => {
   });
 
   ipcMain.handle("img:getCompareAddImg", async (_event, id: string) => {
-    const filepath = path.join(compareDir, addedImgFolder, id + ".png");
+    const filepath = path.join(compareAddedDir, id + ".png");
     return await getImg(filepath);
   });
 
   ipcMain.handle("img:getCompareRemovedImg", async (_event, id: string) => {
-    const filepath = path.join(compareDir, removedImgFolder, id + ".png");
+    const filepath = path.join(compareRemovedDir, id + ".png");
     console.log(filepath);
     return await getImg(filepath);
   });
 
   ipcMain.handle("img:getCompareDiffImg", async (_event, id: string) => {
-    const filepath = path.join(compareDir, diffImgFolder, id + ".png");
+    const filepath = path.join(compareDir, id + ".png");
     return await getImg(filepath);
   });
 

@@ -3,11 +3,11 @@ import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
 import { StoriesDifferImpl } from "./stories-differ/StoriesDifferImpl";
 import {
-  addedImgFolder,
+  compareAddedDir,
+  compareDiffDir,
   compareDir,
   compareMetadataFilename,
-  diffImgFolder,
-  removedImgFolder,
+  compareRemovedDir,
   savedInfoFilename,
 } from "./Filepath";
 import type { CompareResponse } from "../interface";
@@ -30,22 +30,16 @@ export async function compareService(refDir: string, testDir: string) {
   const refBranch = refSavedInfo.branch;
   const testBranch = testSetSavedInfo.branch;
 
-  const compareRootDir = path.join(compareDir);
+  await fs.remove(compareDir);
 
-  await fs.remove(compareRootDir);
-
-  const diffImgDir = path.join(compareRootDir, diffImgFolder);
-  const removedImgDir = path.join(compareRootDir, removedImgFolder);
-  const addedImgDir = path.join(compareRootDir, addedImgFolder);
-
-  await fs.ensureDir(compareRootDir);
-  await fs.ensureDir(diffImgDir);
-  await fs.ensureDir(removedImgDir);
-  await fs.ensureDir(addedImgDir);
+  await fs.ensureDir(compareDir);
+  await fs.ensureDir(compareDiffDir);
+  await fs.ensureDir(compareRemovedDir);
+  await fs.ensureDir(compareAddedDir);
 
   const differ: StoriesDiffer = new StoriesDifferImpl();
   const tolerance = 5;
-  const result = await differ.computeDiff(refDir, testDir, compareRootDir, tolerance);
+  const result = await differ.computeDiff(refDir, testDir, tolerance);
   const metadata: CompareResponse = {
     uuid,
     createAt: now.toISOString(),
@@ -56,7 +50,7 @@ export async function compareService(refDir: string, testDir: string) {
     testSetId,
     result,
   };
-  const metadataFilepath = path.join(compareRootDir, compareMetadataFilename);
+  const metadataFilepath = path.join(compareDir, compareMetadataFilename);
   await fs.writeJson(metadataFilepath, metadata);
   return metadata;
 }
