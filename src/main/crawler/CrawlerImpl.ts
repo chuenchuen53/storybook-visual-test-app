@@ -7,6 +7,7 @@ import { sleep } from "../utils";
 import { screenshotDir, screenshotMetadataFilename } from "../Filepath";
 import { logger } from "../logger";
 import { ScreenshotManager } from "./ScreenshotManager";
+import { getStorybookMetadata } from "./client-code";
 import type { StoryMetadata, StoryState, Viewport } from "../../shared/type";
 import type { Crawler } from "./Crawler";
 import type { GetStoriesMetadataResult, SavedMetadata, ScreenshotStoriesResult } from "./type";
@@ -58,7 +59,7 @@ export class CrawlerImpl implements Crawler {
       const page = await browser.newPage();
       await page.goto(storybookUrl + "/iframe.html?selectedKind=story-crawler-kind&selectedStory=story-crawler-story", {
         timeout: 30000,
-        waitUntil: "networkidle0",
+        waitUntil: ["domcontentloaded", "networkidle0"],
       });
 
       logger.info("Successfully connected to storybook");
@@ -66,30 +67,27 @@ export class CrawlerImpl implements Crawler {
 
       onComputingMetadata();
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await page.waitForFunction(() => (window as any).__STORYBOOK_PREVIEW__?.storyStoreValue, {
-        timeout: 30000,
-      });
-      await page.evaluate(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const api = (window as any).__STORYBOOK_PREVIEW__;
-        return await api.storyStoreValue?.cacheAllCSFFiles();
-      });
-      const result: StoryMetadata[] = await page.evaluate(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const api = (window as any).__STORYBOOK_PREVIEW__;
-        const rawData = await api.storyStoreValue.extract();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return Object.values(rawData).map((x: any) => ({
-          id: x.id,
-          componentId: x.componentId,
-          title: x.title,
-          kind: x.kind,
-          tags: x.tags,
-          name: x.name,
-          story: x.story,
-        }));
-      });
+      let trail = 0;
+      const maxTrail = 5;
+      const delayForTrail = 5000;
+
+      let result: StoryMetadata[] = [];
+      while (trail < maxTrail) {
+        trail++;
+        const resp = await getStorybookMetadata(page);
+        if (resp.result) {
+          result = resp.result;
+          break;
+        } else if (trail === maxTrail) {
+          throw resp.error;
+        } else {
+          logger.error(resp.error);
+          logger.error("Failed to get metadata, retrying");
+          logger.info("Retrying");
+          await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
+          await sleep(delayForTrail);
+        }
+      }
 
       logger.info("Successfully computed metadata");
 

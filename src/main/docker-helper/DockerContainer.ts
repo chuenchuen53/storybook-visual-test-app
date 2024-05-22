@@ -33,6 +33,18 @@ export class DockerContainer {
     return DockerContainer.instances[containerType];
   }
 
+  public static async ensureAllStopped() {
+    const { stdout } = await execa("docker", ["ps", "-qf", `name=${DockerContainer.COMMON_PREFIX}`]);
+    const allContainerIds = stdout
+      .trim()
+      .split("\n")
+      .filter(x => x !== "");
+    if (allContainerIds.length === 0) return;
+    await execa("docker", ["stop", ...allContainerIds]);
+    DockerContainer.instances.metadata.containers = [];
+    DockerContainer.instances.screenshot.containers = [];
+  }
+
   public getContainerInfo(): ContainerInfo[] {
     // deep clone to prevent being modified
     return this.containers.map(x => ({ ...x }));
@@ -75,3 +87,4 @@ export class DockerContainer {
     return stdout;
   }
 }
+DockerContainer.ensureAllStopped();

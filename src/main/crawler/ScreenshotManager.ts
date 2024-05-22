@@ -71,7 +71,7 @@ export class ScreenshotManager {
     await page.setViewport(this.viewport);
     await page.goto(this.storyUrl(this.storybookUrl, story.id), {
       timeout: 30000,
-      waitUntil: "networkidle0",
+      waitUntil: ["domcontentloaded", "networkidle0"],
     });
 
     const storyErr = await page.evaluate(() => {

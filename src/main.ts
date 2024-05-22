@@ -8,6 +8,7 @@ import { ImgServiceImpl } from "./main/service/ImgServiceImpl";
 import { registerScreenshotHandlers } from "./main/ipc-handlers/screenshot-handlers";
 import { registerCompareHandlers } from "./main/ipc-handlers/compare-handlers";
 import { registerImgHandlers } from "./main/ipc-handlers/img-handlers";
+import { DockerContainer } from "./main/docker-helper/DockerContainer";
 import type { CompareService } from "./main/service/CompareService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
 import type { ImgService } from "./main/service/ImgService";
@@ -54,6 +55,7 @@ app.on("ready", () => {
   registerImgHandlers(imgService);
   registerScreenshotHandlers(screenshotService);
   registerCompareHandlers(compareService);
+  void DockerContainer.ensureAllStopped();
 
   createWindow();
 });
@@ -61,10 +63,15 @@ app.on("ready", () => {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
+app.on("window-all-closed", async () => {
+  await DockerContainer.ensureAllStopped();
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+app.on("before-quit", async event => {
+  logger.info("app quit");
 });
 
 app.on("activate", () => {
