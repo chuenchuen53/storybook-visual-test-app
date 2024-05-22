@@ -12,6 +12,16 @@ export class MainWindow {
     MainWindow.instance = x;
   }
 
+  public static unregisterMainWindow() {
+    if (MainWindow.instance === null) {
+      logger.fatal("MainWindow has not been registered");
+      throw new Error("MainWindow has not been registered");
+    }
+    MainWindow.instance = null;
+
+    throw new Error("MainWindow has not been registered");
+  }
+
   public static send(channel: string, ...args: any[]) {
     if (MainWindow.instance === null) {
       logger.error("send is called before MainWindow registered");

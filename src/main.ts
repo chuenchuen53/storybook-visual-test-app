@@ -1,5 +1,5 @@
 import path from "path";
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow } from "electron";
 import { MainWindow } from "./MainWindow";
 import { ScreenshotServiceImpl } from "./main/service/ScreenshotServiceImpl";
 import { CompareServiceImpl } from "./main/service/CompareServiceImpl";
@@ -44,29 +44,19 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 
   MainWindow.registerMainWindow(mainWindow);
+
+  mainWindow.on("closed", () => {
+    MainWindow.unregisterMainWindow();
+  });
 };
 
-const gotTheLock = app.requestSingleInstanceLock();
+app.on("ready", () => {
+  registerImgHandlers(imgService);
+  registerScreenshotHandlers(screenshotService);
+  registerCompareHandlers(compareService);
 
-if (!gotTheLock) {
-  app.quit();
-} else {
-  app.on("second-instance", (event, commandLine, workingDirectory, additionalData) => {
-    // Someone tried to run a second instance, we should focus our window.
-    if (MainWindow.instance !== null) {
-      if (MainWindow.instance.isMinimized()) MainWindow.instance.restore();
-      MainWindow.instance.focus();
-    }
-  });
-
-  app.on("ready", () => {
-    registerImgHandlers(imgService);
-    registerScreenshotHandlers(screenshotService);
-    registerCompareHandlers(compareService);
-
-    createWindow();
-  });
-}
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -84,9 +74,6 @@ app.on("activate", () => {
     createWindow();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
 
 process.on("uncaughtException", err => {
   logger.fatal(err, "uncaught exception detected");

@@ -65,6 +65,7 @@ module.exports = {
         varsIgnorePattern: "^_",
       },
     ],
+    "vue/multi-word-component-names": "off",
   },
   overrides: [
     {
