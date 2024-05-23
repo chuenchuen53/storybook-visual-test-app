@@ -33,7 +33,7 @@ import ProgressSpinner from "primevue/progressspinner";
 import Image from "primevue/image";
 import MetadataCrawler from "../components/screenshot/MetadataCrawler.vue";
 import { useScreenshotStore } from "../stores/ScreenshotStore";
-import StoryTreeExplorer from "../components/screenshot/StoryTreeExplorer.vue";
+import StoryTreeExplorer from "../components/screenshot/story-explorer/StoryTreeExplorer.vue";
 import SaveDialog from "../components/screenshot/SaveDialog.vue";
 
 const store = useScreenshotStore();

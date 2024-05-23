@@ -92,36 +92,38 @@ import { storeToRefs } from "pinia";
 import Button from "primevue/button";
 import Menu from "primevue/menu";
 import { computed, ref } from "vue";
-import { isLeftNode, treeNodesForUi, treeOfStoryMetadata } from "../../utils";
-import { useScreenshotStore } from "../../stores/ScreenshotStore";
-import { ScreenshotState, StoryState } from "../../../shared/type";
-import StyledTree from "../general/tree/StyledTree.vue";
-import { getAllNonLeafKeys, getLeafKeyFromSingleBranch, isSingleBranch } from "../general/tree/tree-helper";
-import type { NodeData } from "../general/tree/type";
-import type { StoryTree } from "../../utils";
+import { useScreenshotStore } from "../../../stores/ScreenshotStore";
+import { ScreenshotState, StoryState } from "../../../../shared/type";
+import StyledTree from "../../general/tree/StyledTree.vue";
+import { getAllNonLeafKeys, checkSingleBranchAndGetLeaf } from "../../general/tree/tree-helper";
+import { generateTreeFromFlatData } from "../../../utils/story-tree-utils";
+import { getScreenshotPageTreeData } from "./helper";
+import type { NodeData } from "../../general/tree/type";
 
 const store = useScreenshotStore();
 const { metadata, storyTypeFilter, state } = storeToRefs(store);
 const { setStoryTypeFilter, updateDisplayingImg, openInExplorer, openSaveDialog } = store;
 
 const nodes = computed(() => {
-  return metadata.value === null ? [] : treeNodesForUi<StoryTree>(treeOfStoryMetadata(metadata.value), isLeftNode);
+  console.log(metadata.value === null ? [] : getScreenshotPageTreeData(metadata.value as any));
+  return metadata.value === null ? [] : getScreenshotPageTreeData(generateTreeFromFlatData(metadata.value));
 });
 
 const expandedKeys = ref(new Set<string>());
 const highlightKey = ref<string | null>(null);
 
 const onNodeSelect = (node: NodeData) => {
-  console.log("hi");
   if (node.data) {
     updateDisplayingImg(node.data.id);
   } else {
-    if (expandedKeys.value.has(node.key) && isSingleBranch(node)) {
-      const allKeys = getAllNonLeafKeys(node);
-      for (const key of allKeys) {
-        expandedKeys.value.add(key);
+    if (expandedKeys.value.has(node.key)) {
+      const { isSingleBranch, leafKey, nonLeafKeys } = checkSingleBranchAndGetLeaf(node);
+      if (isSingleBranch) {
+        for (const key of nonLeafKeys) {
+          expandedKeys.value.add(key);
+        }
+        highlightKey.value = leafKey;
       }
-      highlightKey.value = getLeafKeyFromSingleBranch(node);
     }
   }
 };
@@ -167,7 +169,7 @@ const items = ref([
   },
 ]);
 
-const toggle = event => {
+const toggle = (event: any) => {
   menu.value.toggle(event);
 };
 

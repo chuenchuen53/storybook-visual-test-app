@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { treeOfCompareResult } from "../utils";
+import { generateTreeFromRespData } from "../../../components/compare/comparison-result-explorer/helper";
+import type { CompareResponse$Data } from "../../../../shared/type";
 
-import type { CompareResponse } from "../../shared/type";
-
-describe("treeOfCompareResult", () => {
+describe("generateTreeFromRespData", () => {
   // Function handles empty result arrays for same, added, removed, and diff without errors
   it("should handle empty result arrays without errors", () => {
-    const compareResponse: CompareResponse = {
+    const data: CompareResponse$Data = {
       uuid: "124",
       createAt: "2023-01-02T00:00:00Z",
       project: "ProjectY",
@@ -21,7 +20,9 @@ describe("treeOfCompareResult", () => {
         diff: [],
       },
     };
-    const result = treeOfCompareResult(compareResponse);
+
+    const result = generateTreeFromRespData(data);
+
     expect(result).toEqual({
       same: {},
       added: {},
@@ -47,23 +48,25 @@ describe("treeOfCompareResult", () => {
         diff: ["comp7--view7", "comp8--view8"],
       },
     };
-    const result = treeOfCompareResult(compareResponse);
+
+    const result = generateTreeFromRespData(compareResponse);
+
     expect(result).toEqual({
       same: {
-        comp1: { view1: { storyId: "comp1--view1" } },
-        comp2: { view2: { storyId: "comp2--view2" } },
+        comp1: { view1: { storyId: "comp1--view1", resultType: "same" } },
+        comp2: { view2: { storyId: "comp2--view2", resultType: "same" } },
       },
       added: {
-        comp3: { view3: { storyId: "comp3--view3" } },
-        comp4: { view4: { storyId: "comp4--view4" } },
+        comp3: { view3: { storyId: "comp3--view3", resultType: "added" } },
+        comp4: { view4: { storyId: "comp4--view4", resultType: "added" } },
       },
       removed: {
-        comp5: { view5: { storyId: "comp5--view5" } },
-        comp6: { view6: { storyId: "comp6--view6" } },
+        comp5: { view5: { storyId: "comp5--view5", resultType: "removed" } },
+        comp6: { view6: { storyId: "comp6--view6", resultType: "removed" } },
       },
       diff: {
-        comp7: { view7: { storyId: "comp7--view7" } },
-        comp8: { view8: { storyId: "comp8--view8" } },
+        comp7: { view7: { storyId: "comp7--view7", resultType: "diff" } },
+        comp8: { view8: { storyId: "comp8--view8", resultType: "diff" } },
       },
     });
   });

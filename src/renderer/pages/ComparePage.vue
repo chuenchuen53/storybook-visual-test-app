@@ -68,7 +68,7 @@ import Image from "primevue/image";
 import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 import Button from "primevue/button";
-import CompareResultExplorer from "../components/compare/CompareResultExplorer.vue";
+import CompareResultExplorer from "../components/compare/comparison-result-explorer/ComparisonResultExplorer.vue";
 import CompareSetting from "../components/compare/CompareSetting.vue";
 import { useCompareStore } from "../stores/CompareStore";
 import SaveCompareResultDialog from "../components/compare/SaveCompareResultDialog.vue";

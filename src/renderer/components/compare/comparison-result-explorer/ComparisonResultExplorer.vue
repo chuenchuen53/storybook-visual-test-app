@@ -98,9 +98,8 @@ import Tree, { type TreeExpandedKeys } from "primevue/tree";
 import Button from "primevue/button";
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useCompareStore } from "../../stores/CompareStore";
-import { isCompareResultLeaf, treeNodesForUi, treeOfCompareResult } from "../../utils";
-import type { CompareResultTree } from "../../utils";
+import { useCompareStore } from "../../../stores/CompareStore";
+import { generateTreeFromRespData, getCompareResultTreeData } from "./helper";
 import type { TreeNode } from "primevue/treenode";
 
 const store = useCompareStore();
@@ -120,9 +119,7 @@ const expandedKeys = ref<TreeExpandedKeys>({});
 const selectedKey = ref(null);
 
 const nodes = computed(() => {
-  return compareResult.value === null
-    ? []
-    : treeNodesForUi<CompareResultTree>(treeOfCompareResult(compareResult.value), isCompareResultLeaf);
+  return compareResult.value === null ? [] : getCompareResultTreeData(generateTreeFromRespData(compareResult.value));
 });
 
 const expandNode = (node: TreeNode) => {
