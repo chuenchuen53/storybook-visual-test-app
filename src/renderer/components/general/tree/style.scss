@@ -1,0 +1,12 @@
+@mixin hover-and-highlight-effect {
+  &:hover {
+    color: var(--p-text-hover-color);
+    background-color: var(--p-content-hover-background);
+  }
+
+  &.highlighted,
+  &.highlighted:hover {
+    color: var(--p-highlight-color);
+    background: var(--p-highlight-background);
+  }
+}
