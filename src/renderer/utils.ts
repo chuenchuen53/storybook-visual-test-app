@@ -1,3 +1,4 @@
+import type { NodeData } from "./components/general/tree/type";
 import type { TreeNode } from "primevue/treenode";
 import type { CompareResponse, StoryMetadata, StoryState } from "../shared/type";
 
@@ -98,16 +99,12 @@ export function isCompareResultLeaf(node: CompareResultTree): boolean {
   return leftKeys.every(key => keys.includes(key));
 }
 
-export function treeNodesForPrimevue<T>(
-  storyTree: T,
-  isLeftNodePredicate: (x: T) => boolean,
-  parentKey = "",
-): TreeNode[] {
-  const result: TreeNode[] = [];
+export function treeNodesForUi<T>(storyTree: T, isLeftNodePredicate: (x: T) => boolean, parentKey = ""): NodeData[] {
+  const result: NodeData[] = [];
 
   const entries = Object.entries(storyTree);
   for (const [key, value] of entries) {
-    const node: TreeNode = {
+    const node: NodeData = {
       key: parentKey ? `${parentKey}-${key}` : key,
       label: key,
     };
@@ -115,7 +112,7 @@ export function treeNodesForPrimevue<T>(
     if (isLeftNodePredicate(value as T)) {
       node.data = value;
     } else {
-      node.children = treeNodesForPrimevue(value as T, isLeftNodePredicate, node.key);
+      node.children = treeNodesForUi(value as T, isLeftNodePredicate, node.key);
     }
 
     result.push(node);

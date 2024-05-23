@@ -4,6 +4,7 @@ import Aura from "primevue/themes/Aura";
 import { createPinia } from "pinia";
 import Tooltip from "primevue/tooltip";
 import ToastService from "primevue/toastservice";
+import Ripple from "primevue/ripple";
 import App from "./renderer/App.vue";
 import { router } from "./renderer/routes";
 import "primeicons/primeicons.css";
@@ -27,6 +28,7 @@ app.use(PrimeVue, {
   },
 });
 
+app.directive("ripple", Ripple);
 app.directive("tooltip", Tooltip);
 app.use(ToastService);
 

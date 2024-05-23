@@ -1,7 +1,7 @@
 import { createMemoryHistory, createRouter } from "vue-router";
-import ReferencePage from "./page/ReferencePage.vue";
-import ScreenshotPage from "./page/ScreenshotPage.vue";
-import ComparePage from "./page/ComparePage.vue";
+import ReferencePage from "./pages/ReferencePage.vue";
+import ScreenshotPage from "./pages/ScreenshotPage.vue";
+import ComparePage from "./pages/ComparePage.vue";
 import type { RouteRecordRaw } from "vue-router";
 
 const routes: RouteRecordRaw[] = [

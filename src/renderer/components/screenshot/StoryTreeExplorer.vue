@@ -1,14 +1,14 @@
 <template>
-  <div class="relative flex h-full flex-col bg-[--p-content-background]">
-    <div class="flex justify-between gap-2 px-2">
-      <div>
+  <div class="relative flex h-full flex-col bg-[--p-content-background] pb-10">
+    <div class="flex justify-between gap-2 px-2 py-1">
+      <div class="flex gap-[2px]">
         <Button
           v-tooltip.bottom="'Open in explorer'"
+          class="icon-btn"
           icon="pi pi-folder-open"
           severity="secondary"
           text
           rounded
-          size="small"
           @click="openInExplorer"
         />
         <Button
@@ -19,29 +19,13 @@
           severity="secondary"
           text
           rounded
-          size="small"
+          class="icon-btn"
           @click="openSaveDialog"
         />
       </div>
-      <div class="flex gap-2">
-        <Button
-          icon="pi pi-arrow-up-right-and-arrow-down-left-from-center"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          @click="expandAll"
-        />
-        <Button
-          icon="pi pi-arrow-down-left-and-arrow-up-right-to-center"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          @click="collapseAll"
-        />
+      <div class="flex gap-[2px]">
         <div>
-          <Button icon="pi pi-filter" severity="secondary" text rounded size="small" @click="toggle" />
+          <Button icon="pi pi-filter" severity="secondary" text rounded class="icon-btn" @click="toggle" />
           <Menu ref="menu" :model="items" :popup="true" :pt="{ root: { style: { transform: 'translateX(-165px)' } } }">
             <template #item="{ item, props }">
               <div
@@ -55,56 +39,32 @@
             </template>
           </Menu>
         </div>
+        <Button
+          icon="pi pi-arrow-up-right-and-arrow-down-left-from-center"
+          severity="secondary"
+          text
+          rounded
+          class="icon-btn"
+          @click="expandAll"
+        />
+        <Button
+          icon="pi pi-arrow-down-left-and-arrow-up-right-to-center"
+          severity="secondary"
+          text
+          rounded
+          class="icon-btn"
+          @click="collapseAll"
+        />
       </div>
     </div>
-    <Tree
+    <StyledTree
       v-model:expandedKeys="expandedKeys"
-      v-model:selection-keys="selectedKey"
-      :value="nodes"
-      class="scrollbar-hide overflow-y-auto"
-      selection-mode="single"
-      :filter="true"
-      filter-mode="lenient"
-      filter-placeholder="Find story"
-      :pt="{
-        root: {
-          style: {
-            fontSize: '14px',
-            background: 'none',
-            paddingTop: '0',
-          },
-        },
-        nodetogglebutton: {
-          style: {
-            width: '22px',
-            height: '22px',
-          },
-        },
-        pcFilterIconContainer: {
-          style: {
-            top: '45%',
-          },
-        },
-        wrapper: {
-          style: {
-            marginTop: '16px',
-          },
-        },
-        nodeToggleIcon: {
-          style: {
-            width: '10px',
-            height: '10px',
-          },
-        },
-        nodelabel: {
-          style: {
-            flex: '100%',
-          },
-        },
-      }"
-      @node-select="onNodeSelect"
+      v-model:highlightKey="highlightKey"
+      :data="nodes"
+      class="scrollbar-hide overflow-y-auto px-3 py-2 text-sm"
+      @node-click="onNodeSelect"
     >
-      <template #default="{ node }">
+      <template #node-content="{ node }">
         <div v-if="!node.children && typeof node.data === 'object'">
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
@@ -123,61 +83,46 @@
           <div>{{ node.label }}</div>
         </div>
       </template>
-    </Tree>
+    </StyledTree>
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import Tree from "primevue/tree";
 import Button from "primevue/button";
 import Menu from "primevue/menu";
 import { computed, ref } from "vue";
-import { isLeftNode, treeNodesForPrimevue, treeOfStoryMetadata } from "../utils";
-import { useScreenshotStore } from "../stores/ScreenshotStore";
-import { ScreenshotState, StoryState } from "../../shared/type";
-import type { StoryTree } from "../utils";
-import type { TreeNode } from "primevue/treenode";
-import type { TreeExpandedKeys } from "primevue/tree";
+import { isLeftNode, treeNodesForUi, treeOfStoryMetadata } from "../../utils";
+import { useScreenshotStore } from "../../stores/ScreenshotStore";
+import { ScreenshotState, StoryState } from "../../../shared/type";
+import StyledTree from "../general/tree/StyledTree.vue";
+import { getAllNonLeafKeys, getLeafKeyFromSingleBranch, isSingleBranch } from "../general/tree/tree-helper";
+import type { NodeData } from "../general/tree/type";
+import type { StoryTree } from "../../utils";
 
 const store = useScreenshotStore();
 const { metadata, storyTypeFilter, state } = storeToRefs(store);
 const { setStoryTypeFilter, updateDisplayingImg, openInExplorer, openSaveDialog } = store;
 
 const nodes = computed(() => {
-  return metadata.value === null
-    ? []
-    : treeNodesForPrimevue<StoryTree>(treeOfStoryMetadata(metadata.value), isLeftNode);
+  return metadata.value === null ? [] : treeNodesForUi<StoryTree>(treeOfStoryMetadata(metadata.value), isLeftNode);
 });
 
-const expandedKeys = ref<TreeExpandedKeys>({});
-const selectedKey = ref(null);
+const expandedKeys = ref(new Set<string>());
+const highlightKey = ref<string | null>(null);
 
-const expandNode = (node: TreeNode) => {
-  if (node.children && node.children.length) {
-    expandedKeys.value[node.key] = true;
-
-    for (let child of node.children) {
-      expandNode(child);
-    }
-  }
-};
-
-const expandAll = () => {
-  for (let node of nodes.value) {
-    expandNode(node);
-  }
-
-  expandedKeys.value = { ...expandedKeys.value };
-};
-
-const collapseAll = () => {
-  expandedKeys.value = {};
-};
-
-const onNodeSelect = (node: TreeNode) => {
+const onNodeSelect = (node: NodeData) => {
+  console.log("hi");
   if (node.data) {
     updateDisplayingImg(node.data.id);
+  } else {
+    if (expandedKeys.value.has(node.key) && isSingleBranch(node)) {
+      const allKeys = getAllNonLeafKeys(node);
+      for (const key of allKeys) {
+        expandedKeys.value.add(key);
+      }
+      highlightKey.value = getLeafKeyFromSingleBranch(node);
+    }
   }
 };
 
@@ -225,18 +170,34 @@ const items = ref([
 const toggle = event => {
   menu.value.toggle(event);
 };
+
+function expandAll() {
+  const allKeys = nodes.value.map(node => getAllNonLeafKeys(node)).flat();
+  for (const key of allKeys) {
+    expandedKeys.value.add(key);
+  }
+}
+
+function collapseAll() {
+  expandedKeys.value.clear();
+}
 </script>
 
 <style lang="scss">
-.p-tree-node-leaf .p-tree-node-toggle-button {
-  display: none;
-}
-
 .active-menu-item {
   color: var(--p-primary-color) !important;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+</style>
+
+<style scoped lang="scss">
+.icon-btn {
+  padding: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  --p-icon-size: 12px;
 }
 </style>

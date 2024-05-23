@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { treeNodesForPrimevue } from "src/renderer/utils";
+import { treeNodesForUi } from "src/renderer/utils";
 import type { StoryTree } from "src/renderer/utils";
 import type { TreeNode } from "primevue/treenode";
 
@@ -7,7 +7,7 @@ describe("treeOfStoryMetadata", () => {
   // Should return an empty array when given an empty object
   it("should return an empty array when given an empty object", () => {
     const storyTree = {};
-    const result = treeNodesForPrimevue(storyTree);
+    const result = treeNodesForUi(storyTree);
     expect(result).toEqual([]);
   });
 
@@ -81,7 +81,7 @@ describe("treeOfStoryMetadata", () => {
       },
     ];
 
-    const result = treeNodesForPrimevue(storyTree);
+    const result = treeNodesForUi(storyTree);
     expect(result).toEqual(expectedNodes);
   });
 });

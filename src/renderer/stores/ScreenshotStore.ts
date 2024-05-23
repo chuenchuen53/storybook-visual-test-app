@@ -61,7 +61,8 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const metadata = computed(() => {
     if (_metadata.value === null) return null;
     if (storyTypeFilter.value === "all") return _metadata.value;
-    return _metadata.value.filter(item => item.state === StoryState.FAILED);
+    console.log(_metadata.value);
+    return _metadata.value.filter(item => item.storyErr);
   });
 
   const isSaving = ref(false);
@@ -83,6 +84,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   };
 
   const setStoryTypeFilter = (filter: StoryTypeFilter) => {
+    console.log(filter);
     storyTypeFilter.value = filter;
   };
 
