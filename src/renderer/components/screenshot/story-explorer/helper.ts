@@ -14,7 +14,7 @@ export type StoryTree = TreeObj<StoryMetadataInExplorer>;
 
 function isLeafNode(node: StoryTree | StoryMetadataInExplorer): node is StoryMetadataInExplorer {
   const keys = Object.keys(node);
-  const requiredLeafKeys = ["id", "componentId", "title", "kind", "tags", "name", "story"];
+  const requiredLeafKeys = ["id", "title", "tags", "name"];
   return requiredLeafKeys.every(key => keys.includes(key));
 }
 

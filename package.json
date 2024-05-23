@@ -12,6 +12,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
+    "ts-check": "tsc --noEmit",
     "lint": "eslint --ext .ts,.vue ./src"
   },
   "devDependencies": {

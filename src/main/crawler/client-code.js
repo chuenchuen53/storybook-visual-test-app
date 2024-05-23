@@ -7,20 +7,16 @@ export async function getStorybookMetadata(page) {
     });
 
     await page.evaluate(async () => {
-      const api = window.__STORYBOOK_PREVIEW__;
-      await api.storyStoreValue?.cacheAllCSFFiles();
+      await window.__STORYBOOK_PREVIEW__.storyStoreValue?.cacheAllCSFFiles();
     });
 
     const result = await page.evaluate(async () => {
       const rawData = await window.__STORYBOOK_PREVIEW__.storyStoreValue.extract();
       return Object.values(rawData).map(x => ({
         id: x.id,
-        componentId: x.componentId,
         title: x.title,
-        kind: x.kind,
         tags: x.tags,
         name: x.name,
-        story: x.story,
       }));
     });
     return { result };

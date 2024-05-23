@@ -135,10 +135,7 @@ export class ScreenshotManager {
     await page.close();
     this.result[jobIndex] = {
       id: story.id,
-      componentId: story.componentId,
-      kind: story.kind,
       name: story.name,
-      story: story.story,
       tags: story.tags,
       title: story.title,
       storyErr,
