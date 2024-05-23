@@ -5,6 +5,7 @@ import { createPinia } from "pinia";
 import Tooltip from "primevue/tooltip";
 import ToastService from "primevue/toastservice";
 import Ripple from "primevue/ripple";
+// @ts-ignore
 import App from "./renderer/App.vue";
 import { router } from "./renderer/routes";
 import "primeicons/primeicons.css";

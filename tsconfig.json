@@ -11,5 +11,7 @@
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true
-  }
+  },
+  "include": ["main.ts", "preload.ts", "renderer.ts", "forge.env.d.ts", "src/**/*.ts"],
+  "exclude": ["**/*.test.ts"]
 }
