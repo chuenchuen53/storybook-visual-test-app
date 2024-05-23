@@ -12,8 +12,8 @@ export enum StoryState {
 export interface StoryMetadata {
   id: string;
   title: string;
-  tags: string[];
   name: string;
+  tags: string[];
 }
 
 export enum ScreenshotState {

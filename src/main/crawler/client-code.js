@@ -15,8 +15,8 @@ export async function getStorybookMetadata(page) {
       return Object.values(rawData).map(x => ({
         id: x.id,
         title: x.title,
-        tags: x.tags,
         name: x.name,
+        tags: x.tags,
       }));
     });
     return { result };

@@ -100,14 +100,11 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   });
 
   window.screenshotApi.onNewMetadata(storyMetadataList => {
-    _metadata.value = storyMetadataList.map((x: any) => ({
+    _metadata.value = storyMetadataList.map(x => ({
       id: x.id,
-      componentId: x.componentId,
       title: x.title,
-      kind: x.kind,
-      tags: x.tags,
       name: x.name,
-      story: x.story,
+      tags: x.tags,
       state: StoryState.WAITING,
       browserName: null,
       startTime: null,

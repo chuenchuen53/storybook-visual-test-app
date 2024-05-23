@@ -1,13 +1,17 @@
+interface StoryData {
+  title: string;
+  name: string;
+}
+
 export type TreeObj<T extends object> = {
   [key: string]: T | TreeObj<T>;
 };
 
-export function generateTreeFromFlatData<T extends { id: string }>(flatDataArr: T[]): TreeObj<T> {
+export function generateTreeFromFlatData<T extends StoryData>(flatDataArr: T[]): TreeObj<T> {
   const result: TreeObj<T> = {};
 
   for (const data of flatDataArr) {
-    const [multiLayer, name] = data.id.split("--");
-    const layers = multiLayer.split("-");
+    const layers = data.title.split("/").filter(x => x !== "");
     let currentLayer: TreeObj<T> = result;
 
     for (const layer of layers) {
@@ -17,7 +21,7 @@ export function generateTreeFromFlatData<T extends { id: string }>(flatDataArr: 
       currentLayer = currentLayer[layer] as TreeObj<T>;
     }
 
-    currentLayer[name] = data;
+    currentLayer[data.name] = data;
   }
 
   return result;

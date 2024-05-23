@@ -6,7 +6,8 @@ import type { StoryMetadata } from "../../../../shared/type";
 
 interface TreeData {
   id: string;
-  label: string;
+  title: string;
+  name: string;
 }
 
 describe("generateTreeFromFlatData", () => {
@@ -21,25 +22,28 @@ describe("generateTreeFromFlatData", () => {
     const flatDataArr: TreeData[] = [
       {
         id: "general-button--main",
-        label: "general/Button/Main",
+        title: "general/Button",
+        name: "Main",
       },
       {
         id: "general-button--disabled",
-        label: "general/Button/Disabled",
+        title: "general/Button",
+        name: "Disabled",
       },
       {
         id: "general-iconbutton--icon-button",
-        label: "general/IconButton/Icon Button",
+        title: "general/IconButton",
+        name: "Icon Button",
       },
     ];
     const expectedResult: TreeObj<TreeData> = {
       general: {
-        button: {
-          main: flatDataArr[0],
-          disabled: flatDataArr[1],
+        Button: {
+          Main: flatDataArr[0],
+          Disabled: flatDataArr[1],
         },
-        iconbutton: {
-          "icon-button": flatDataArr[2],
+        IconButton: {
+          "Icon Button": flatDataArr[2],
         },
       },
     };
@@ -50,144 +54,161 @@ describe("generateTreeFromFlatData", () => {
     const mockData: TreeData[] = [
       {
         id: "general-button--main",
-        label: "general/Button/Main",
+        title: "general/Button",
+        name: "Main",
       },
       {
         id: "general-button--disabled",
-        label: "general/Button/Disabled",
+        title: "general/Button",
+        name: "Disabled",
       },
       {
         id: "general-button--loading",
-        label: "general/Button/Loading",
+        title: "general/Button",
+        name: "Loading",
       },
       {
         id: "general-iconbutton--icon-button",
-        label: "general/IconButton/Icon Button",
+        title: "general/IconButton",
+        name: "Icon Button",
       },
       {
         id: "general-linkbutton--link-button",
-        label: "general/LinkButton/Link Button",
+        title: "general/LinkButton",
+        name: "Link Button",
       },
       {
         id: "general-datepicker--date-picker",
-        label: "general/DatePicker/Date Picker",
+        title: "general/DatePicker",
+        name: "Date Picker",
       },
       {
         id: "general-dropdown--dropdown",
-        label: "general/Dropdown/Dropdown",
+        title: "general/Dropdown",
+        name: "Dropdown",
       },
       {
         id: "general-input--input",
-        label: "general/Input/Input",
+        title: "general/Input",
+        name: "Input",
       },
       {
         id: "general-message--message",
-        label: "general/Message/Message",
+        title: "general/Message",
+        name: "Message",
       },
       {
         id: "general-modal--modal",
-        label: "general/Modal/Modal",
+        title: "general/Modal",
+        name: "Modal",
       },
       {
         id: "general-select-multipleselect--multiple-select",
-        label: "general/Select/MultipleSelect",
+        title: "general/Select/MultipleSelect",
+        name: "Multiple Select",
       },
       {
         id: "general-select-singleselect--single-select",
-        label: "general/Select/SingleSelect",
+        title: "general/Select/SingleSelect",
+        name: "Single Select",
       },
       {
         id: "general-timepicker--time-picker",
-        label: "general/TimePicker/Time Picker",
+        title: "general/TimePicker",
+        name: "Time Picker",
       },
       {
         id: "dev-test-testnew--test-new",
-        label: "dev-test/TestNew/Test New",
+        title: "dev-test/TestNew",
+        name: "Test New",
       },
       {
         id: "dev-test-testremove--test-remove",
-        label: "dev-test/TestRemove/Test Remove",
+        title: "dev-test/TestRemove",
+        name: "Test Remove",
       },
       {
         id: "dev-test-testrename--test-rename",
-        label: "dev-test/TestRename/Test Rename",
+        title: "dev-test/TestRename",
+        name: "Test Rename",
       },
       {
         id: "dev-test-testresize--test-resize",
-        label: "dev-test/TestResize/Test Resize",
+        title: "dev-test/TestResize",
+        name: "Test Resize",
       },
       {
         id: "app-eventcard--event-card",
-        label: "app/EventCard/Event Card",
+        title: "app/EventCard",
+        name: "Event Card",
       },
       {
         id: "app-tagcard--tag-card",
-        label: "app/TagCard/Tag Card",
+        title: "app/TagCard",
+        name: "Tag Card",
       },
     ];
 
     const expectedResult: TreeObj<TreeData> = {
       general: {
-        button: {
-          main: mockData[0],
-          disabled: mockData[1],
-          loading: mockData[2],
+        Button: {
+          Main: mockData[0],
+          Disabled: mockData[1],
+          Loading: mockData[2],
         },
-        iconbutton: {
-          "icon-button": mockData[3],
+        IconButton: {
+          "Icon Button": mockData[3],
         },
-        linkbutton: {
-          "link-button": mockData[4],
+        LinkButton: {
+          "Link Button": mockData[4],
         },
-        datepicker: {
-          "date-picker": mockData[5],
+        DatePicker: {
+          "Date Picker": mockData[5],
         },
-        dropdown: {
-          dropdown: mockData[6],
+        Dropdown: {
+          Dropdown: mockData[6],
         },
-        input: {
-          input: mockData[7],
+        Input: {
+          Input: mockData[7],
         },
-        message: {
-          message: mockData[8],
+        Message: {
+          Message: mockData[8],
         },
-        modal: {
-          modal: mockData[9],
+        Modal: {
+          Modal: mockData[9],
         },
-        select: {
-          multipleselect: {
-            "multiple-select": mockData[10],
+        Select: {
+          MultipleSelect: {
+            "Multiple Select": mockData[10],
           },
-          singleselect: {
-            "single-select": mockData[11],
+          SingleSelect: {
+            "Single Select": mockData[11],
           },
         },
-        timepicker: {
-          "time-picker": mockData[12],
+        TimePicker: {
+          "Time Picker": mockData[12],
         },
       },
-      dev: {
-        test: {
-          testnew: {
-            "test-new": mockData[13],
-          },
-          testremove: {
-            "test-remove": mockData[14],
-          },
-          testrename: {
-            "test-rename": mockData[15],
-          },
-          testresize: {
-            "test-resize": mockData[16],
-          },
+      "dev-test": {
+        TestNew: {
+          "Test New": mockData[13],
+        },
+        TestRemove: {
+          "Test Remove": mockData[14],
+        },
+        TestRename: {
+          "Test Rename": mockData[15],
+        },
+        TestResize: {
+          "Test Resize": mockData[16],
         },
       },
       app: {
-        eventcard: {
-          "event-card": mockData[17],
+        EventCard: {
+          "Event Card": mockData[17],
         },
-        tagcard: {
-          "tag-card": mockData[18],
+        TagCard: {
+          "Tag Card": mockData[18],
         },
       },
     };

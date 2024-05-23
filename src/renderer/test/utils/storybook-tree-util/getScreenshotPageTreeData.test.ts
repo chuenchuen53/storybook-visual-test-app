@@ -13,21 +13,15 @@ describe("getScreenshotPageTreeData", () => {
     const storyTree = {
       node1: {
         id: "1",
-        componentId: "comp1",
         title: "Title 1",
-        kind: "Kind 1",
         tags: ["tag1"],
         name: "Name 1",
-        story: "Story 1",
       },
       node2: {
         id: "2",
-        componentId: "comp2",
         title: "Title 2",
-        kind: "Kind 2",
         tags: ["tag2"],
         name: "Name 2",
-        story: "Story 2",
       },
     };
     const result = getScreenshotPageTreeData(storyTree as unknown as StoryTree);
@@ -52,12 +46,9 @@ describe("getScreenshotPageTreeData", () => {
         level2: {
           level3: {
             id: "test-id",
-            componentId: "test-component",
             title: "Test Title",
-            kind: "Test Kind",
             tags: ["tag1", "tag2"],
             name: "Test Name",
-            story: "Test Story",
           },
         },
       },
@@ -87,35 +78,26 @@ describe("getScreenshotPageTreeData", () => {
   it("should return an array of tree nodes when given a tree", () => {
     const storyTree = {
       general: {
-        button: {
-          main: {
+        Button: {
+          Main: {
             id: "general-button--main",
-            componentId: "general-button",
             title: "general/Button",
-            kind: "general/Button",
-            tags: ["dev", "test"],
             name: "Main",
-            story: "Main",
+            tags: ["a"],
           },
-          disabled: {
+          Disabled: {
             id: "general-button--disabled",
-            componentId: "general-button",
             title: "general/Button",
-            kind: "general/Button",
-            tags: ["dev", "test"],
             name: "Disabled",
-            story: "Disabled",
+            tags: ["a"],
           },
         },
-        iconbutton: {
-          "icon-button": {
+        IconButton: {
+          "Icon Button": {
             id: "general-iconbutton--icon-button",
-            componentId: "general-iconbutton",
             title: "general/IconButton",
-            kind: "general/IconButton",
-            tags: ["dev", "test"],
             name: "Icon Button",
-            story: "Icon Button",
+            tags: ["a"],
           },
         },
       },
@@ -127,29 +109,29 @@ describe("getScreenshotPageTreeData", () => {
         label: "general",
         children: [
           {
-            key: "general-button",
-            label: "button",
+            key: "general-Button",
+            label: "Button",
             children: [
               {
-                key: "general-button-main",
-                label: "main",
-                data: storyTree.general.button.main,
+                key: "general-Button-Main",
+                label: "Main",
+                data: storyTree.general.Button.Main,
               },
               {
-                key: "general-button-disabled",
-                label: "disabled",
-                data: storyTree.general.button.disabled,
+                key: "general-Button-Disabled",
+                label: "Disabled",
+                data: storyTree.general.Button.Disabled,
               },
             ],
           },
           {
-            key: "general-iconbutton",
-            label: "iconbutton",
+            key: "general-IconButton",
+            label: "IconButton",
             children: [
               {
-                key: "general-iconbutton-icon-button",
-                label: "icon-button",
-                data: storyTree.general.iconbutton["icon-button"],
+                key: "general-IconButton-Icon Button",
+                label: "Icon Button",
+                data: storyTree.general.IconButton["Icon Button"],
               },
             ],
           },
