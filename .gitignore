@@ -93,4 +93,5 @@ out/
 
 # ide
 .idea/
+.run
 .vscode/

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeArrDiff } from "../../main/utils";
+import { computeArrDiff } from "@main/utils";
 
 describe("computeArrDiff", () => {
   // Both arrays have no common elements

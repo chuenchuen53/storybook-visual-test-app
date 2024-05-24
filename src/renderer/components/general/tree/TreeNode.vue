@@ -6,12 +6,8 @@
       :class="{ highlighted: highlightKey === node.key }"
       @click="$emit('nodeClick', node)"
     >
-      <div class="flex h-5 flex-shrink-0 flex-grow-0 basis-4 items-center justify-center">
-        <i
-          v-if="!isLeaf(node)"
-          class="!text-[14px]"
-          :class="expandedKeys.has(node.key) ? 'pi pi-angle-down' : 'pi pi-angle-right'"
-        ></i>
+      <div class="flex flex-shrink-0 flex-grow-0 basis-4 items-center justify-center">
+        <i v-if="!isLeaf(node)" :class="expandedKeys.has(node.key) ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
       </div>
       <div class="flex-shrink flex-grow basis-full select-none">
         <slot name="node-content" :node="node">
@@ -19,7 +15,7 @@
         </slot>
       </div>
     </div>
-    <ul v-if="expandedKeys && expandedKeys.has(node.key)" class="flex flex-col">
+    <ul v-if="expandedKeys?.has(node.key)" class="flex flex-col">
       <TreeNode
         v-for="childNode in node.children"
         :key="childNode.key"

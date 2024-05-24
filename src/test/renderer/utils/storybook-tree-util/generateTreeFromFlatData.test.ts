@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { generateTreeFromFlatData } from "../../../utils/story-tree-utils";
-import type { TreeObj } from "../../../utils/story-tree-utils";
-import type { StoryTree } from "../../../components/screenshot/story-explorer/helper";
-import type { StoryMetadata } from "../../../../shared/type";
+import { generateTreeFromFlatData } from "@renderer/utils/story-tree-utils";
+import type { TreeObj } from "@renderer/utils/story-tree-utils";
+import type { StoryTree } from "@renderer/components/screenshot/story-explorer/helper";
+import type { StoryMetadata } from "@shared/type";
 
 interface TreeData {
   id: string;

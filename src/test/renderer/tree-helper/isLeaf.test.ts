@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isLeaf } from "../../components/general/tree/tree-helper";
-import type { NodeData } from "../../components/general/tree/type";
+import { isLeaf } from "@renderer/components/general/tree/tree-helper";
+import type { NodeData } from "@renderer/components/general/tree/type";
 
 describe("isLeaf", () => {
   // Node with undefined children is considered a leaf

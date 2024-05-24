@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { generateTreeFromRespData } from "../../../components/compare/comparison-result-explorer/helper";
-import type { CompareResponse$Data } from "../../../../shared/type";
+import { generateTreeFromRespData } from "@renderer/components/compare/comparison-result-explorer/helper";
+import type { CompareResponse$Data } from "@shared/type";
 
 describe("generateTreeFromRespData", () => {
   // Function handles empty result arrays for same, added, removed, and diff without errors

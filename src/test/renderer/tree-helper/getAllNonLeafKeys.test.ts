@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { getAllNonLeafKeys } from "../../components/general/tree/tree-helper";
-import type { NodeData } from "../../components/general/tree/type";
+import { getAllNonLeafKeys } from "@renderer/components/general/tree/tree-helper";
+import type { NodeData } from "@renderer/components/general/tree/type";
 
 describe("getAllNonLeafKeys", () => {
   // Return all non-leaf keys from a complex node structure

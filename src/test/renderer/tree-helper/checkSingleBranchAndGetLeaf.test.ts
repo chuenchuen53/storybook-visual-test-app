@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkSingleBranchAndGetLeaf } from "../../components/general/tree/tree-helper";
+import { checkSingleBranchAndGetLeaf } from "@renderer/components/general/tree/tree-helper";
 
 describe("checkSingleBranchAndGetLeaf", () => {
   // Node is a leaf and is the only node

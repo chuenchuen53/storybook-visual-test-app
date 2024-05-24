@@ -1,17 +1,15 @@
 <template>
-  <div>
-    <ul class="flex flex-col">
-      <TreeNode v-for="node in props.data" :key="node.key" :node="node" :is-root="true" @node-click="handleNodeClick">
-        <template #node-content="slotProps">
-          <slot name="node-content" :node="slotProps.node"></slot>
-        </template>
-      </TreeNode>
-    </ul>
-  </div>
+  <ul class="flex flex-col">
+    <TreeNode v-for="node in props.data" :key="node.key" :node="node" @node-click="handleNodeClick">
+      <template #node-content="slotProps">
+        <slot name="node-content" :node="slotProps.node"></slot>
+      </template>
+    </TreeNode>
+  </ul>
 </template>
 
 <script setup lang="ts">
-import { ref, provide } from "vue";
+import { ref, provide, readonly } from "vue";
 import TreeNode from "./TreeNode.vue";
 import { isLeaf } from "./tree-helper";
 import type { EmitEvent, NodeData, NodeSlots } from "./type";
@@ -31,8 +29,8 @@ const emit = defineEmits<EmitEvent>();
 const highlightKey = highlightKeyModel.value !== undefined ? highlightKeyModel : ref<null | string>(null);
 const expandedKeys = expandedKeysModel.value !== undefined ? expandedKeysModel : ref(new Set<string>());
 
-provide("expandedKeys", expandedKeys);
-provide("highlightKey", highlightKey);
+provide("expandedKeys", readonly(expandedKeys));
+provide("highlightKey", readonly(highlightKey));
 
 function handleNodeClick(node: NodeData) {
   toggleKey(node);
