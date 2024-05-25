@@ -1,14 +1,19 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
+import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
+import { generateTreeFromFlatData } from "../utils/story-tree-utils";
 import { ScreenshotState, StoryState } from "../../shared/type";
-
-import type { StoryMetadataInExplorer } from "../components/screenshot/story-explorer/helper";
+import {
+  getScreenshotPageTreeData,
+  type StoryMetadataInExplorer,
+} from "../components/screenshot/story-explorer/helper";
+import type { SaveScreenshotType } from "../../shared/type";
 
 export type StoryTypeFilter = "all" | "error";
 
 interface SaveInfo {
-  type: string;
+  type: SaveScreenshotType;
   project: string;
   branch: string;
 }
@@ -17,10 +22,8 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const toast = useToast();
 
   const storybookUrl = ref<string>("");
+
   const state = ref<ScreenshotState>(ScreenshotState.IDLE);
-  // const _metadata = ref<null | StoryMetadataInExplorer[]>(mockData);
-  const _metadata = ref<null | StoryMetadataInExplorer[]>(null);
-  // const activeStep = ref(1);
   const activeStep = computed<number>(() => {
     switch (state.value) {
       case ScreenshotState.IDLE:
@@ -43,14 +46,6 @@ export const useScreenshotStore = defineStore("screenshot", () => {
         return 0;
     }
   });
-  const apiLogs = ref<string[]>([]);
-  const storyTypeFilter = ref<StoryTypeFilter>("all");
-  const displayingImg = ref<{ loading: boolean; isExist: boolean | null; base64: string | null }>({
-    loading: false,
-    isExist: null,
-    base64: null,
-  });
-
   const processing = computed(() => {
     return (
       state.value !== ScreenshotState.IDLE &&
@@ -59,12 +54,46 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     );
   });
 
-  const metadata = computed(() => {
+  const _metadata = ref<null | StoryMetadataInExplorer[]>(null);
+  // a map of id to index of _metadata for faster search (no need ref as no related to view)
+  const _metadataKeyMap = new Map<string, number>();
+  const storySearchText = ref<string>("");
+  const storyTypeFilterInExplorer = ref<StoryTypeFilter>("all");
+  const highlightKey = ref<string | null>(null);
+  const expandedKeys = ref(new Set<string>());
+  const selectedStoryId = ref<string | null>(null);
+
+  const _filteredMetadata = computed<null | StoryMetadataInExplorer[]>(() => {
     if (_metadata.value === null) return null;
-    if (storyTypeFilter.value === "all") return _metadata.value;
-    console.log(_metadata.value);
-    return _metadata.value.filter(item => item.storyErr);
+    const arr =
+      storyTypeFilterInExplorer.value === "all" ? _metadata.value : _metadata.value.filter(item => item.storyErr);
+    return storySearchText.value
+      ? arr.filter(item => {
+          const lowerCaseSearchText = storySearchText.value.toLowerCase();
+          return (
+            item.title.toLowerCase().includes(lowerCaseSearchText) ||
+            item.name.toLowerCase().includes(lowerCaseSearchText)
+          );
+        })
+      : arr;
   });
+
+  const explorerTreeData = computed(() => {
+    return _filteredMetadata.value === null
+      ? []
+      : getScreenshotPageTreeData(generateTreeFromFlatData(_filteredMetadata.value));
+  });
+
+  const expandAll = () => {
+    const allKeys = explorerTreeData.value.map(node => getAllNonLeafKeys(node)).flat();
+    for (const key of allKeys) {
+      expandedKeys.value.add(key);
+    }
+  };
+
+  const collapseAll = () => {
+    expandedKeys.value.clear();
+  };
 
   const isSaving = ref(false);
   const savingDialogOpen = ref(false);
@@ -81,13 +110,14 @@ export const useScreenshotStore = defineStore("screenshot", () => {
 
   const startScreenshot = async () => {
     state.value = ScreenshotState.CHECKING_SERVICE;
-    window.screenshotApi.startScreenshot(storybookUrl.value);
+    void window.screenshotApi.startScreenshot(storybookUrl.value);
   };
 
-  const setStoryTypeFilter = (filter: StoryTypeFilter) => {
-    console.log(filter);
-    storyTypeFilter.value = filter;
-  };
+  const displayingImg = ref<{ loading: boolean; isExist: boolean | null; base64: string | null }>({
+    loading: false,
+    isExist: null,
+    base64: null,
+  });
 
   const updateDisplayingImg = async (id: string) => {
     displayingImg.value = { loading: true, isExist: null, base64: null };
@@ -111,16 +141,23 @@ export const useScreenshotStore = defineStore("screenshot", () => {
       endTime: null,
       storyErr: null,
     }));
+    _metadataKeyMap.clear();
+    storyMetadataList.forEach((item, index) => {
+      _metadataKeyMap.set(item.id, index);
+    });
+    highlightKey.value = null;
+    expandedKeys.value.clear();
+    selectedStoryId.value = null;
   });
 
   window.screenshotApi.onUpdateStoryState((storyId, state, browserName, storyErr) => {
-    const story = _metadata.value?.find(item => item.id === storyId);
+    const idx = _metadataKeyMap.get(storyId);
+    const story = idx !== undefined ? _metadata.value?.[idx] : null;
     if (story) {
       story.state = state;
       story.browserName = browserName;
-      if (storyErr !== null) {
-        story.storyErr = storyErr;
-      }
+      story.storyErr = storyErr;
+
       if (state === StoryState.CAPTURING) {
         story.startTime = new Date().toISOString();
       } else if (state === StoryState.FINISHED) {
@@ -130,20 +167,23 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   });
 
   const saveScreenshot = async () => {
-    isSaving.value = true;
-    const result = await window.screenshotApi.saveScreenshot(
-      saveInfo.value.project,
-      saveInfo.value.branch,
-      saveInfo.value.type,
-    );
+    try {
+      isSaving.value = true;
+      const result = await window.screenshotApi.saveScreenshot(
+        saveInfo.value.project,
+        saveInfo.value.branch,
+        saveInfo.value.type,
+      );
 
-    isSaving.value = false;
-    if (result.success) {
-      toast.add({ severity: "success", summary: "Success", detail: "Successfully saved the screenshot", life: 5000 });
-      savingDialogOpen.value = false;
-    } else {
-      toast.add({ severity: "error", summary: "Error", detail: "Fail to saved the screenshot", life: 5000 });
-      console.log(result.errMsg);
+      if (result.success) {
+        toast.add({ severity: "success", summary: "Success", detail: "Successfully saved the screenshot", life: 5000 });
+        savingDialogOpen.value = false;
+      } else {
+        toast.add({ severity: "error", summary: "Error", detail: "Fail to saved the screenshot", life: 5000 });
+        console.log(result.errMsg);
+      }
+    } finally {
+      isSaving.value = false;
     }
   };
 
@@ -160,16 +200,20 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     storybookUrl,
     processing,
     activeStep,
-    metadata,
-    apiLogs,
-    storyTypeFilter,
+    explorerTreeData,
+    expandedKeys,
+    highlightKey,
+    storyTypeFilterInExplorer,
+    storySearchText,
     displayingImg,
     saveInfo,
     isSaving,
     savingDialogOpen,
-    setStoryTypeFilter,
+    selectedStoryId,
     getDefaultStorybookUrl,
     startScreenshot,
+    expandAll,
+    collapseAll,
     updateDisplayingImg,
     openInExplorer,
     saveScreenshot,

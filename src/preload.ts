@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld("screenshotApi", {
   onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) =>
     ipcRenderer.on("screenshot:newMetadata", (_event, storyMetadataList) => cb(storyMetadataList)),
   onUpdateStoryState: (
-    cb: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
+    cb: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ) =>
     ipcRenderer.on("screenshot:updateStoryState", (_event, storyId, state, browserName, storyErr) =>
       cb(storyId, state, browserName, storyErr),

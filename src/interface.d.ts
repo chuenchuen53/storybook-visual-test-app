@@ -32,7 +32,7 @@ export interface ScreenshotApi {
   onUpdateStatus: (cb: (status: ScreenshotState) => void) => void;
   onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) => void;
   onUpdateStoryState: (
-    cb: (storyId: string, state: StoryState, browserName: string | null, storyErr: boolean | null) => void,
+    cb: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ) => void;
 
   openInExplorer: () => void;

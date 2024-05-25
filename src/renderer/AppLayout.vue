@@ -1,25 +1,19 @@
 <template>
-  <div class="flex min-h-screen flex-col">
-    <nav class="fixed inset-x-0 z-10">
+  <div id="app-layout">
+    <nav>
       <TabMenu :model="items">
         <template #item="{ item, props }">
-          <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+          <router-link v-slot="{ href, navigate }" :to="item.route" custom>
             <a :href="href" v-bind="props.action" @click="navigate">
               <span v-bind="props.icon" />
               <span v-bind="props.label">{{ item.label }}</span>
             </a>
           </router-link>
-          <a v-else :href="item.url" :target="item.target" v-bind="props.action">
-            <span v-bind="props.icon" />
-            <span v-bind="props.label">{{ item.label }}</span>
-          </a>
         </template>
       </TabMenu>
       <div />
     </nav>
-    <main class="flex flex-[1_1_auto] flex-col pt-[50px]">
-      <slot />
-    </main>
+    <slot />
   </div>
 </template>
 
@@ -33,3 +27,13 @@ const items = ref([
   { label: "Compare", icon: "pi pi-eye", route: "/compare" },
 ]);
 </script>
+
+<style scoped>
+#app-layout {
+  display: grid;
+  grid-template-rows: 50px 1fr;
+  grid-template-columns: 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+</style>

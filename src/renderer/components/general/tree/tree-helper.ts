@@ -6,11 +6,13 @@ export type CheckSingleBranchAndGetLeafResult =
       isSingleBranch: true;
       leafKey: string;
       nonLeafKeys: string[];
+      leafNode: NodeData;
     }
   | {
       isSingleBranch: false;
       leafKey: null;
       nonLeafKeys: null;
+      leafNode: null;
     };
 
 export type LeafNodePredicate<T extends object> = (x: T | TreeObj<T>) => x is T;
@@ -30,26 +32,29 @@ export function checkSingleBranchAndGetLeaf(x: NodeData): CheckSingleBranchAndGe
   const nonLeafKeys: string[] = [];
   let leafKey: string = null;
 
+  let leafNode: NodeData | null = null;
+
   function traverse(node: NodeData) {
     if (isLeaf(node)) {
       leafKey = node.key;
-    } else {
+      leafNode = node;
+    } else if (node.children?.length === 1) {
       nonLeafKeys.push(node.key);
       traverse(node.children[0]);
     }
   }
 
   if (isLeaf(x)) {
-    return { isSingleBranch: true, leafKey: x.key, nonLeafKeys };
-  }
-
-  if (x.children.length !== 1) {
-    return { isSingleBranch: false, leafKey: null, nonLeafKeys: null };
+    return { isSingleBranch: true, leafKey: x.key, nonLeafKeys, leafNode: x };
   }
 
   traverse(x);
 
-  return { isSingleBranch: true, leafKey, nonLeafKeys };
+  if (leafNode === null) {
+    return { isSingleBranch: false, leafKey: null, nonLeafKeys: null, leafNode: null };
+  }
+
+  return { isSingleBranch: true, leafKey, nonLeafKeys, leafNode };
 }
 
 export function treeNodesForUi<T extends object>(

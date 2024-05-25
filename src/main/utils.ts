@@ -1,6 +1,6 @@
 import os from "os";
-import { exec } from "child_process";
 import path from "path";
+import execa from "execa";
 import fs from "fs-extra";
 
 export async function sleep(ms: number) {
@@ -48,10 +48,10 @@ export function openInExplorer(dir: string) {
 
   if (platform === "darwin") {
     // macOS
-    exec(`open "${dir}"`);
+    execa("open", [dir]);
   } else {
     // Default to Windows if OS is not detected
-    exec(`explorer "${dir.replace(/\//g, "\\")}"`);
+    execa("start", [dir]);
   }
 }
 
