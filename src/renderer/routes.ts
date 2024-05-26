@@ -8,7 +8,7 @@ const ScreenshotPage = () => import("./pages/ScreenshotPage.vue");
 const ComparePage = () => import("./pages/ComparePage.vue");
 
 const routes: RouteRecordRaw[] = [
-  { path: "/", redirect: { path: "/screenshot" } },
+  { path: "/", redirect: { path: "/compare" } },
   { path: "/reference", component: ReferencePage },
   { path: "/screenshot", component: ScreenshotPage },
   { path: "/compare", component: ComparePage },

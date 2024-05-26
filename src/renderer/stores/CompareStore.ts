@@ -1,7 +1,11 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import { CompareResponse } from "../../shared/type";
+import {
+  generateTreeFromRespData,
+  getCompareResultTreeData,
+} from "../components/compare/comparison-result-explorer/helper";
+import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import type { CompareResponse$Data, GetAvailableSetResponse } from "../../shared/type";
 
 interface CompareSet {
@@ -15,6 +19,13 @@ interface ImgState {
   base64: string | null;
 }
 
+interface TypeOptions {
+  same: number;
+  diff: number;
+  added: number;
+  removed: number;
+}
+
 type CurrentDisplayingImgType = "same" | "added" | "removed" | "diff" | null;
 
 export const useCompareStore = defineStore("compare", () => {
@@ -23,13 +34,37 @@ export const useCompareStore = defineStore("compare", () => {
   const project = ref<string | null>(null);
 
   const availableProjects = ref<string[]>([]);
+  const projectsInTab = ref<string[]>([]);
   const availableSets = ref<GetAvailableSetResponse>({
     ref: [],
     test: [],
   });
 
-  const compareResult = ref<null | CompareResponse$Data>(null);
+  const _compareResult = ref<null | CompareResponse$Data>(null);
   const isComparing = ref(false);
+  const expandedKeys = ref(new Set<string>());
+  const highlightKey = ref<null | string>(null);
+  const selectedKey = ref<null | string>(null);
+  const searchText = ref("");
+  const typeOptions = ref<null | TypeOptions>(null);
+  const selectedType = ref<"diff" | "added" | "removed" | "same">("diff");
+
+  const explorerTreeData = computed(() => {
+    return _compareResult.value === null
+      ? []
+      : getCompareResultTreeData(generateTreeFromRespData(_compareResult.value, selectedType.value));
+  });
+
+  const expandAll = () => {
+    const allKeys = explorerTreeData.value.map(node => getAllNonLeafKeys(node)).flat();
+    for (const key of allKeys) {
+      expandedKeys.value.add(key);
+    }
+  };
+
+  const collapseAll = () => {
+    expandedKeys.value.clear();
+  };
 
   const currentDisplayingImgType = ref<CurrentDisplayingImgType>(null);
 
@@ -60,7 +95,17 @@ export const useCompareStore = defineStore("compare", () => {
     const response = await window.compareApi.compare(relativeRefDir, relativeTestDir);
 
     if (response.success) {
-      compareResult.value = response.data;
+      _compareResult.value = response.data;
+      expandedKeys.value.clear();
+      highlightKey.value = null;
+      selectedType.value = "diff";
+      typeOptions.value = {
+        same: response.data.result.same.length,
+        diff: response.data.result.diff.length,
+        added: response.data.result.added.length,
+        removed: response.data.result.removed.length,
+      };
+      console.log("here");
     } else {
       // todo
     }
@@ -70,8 +115,9 @@ export const useCompareStore = defineStore("compare", () => {
 
   const refreshData = async () => {
     availableProjects.value = await window.compareApi.getAvailableProjects();
+    projectsInTab.value = await window.userSettingApi.getProjectsInTab();
 
-    if (availableProjects.value.length === 0) {
+    if (projectsInTab.value.length === 0) {
       project.value = null;
       availableSets.value = {
         ref: [],
@@ -89,8 +135,15 @@ export const useCompareStore = defineStore("compare", () => {
     }
 
     if (!project.value || !availableProjects.value.includes(project.value)) {
-      await updateProject(availableProjects.value[0]);
-    } else if (project.value && availableProjects.value.includes(project.value)) {
+      const firstProject = projectsInTab.value[0];
+      if (availableProjects.value.includes(firstProject)) {
+        await updateProject(firstProject);
+      }
+    } else if (
+      project.value &&
+      projectsInTab.value.includes(project.value) &&
+      availableProjects.value.includes(project.value)
+    ) {
       const oldRefBranch = refSet.value.branch;
       const oldTestBranch = testSet.value.branch;
       const oldRefUuid = refSet.value.uuid;
@@ -131,6 +184,14 @@ export const useCompareStore = defineStore("compare", () => {
 
     const result = await window.compareApi.getAvailableSets(projectName);
     availableSets.value = result;
+  };
+
+  const updateProjectsInTab = async (projects: string[]) => {
+    const success = await window.userSettingApi.updateProjectsInTab(projects);
+    if (success) {
+      projectsInTab.value = projects;
+    }
+    projectsInTab.value = projects;
   };
 
   const refSet = ref<CompareSet>({
@@ -182,7 +243,7 @@ export const useCompareStore = defineStore("compare", () => {
   };
 
   const getSameImg = async (id: string) => {
-    const localResult = compareResult.value;
+    const localResult = _compareResult.value;
     if (localResult === null) return;
     const { project, refBranch, refId, testBranch, testSetId } = localResult;
     console.log(testSetId);
@@ -193,11 +254,15 @@ export const useCompareStore = defineStore("compare", () => {
       window.imgApi.getSavedImg("test", project, testBranch, testSetId, id),
     ]);
     displaySameImg.value.ref = { loading: false, isExist: refImg.isExist, base64: refImg.base64 };
-    displaySameImg.value.test = { loading: false, isExist: testImg.isExist, base64: testImg.base64 };
+    displaySameImg.value.test = {
+      loading: false,
+      isExist: testImg.isExist,
+      base64: testImg.base64,
+    };
   };
 
   const getDiffImg = async (id: string) => {
-    const localResult = compareResult.value;
+    const localResult = _compareResult.value;
     if (localResult === null) return;
     const { project, refBranch, refId, testBranch, testSetId } = localResult;
     displayingDiffImg.value.ref = { loading: true, isExist: null, base64: null };
@@ -208,9 +273,21 @@ export const useCompareStore = defineStore("compare", () => {
       window.imgApi.getSavedImg("test", project, testBranch, testSetId, id),
       window.imgApi.getCompareDiffImg(id),
     ]);
-    displayingDiffImg.value.ref = { loading: false, isExist: refImg.isExist, base64: refImg.base64 };
-    displayingDiffImg.value.test = { loading: false, isExist: testImg.isExist, base64: testImg.base64 };
-    displayingDiffImg.value.diff = { loading: false, isExist: diffImg.isExist, base64: diffImg.base64 };
+    displayingDiffImg.value.ref = {
+      loading: false,
+      isExist: refImg.isExist,
+      base64: refImg.base64,
+    };
+    displayingDiffImg.value.test = {
+      loading: false,
+      isExist: testImg.isExist,
+      base64: testImg.base64,
+    };
+    displayingDiffImg.value.diff = {
+      loading: false,
+      isExist: diffImg.isExist,
+      base64: diffImg.base64,
+    };
   };
 
   const setCurrentDisplayingImgType = (type: CurrentDisplayingImgType) => {
@@ -231,7 +308,12 @@ export const useCompareStore = defineStore("compare", () => {
       });
       savingDialogOpen.value = false;
     } else {
-      toast.add({ severity: "error", summary: "Error", detail: "Fail to saved the comparison result", life: 5000 });
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Fail to saved the comparison result",
+        life: 5000,
+      });
       console.log(result.errMsg);
     }
   };
@@ -248,12 +330,19 @@ export const useCompareStore = defineStore("compare", () => {
     refSet,
     testSet,
     currentDisplayingImgType,
-    compareResult,
+    explorerTreeData,
+    highlightKey,
+    expandedKeys,
+    selectedKey,
     displayingDiffImg,
     displaySameImg,
     displayingSingleImg,
     isSaving,
     savingDialogOpen,
+    searchText,
+    typeOptions,
+    projectsInTab,
+    selectedType,
     updateProject,
     compare,
     refreshData,
@@ -269,5 +358,8 @@ export const useCompareStore = defineStore("compare", () => {
     setCurrentDisplayingImgType,
     saveScreenshot,
     openSaveDialog,
+    expandAll,
+    collapseAll,
+    updateProjectsInTab,
   };
 });

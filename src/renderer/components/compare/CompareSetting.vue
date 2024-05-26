@@ -1,17 +1,6 @@
 <template>
-  <div>
-    <div class="mb-6 pl-[124px]">
-      <FloatLabel class="w-80">
-        <Select
-          input-id="compare-project-select"
-          class="w-80"
-          :model-value="project"
-          :options="availableProjects"
-          @change="handleSelectionChange"
-        />
-        <label for="compare-project-select">Select a project</label>
-      </FloatLabel>
-    </div>
+  <div v-if="project === null" class="text-center text-lg">Select a project to compare</div>
+  <div v-else>
     <div class="grid grid-cols-[100px_1fr_1fr] gap-x-6 gap-y-4">
       <div></div>
       <div>Reference Set</div>
@@ -61,14 +50,13 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import Button from "primevue/button";
-import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/select";
 import { storeToRefs } from "pinia";
 import { useCompareStore } from "../../stores/CompareStore";
 import type { SelectChangeEvent } from "primevue/select";
 
 const store = useCompareStore();
-const { isComparing, project, availableProjects, availableSets, refSet, testSet } = storeToRefs(store);
+const { isComparing, project, availableSets, refSet, testSet } = storeToRefs(store);
 const {
   refreshData,
   updateProject,

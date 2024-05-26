@@ -1,110 +1,67 @@
 <template>
   <div class="relative flex h-full flex-col bg-[--p-content-background]">
-    <div class="flex justify-between gap-2 px-2">
-      <div>
-        <Button
-          v-tooltip.bottom="'Open in explorer'"
-          icon="pi pi-folder-open"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          @click="openInExplorer"
-        />
-        <Button
-          v-if="compareResult !== null"
-          v-tooltip.bottom="'Save'"
-          :disabled="false"
-          icon="pi pi-save"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          @click="openSaveDialog"
-        />
+    <div class="flex justify-between gap-2 px-2 py-1">
+      <div class="flex gap-[2px]">
+        <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
+        <IconButton v-if="true" v-tooltip.bottom="'Save'" :disabled="false" icon="pi pi-save" @click="openSaveDialog" />
       </div>
-      <div class="flex gap-2">
-        <Button
-          icon="pi pi-arrow-up-right-and-arrow-down-left-from-center"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          @click="expandAll"
-        />
-        <Button
-          icon="pi pi-arrow-down-left-and-arrow-up-right-to-center"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          @click="collapseAll"
-        />
+      <div class="flex gap-[2px]">
+        <IconButton icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" @click="expandAll" />
+        <IconButton icon="pi pi-arrow-down-left-and-arrow-up-right-to-center" @click="collapseAll" />
       </div>
     </div>
-    <Tree
-      v-model:expandedKeys="expandedKeys"
-      v-model:selection-keys="selectedKey"
-      :value="nodes"
-      class="scrollbar-hide overflow-y-auto"
-      selection-mode="single"
-      :filter="true"
-      filter-mode="lenient"
-      filter-placeholder="Find story"
-      :pt="{
-        root: {
-          style: {
-            fontSize: '14px',
-            background: 'none',
-            paddingTop: '0',
-          },
-        },
-        nodetogglebutton: {
-          style: {
-            width: '22px',
-            height: '22px',
-          },
-        },
-        pcFilterIconContainer: {
-          style: {
-            top: '45%',
-          },
-        },
-        wrapper: {
-          style: {
-            marginTop: '16px',
-          },
-        },
-        nodeToggleIcon: {
-          style: {
-            width: '10px',
-            height: '10px',
-          },
-        },
-        nodelabel: {
-          style: {
-            flex: '100%',
-          },
-        },
-      }"
-      @node-select="onNodeSelect"
+    <IconField class="mx-3 mb-2">
+      <InputIcon class="pi pi-search" />
+      <InputText v-model="searchText" placeholder="Search" class="w-full" />
+    </IconField>
+    <SelectButton
+      v-if="typeOptions"
+      v-model="selectedType"
+      :options="selectOptions"
+      option-label="name"
+      option-value="value"
+      :allow-empty="false"
+      class="w-full px-3 [&>*]:flex-grow"
     >
-    </Tree>
+      <template #option="slotProps">
+        <div class="text-nowrap text-xs">
+          <span>
+            {{ slotProps.option.name }}
+          </span>
+          <span class="text-[10px] text-gray-400"> ({{ typeOptions[slotProps.option.value] }}) </span>
+        </div>
+      </template>
+    </SelectButton>
+
+    <ScrollPanel class="scroll-panel-height">
+      <StyledTree
+        v-model:expandedKeys="expandedKeys"
+        v-model:highlightKey="highlightKey"
+        :data="explorerTreeData"
+        class="px-3 pb-8 pt-2 text-sm"
+        @node-click="onNodeSelect"
+      >
+      </StyledTree>
+    </ScrollPanel>
   </div>
 </template>
 
 <script setup lang="ts">
-import Tree, { type TreeExpandedKeys } from "primevue/tree";
-import Button from "primevue/button";
-import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
+import InputText from "primevue/inputtext";
+import IconField from "primevue/iconfield";
+import InputIcon from "primevue/inputicon";
+import ScrollPanel from "primevue/scrollpanel";
+import SelectButton from "primevue/selectbutton";
+import StyledTree from "../../general/tree/StyledTree.vue";
 import { useCompareStore } from "../../../stores/CompareStore";
-import { generateTreeFromRespData, getCompareResultTreeData } from "./helper";
-import type { TreeNode } from "primevue/treenode";
+import IconButton from "../../general/IconButton.vue";
+import type { NodeData } from "../../general/tree/type";
 
 const store = useCompareStore();
 
-const { compareResult } = storeToRefs(store);
+const { explorerTreeData, highlightKey, expandedKeys, selectedKey, searchText, typeOptions, selectedType } =
+  storeToRefs(store);
 const {
   openInExplorer,
   getAddedImg,
@@ -113,38 +70,18 @@ const {
   getDiffImg,
   setCurrentDisplayingImgType,
   openSaveDialog,
+  expandAll,
+  collapseAll,
 } = store;
 
-const expandedKeys = ref<TreeExpandedKeys>({});
-const selectedKey = ref(null);
+const selectOptions = [
+  { name: "Diff", value: "diff" },
+  { name: "Added", value: "added" },
+  { name: "Removed", value: "removed" },
+  { name: "Same", value: "same" },
+];
 
-const nodes = computed(() => {
-  return compareResult.value === null ? [] : getCompareResultTreeData(generateTreeFromRespData(compareResult.value));
-});
-
-const expandNode = (node: TreeNode) => {
-  if (node.children && node.children.length) {
-    expandedKeys.value[node.key] = true;
-
-    for (let child of node.children) {
-      expandNode(child);
-    }
-  }
-};
-
-const expandAll = () => {
-  for (let node of nodes.value) {
-    expandNode(node);
-  }
-
-  expandedKeys.value = { ...expandedKeys.value };
-};
-
-const collapseAll = () => {
-  expandedKeys.value = {};
-};
-
-const onNodeSelect = (node: TreeNode) => {
+const onNodeSelect = (node: NodeData) => {
   if (node.data) {
     const storyId = node.data.storyId;
     const resultType = node.data.resultType;
@@ -167,3 +104,9 @@ const onNodeSelect = (node: TreeNode) => {
   }
 };
 </script>
+
+<style lang="scss">
+.scroll-panel-height {
+  height: calc(100vh - 140px);
+}
+</style>

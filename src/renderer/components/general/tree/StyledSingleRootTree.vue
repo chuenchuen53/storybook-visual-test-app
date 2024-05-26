@@ -28,7 +28,7 @@
         v-model:expanded-keys="expandedKeysModel"
         v-model:highlight-key="highlightKeyModel"
         :data="props.data.children"
-        @node-click="emit('nodeClick', $event)"
+        @node-click="handleNodeClick"
       >
         <template #node-content="{ node }">
           <slot name="node-content" :node="node"></slot>
@@ -43,7 +43,7 @@ import { computed } from "vue";
 import IconButton from "../IconButton.vue";
 import TransitionCollapse from "../TransitionCollapse.vue";
 import Tree from "./Tree.vue";
-import { getAllNonLeafKeys, isLeaf } from "./tree-helper";
+import { checkSingleBranchAndGetLeaf, getAllNonLeafKeys, isLeaf } from "./tree-helper";
 import type { EmitEvent, NodeData, NodeSlots } from "./type";
 
 const highlightKeyModel = defineModel<string | null>("highlightKey", { required: true });
@@ -84,6 +84,25 @@ function collapseAll() {
   }
   if (sizeBefore === expandedKeysModel.value.size) {
     expandedKeysModel.value.delete(allNonLeafKeys[0]);
+  }
+}
+
+function handleNodeClick(node: NodeData) {
+  emit("nodeClick", node);
+  autoExpandSingleBranch(node);
+}
+
+function autoExpandSingleBranch(node: NodeData) {
+  if (isLeaf(node)) return;
+  if (!expandedKeysModel.value.has(node.key)) return;
+
+  const { isSingleBranch, leafKey, nonLeafKeys, leafNode } = checkSingleBranchAndGetLeaf(node);
+  if (isSingleBranch) {
+    for (const key of nonLeafKeys) {
+      expandedKeysModel.value.add(key);
+    }
+    highlightKeyModel.value = leafKey;
+    emit("nodeClick", leafNode);
   }
 }
 </script>

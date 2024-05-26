@@ -77,3 +77,7 @@ export interface GetImgResponse {
   isExist: boolean;
   base64: string | null;
 }
+
+export interface UserSetting {
+  projectsInTab?: string[];
+}

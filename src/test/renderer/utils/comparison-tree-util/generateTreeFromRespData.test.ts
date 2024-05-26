@@ -21,14 +21,10 @@ describe("generateTreeFromRespData", () => {
       },
     };
 
-    const result = generateTreeFromRespData(data);
-
-    expect(result).toEqual({
-      same: {},
-      added: {},
-      removed: {},
-      diff: {},
-    });
+    expect(generateTreeFromRespData(data, "same")).toEqual({});
+    expect(generateTreeFromRespData(data, "diff")).toEqual({});
+    expect(generateTreeFromRespData(data, "added")).toEqual({});
+    expect(generateTreeFromRespData(data, "removed")).toEqual({});
   });
 
   // Function processes a CompareResponse with multiple entries in each result type correctly
@@ -49,9 +45,7 @@ describe("generateTreeFromRespData", () => {
       },
     };
 
-    const result = generateTreeFromRespData(compareResponse);
-
-    expect(result).toEqual({
+    const expectedObj = {
       same: {
         comp1: { view1: { storyId: "comp1--view1", resultType: "same" } },
         comp2: { view2: { storyId: "comp2--view2", resultType: "same" } },
@@ -68,6 +62,11 @@ describe("generateTreeFromRespData", () => {
         comp7: { view7: { storyId: "comp7--view7", resultType: "diff" } },
         comp8: { view8: { storyId: "comp8--view8", resultType: "diff" } },
       },
-    });
+    };
+
+    expect(generateTreeFromRespData(compareResponse, "same")).toEqual(expectedObj.same);
+    expect(generateTreeFromRespData(compareResponse, "added")).toEqual(expectedObj.added);
+    expect(generateTreeFromRespData(compareResponse, "removed")).toEqual(expectedObj.removed);
+    expect(generateTreeFromRespData(compareResponse, "diff")).toEqual(expectedObj.diff);
   });
 });

@@ -11,7 +11,6 @@
           </router-link>
         </template>
       </TabMenu>
-      <div />
     </nav>
     <slot />
   </div>
@@ -31,9 +30,10 @@ const items = ref([
 <style scoped>
 #app-layout {
   display: grid;
-  grid-template-rows: 50px 1fr;
-  grid-template-columns: 1fr;
+  grid-template-rows: 50px calc(100vh - 50px);
+  grid-template-columns: 100vw;
   height: 100vh;
   width: 100vw;
+  overflow: hidden;
 }
 </style>

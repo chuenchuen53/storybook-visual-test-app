@@ -28,6 +28,11 @@ export interface ImgApi {
   ) => Promise<GetImgResponse>;
 }
 
+export interface UserSettingApi {
+  getProjectsInTab: () => Promise<string[]>;
+  updateProjectsInTab: (projects: string[]) => Promise<boolean>;
+}
+
 export interface ScreenshotApi {
   onUpdateStatus: (cb: (status: ScreenshotState) => void) => void;
   onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) => void;
@@ -52,6 +57,7 @@ export interface CompareApi {
 declare global {
   interface Window {
     globalApi: GlobalApi;
+    userSettingApi: UserSettingApi;
     imgApi: ImgApi;
     screenshotApi: ScreenshotApi;
     compareApi: CompareApi;

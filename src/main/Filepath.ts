@@ -24,6 +24,8 @@ const savedTestDir = path.join(savedDir, "test");
 const savedComparisonDir = path.join(savedDir, "comparison");
 const savedInfoFilename = "saved-info.json";
 
+const userSettingFilepath = path.join(appDataRootDir, "user-setting.json");
+
 export {
   appLogFilepath,
   screenshotDir,
@@ -38,4 +40,5 @@ export {
   savedTestDir,
   savedInfoFilename,
   savedComparisonDir,
+  userSettingFilepath,
 };

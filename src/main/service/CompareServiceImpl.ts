@@ -38,7 +38,9 @@ export class CompareServiceImpl implements CompareService {
   }
 
   public async getAvailableProjects(): Promise<string[]> {
-    return getAllFolders(savedReferenceDir);
+    const [refs, tests] = await Promise.all([getAllFolders(savedReferenceDir), getAllFolders(savedTestDir)]);
+    const set = new Set([...refs, ...tests]);
+    return Array.from(set);
   }
 
   public async getAvailableSets(project: string): Promise<GetAvailableSetResponse> {

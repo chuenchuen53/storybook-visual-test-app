@@ -15,6 +15,11 @@ contextBridge.exposeInMainWorld("imgApi", {
     ipcRenderer.invoke("img:getSavedImg", type, project, branch, uuid, id),
 });
 
+contextBridge.exposeInMainWorld("userSettingApi", {
+  getProjectsInTab: () => ipcRenderer.invoke("userSetting:getProjectsInTab"),
+  updateProjectsInTab: (projects: string[]) => ipcRenderer.invoke("userSetting:updateProjectsInTab", projects),
+});
+
 contextBridge.exposeInMainWorld("screenshotApi", {
   onUpdateStatus: (cb: (status: ScreenshotState) => void) =>
     ipcRenderer.on("screenshot:updateStatus", (_event, status) => cb(status)),

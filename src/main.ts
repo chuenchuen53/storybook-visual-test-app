@@ -1,5 +1,7 @@
 import path from "path";
 import { app, BrowserWindow } from "electron";
+import { registerUserSettingHandlers } from "./main/ipc-handlers/user-setting-handlers";
+import { UserSettingServiceImpl } from "./main/service/UserSettingServiceImpl";
 import { MainWindow } from "./MainWindow";
 import { ScreenshotServiceImpl } from "./main/service/ScreenshotServiceImpl";
 import { CompareServiceImpl } from "./main/service/CompareServiceImpl";
@@ -9,12 +11,14 @@ import { registerScreenshotHandlers } from "./main/ipc-handlers/screenshot-handl
 import { registerCompareHandlers } from "./main/ipc-handlers/compare-handlers";
 import { registerImgHandlers } from "./main/ipc-handlers/img-handlers";
 import { DockerContainer } from "./main/docker-helper/DockerContainer";
+import type { UserSettingService } from "./main/service/UserSettingService";
 import type { CompareService } from "./main/service/CompareService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
 import type { ImgService } from "./main/service/ImgService";
 
 logger.info("app start");
 
+const userSettingService: UserSettingService = UserSettingServiceImpl.getInstance();
 const imgService: ImgService = ImgServiceImpl.getInstance();
 const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
 const compareService: CompareService = CompareServiceImpl.getInstance();
@@ -29,6 +33,8 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
+    minWidth: 1280,
+    minHeight: 720,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
@@ -53,6 +59,7 @@ const createWindow = () => {
 
 app.on("ready", () => {
   registerImgHandlers(imgService);
+  registerUserSettingHandlers(userSettingService);
   registerScreenshotHandlers(screenshotService);
   registerCompareHandlers(compareService);
   void DockerContainer.ensureAllStopped();

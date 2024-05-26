@@ -127,17 +127,6 @@ const onNodeSelect = (node: NodeData) => {
   const data: StoryMetadataInExplorer | undefined = node.data;
   if (data) {
     updateDisplayingImg(data.id);
-  } else {
-    if (expandedKeys.value.has(node.key)) {
-      const { isSingleBranch, leafKey, nonLeafKeys, leafNode } = checkSingleBranchAndGetLeaf(node);
-      if (isSingleBranch) {
-        for (const key of nonLeafKeys) {
-          expandedKeys.value.add(key);
-        }
-        highlightKey.value = leafKey;
-        if (leafNode.data?.id) updateDisplayingImg(leafNode.data.id);
-      }
-    }
   }
 };
 
