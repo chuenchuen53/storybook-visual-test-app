@@ -77,7 +77,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
         url,
         () => ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_METADATA_BROWSER),
         () => ScreenshotChannel.updateStatus(ScreenshotState.COMPUTING_METADATA),
-        (err: Error) => logger.error(err),
+        (err: unknown) => logger.error(err),
       );
 
       if (metadataResult.success === false || metadataResult.storyMetadataList === null) {
@@ -138,8 +138,9 @@ export class ScreenshotServiceImpl implements ScreenshotService {
       await fs.writeJson(savedInfoPath, savedInfo);
       return { success: true };
     } catch (e) {
+      const typedError = e as Error;
       logger.error(e);
-      return { success: false, errMsg: e.message };
+      return { success: false, errMsg: typedError.message };
     }
   }
 

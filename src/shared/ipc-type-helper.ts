@@ -1,9 +1,9 @@
-import type { IpcMainEvent } from "electron";
+import type { IpcMainInvokeEvent } from "electron";
 
 export interface IpcApi {
-  listen: Record<string, (cb: (...args: unknown[]) => void) => void>;
-  send: Record<string, (...args: unknown[]) => void>;
-  invoke: Record<string, (...args: unknown[]) => Promise<unknown>>;
+  listen: Record<string, (cb: (...args: any[]) => void) => void>;
+  send: Record<string, (...args: any[]) => void>;
+  invoke: Record<string, (...args: any[]) => Promise<unknown>>;
 }
 
 export interface IpcChannel<T extends IpcApi> {
@@ -13,7 +13,7 @@ export interface IpcChannel<T extends IpcApi> {
 }
 
 export type IpcMainHandlerType<T extends (...args: unknown[]) => unknown | Promise<unknown>> = (
-  event: IpcMainEvent,
+  event: IpcMainInvokeEvent,
   ...args: Parameters<T>
 ) => ReturnType<T>;
 

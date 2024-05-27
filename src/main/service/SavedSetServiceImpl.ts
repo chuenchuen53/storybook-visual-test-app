@@ -48,7 +48,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     logger.info(dir);
     const allSets = await getAllFolders(dir);
 
-    const getSavedInfo = async (setId: string): Promise<RefTestSavedInfo> => {
+    const getSavedInfo = async (setId: string): Promise<RefTestSavedInfo | null> => {
       const metadataPath = path.join(dir, setId, screenshotMetadataFilename);
       const exist = await fs.pathExists(metadataPath);
       if (!exist) return null;
@@ -69,7 +69,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     };
 
     const results = await Promise.all(allSets.map(getSavedInfo));
-    return results.filter(info => info !== null);
+    return results.filter((info): info is RefTestSavedInfo => info !== null);
   }
 
   public async getAllSavedSets(project: string): Promise<SavedSets> {
@@ -127,7 +127,7 @@ export class SavedSetServiceImpl implements SavedSetService {
       };
     };
 
-    return (await Promise.all(allSets.map(getSavedInfo))).filter(info => info !== null);
+    return (await Promise.all(allSets.map(getSavedInfo))).filter((info): info is ComparisonSavedInfo => info !== null);
   }
 
   public async getRefOrTestSavedSetMetadata(

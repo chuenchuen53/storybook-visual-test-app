@@ -25,6 +25,7 @@ export class MainWindow {
   public static send(channel: string, ...args: any[]) {
     if (MainWindow.instance === null) {
       logger.error("send is called before MainWindow registered");
+      return;
     }
     MainWindow.instance.webContents.send(channel, ...args);
   }

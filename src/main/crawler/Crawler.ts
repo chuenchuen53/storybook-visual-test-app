@@ -6,7 +6,7 @@ export interface Crawler {
     storybookUrl: string,
     onStartingBrowser: () => void,
     onComputingMetadata: () => void,
-    onError: (err: Error) => void,
+    onError: (err: unknown) => void,
   ): Promise<GetStoriesMetadataResult>;
 
   screenshotStories(

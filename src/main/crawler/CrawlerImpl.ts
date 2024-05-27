@@ -32,7 +32,7 @@ export class CrawlerImpl implements Crawler {
     storybookUrl: string,
     onStartingBrowser: () => void,
     onComputingMetadata: () => void,
-    onError: (err: Error) => void,
+    onError: (err: unknown) => void,
   ): Promise<GetStoriesMetadataResult> {
     let container: DockerContainer | undefined = undefined;
     let browser: Browser | undefined = undefined;

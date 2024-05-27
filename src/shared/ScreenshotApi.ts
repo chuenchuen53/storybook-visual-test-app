@@ -25,7 +25,7 @@ export interface ScreenshotApi extends IpcApi {
     startScreenshot: (url: string) => void;
   };
   invoke: {
-    getLocalIPAddress: () => Promise<string>;
+    getLocalIPAddress: () => Promise<string | undefined>;
     saveScreenshot: (params: SaveScreenshotRequest) => Promise<SavedScreenshotResponse>;
   };
 }

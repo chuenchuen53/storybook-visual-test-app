@@ -125,7 +125,8 @@ export class CompareServiceImpl implements CompareService {
       return { success: true };
     } catch (e) {
       logger.error(e);
-      return { success: false, errMsg: e.message };
+      const typedError = e as Error;
+      return { success: false, errMsg: typedError.message };
     }
   }
 

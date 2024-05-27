@@ -75,7 +75,7 @@ export class ScreenshotManager {
 
     const storyErr = await page.evaluate(() => {
       const errorStack = document.querySelector("#error-stack");
-      return errorStack && errorStack.textContent.trim().length > 0;
+      return Boolean(errorStack?.textContent && errorStack.textContent.trim().length > 0);
     });
 
     const filepath = path.join(screenshotDir, `${story.id}.png`);
