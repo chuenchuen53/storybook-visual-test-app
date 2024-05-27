@@ -7,11 +7,10 @@ import type {
   SavedScreenshotResponse,
   SavedSets,
   SaveScreenshotType,
-  ScreenshotState,
-  StoryMetadata,
   StoryScreenshotMetadata,
-  StoryState,
 } from "./shared/type";
+
+import type { ScreenshotApi } from "./shared/ScreenshotApi";
 
 export interface GlobalApi {
   onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) => void;
@@ -34,19 +33,6 @@ export interface ImgApi {
 export interface UserSettingApi {
   getProjectsInTab: () => Promise<string[]>;
   updateProjectsInTab: (projects: string[]) => Promise<boolean>;
-}
-
-export interface ScreenshotApi {
-  onUpdateStatus: (cb: (status: ScreenshotState) => void) => void;
-  onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) => void;
-  onUpdateStoryState: (
-    cb: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
-  ) => void;
-
-  openInExplorer: () => void;
-  getLocalIPAddress: () => Promise<string> | Promise<undefined>;
-  startScreenshot: (url: string) => Promise<void>;
-  saveScreenshot: (project: string, branch: string, type: SaveScreenshotType) => Promise<SavedScreenshotResponse>;
 }
 
 export interface CompareApi {

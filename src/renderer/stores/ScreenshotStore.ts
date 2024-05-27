@@ -104,13 +104,13 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   });
 
   const getDefaultStorybookUrl = async () => {
-    const ip = await window.screenshotApi.getLocalIPAddress();
+    const ip = await window.screenshotApi.invoke.getLocalIPAddress();
     if (ip) storybookUrl.value = `http://${ip}:6006`;
   };
 
   const startScreenshot = async () => {
     state.value = ScreenshotState.CHECKING_SERVICE;
-    void window.screenshotApi.startScreenshot(storybookUrl.value);
+    void window.screenshotApi.send.startScreenshot(storybookUrl.value);
   };
 
   const displayingImg = ref<{ loading: boolean; isExist: boolean | null; base64: string | null }>({
@@ -125,11 +125,11 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     displayingImg.value = { loading: false, isExist: result.isExist, base64: result.base64 };
   };
 
-  window.screenshotApi.onUpdateStatus(status => {
+  window.screenshotApi.listen.onUpdateStatus(status => {
     state.value = status;
   });
 
-  window.screenshotApi.onNewMetadata(storyMetadataList => {
+  window.screenshotApi.listen.onNewMetadata(storyMetadataList => {
     _metadata.value = storyMetadataList.map(x => ({
       id: x.id,
       title: x.title,
@@ -150,7 +150,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     selectedStoryId.value = null;
   });
 
-  window.screenshotApi.onUpdateStoryState((storyId, state, browserName, storyErr) => {
+  window.screenshotApi.listen.onUpdateStoryState(({ storyId, state, browserName, storyErr }) => {
     const idx = _metadataKeyMap.get(storyId);
     const story = idx !== undefined ? _metadata.value?.[idx] : null;
     if (story) {
@@ -169,11 +169,11 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const saveScreenshot = async () => {
     try {
       isSaving.value = true;
-      const result = await window.screenshotApi.saveScreenshot(
-        saveInfo.value.project,
-        saveInfo.value.branch,
-        saveInfo.value.type,
-      );
+      const result = await window.screenshotApi.invoke.saveScreenshot({
+        project: saveInfo.value.project,
+        branch: saveInfo.value.branch,
+        type: saveInfo.value.type,
+      });
 
       if (result.success) {
         toast.add({ severity: "success", summary: "Success", detail: "Successfully saved the screenshot", life: 5000 });
@@ -188,7 +188,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   };
 
   const openInExplorer = () => {
-    window.screenshotApi.openInExplorer();
+    window.screenshotApi.send.openInExplorer();
   };
 
   const openSaveDialog = () => {

@@ -97,7 +97,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
         8,
         () => ScreenshotChannel.updateStatus(ScreenshotState.CAPTURING_SCREENSHOT),
         (storyId, state, browserName, storyErr) =>
-          ScreenshotChannel.updateStoryState(storyId, state, browserName, storyErr),
+          ScreenshotChannel.updateStoryState({ storyId, state, browserName, storyErr }),
       );
 
       if (result.success === false) {

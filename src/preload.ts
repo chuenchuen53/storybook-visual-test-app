@@ -1,5 +1,29 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { GlobalMessage, SaveScreenshotType, ScreenshotState, StoryMetadata, StoryState } from "./shared/type";
+import { ScreenshotChannelKey } from "./shared/ScreenshotApi";
+import type { IpcRendererHandler } from "./shared/ipc-type-helper";
+import type { ScreenshotApi } from "./shared/ScreenshotApi";
+import type { GlobalMessage, SaveScreenshotType } from "./shared/type";
+
+const screenshotApi: IpcRendererHandler<ScreenshotApi> = {
+  listen: {
+    onUpdateStatus: cb =>
+      ipcRenderer.on(ScreenshotChannelKey.listen.onUpdateStatus, (_, status: Parameters<typeof cb>[0]) => cb(status)),
+    onNewMetadata: cb =>
+      ipcRenderer.on(ScreenshotChannelKey.listen.onNewMetadata, (_, storyMetadataList: Parameters<typeof cb>[0]) =>
+        cb(storyMetadataList),
+      ),
+    onUpdateStoryState: cb =>
+      ipcRenderer.on(ScreenshotChannelKey.listen.onUpdateStoryState, (_, data: Parameters<typeof cb>[0]) => cb(data)),
+  },
+  send: {
+    openInExplorer: () => ipcRenderer.send(ScreenshotChannelKey.send.openInExplorer),
+    startScreenshot: url => ipcRenderer.send(ScreenshotChannelKey.send.startScreenshot, url),
+  },
+  invoke: {
+    getLocalIPAddress: () => ipcRenderer.invoke(ScreenshotChannelKey.invoke.getLocalIPAddress),
+    saveScreenshot: req => ipcRenderer.invoke(ScreenshotChannelKey.invoke.saveScreenshot, req),
+  },
+};
 
 contextBridge.exposeInMainWorld("globalApi", {
   onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) =>
@@ -20,24 +44,7 @@ contextBridge.exposeInMainWorld("userSettingApi", {
   updateProjectsInTab: (projects: string[]) => ipcRenderer.invoke("userSetting:updateProjectsInTab", projects),
 });
 
-contextBridge.exposeInMainWorld("screenshotApi", {
-  onUpdateStatus: (cb: (status: ScreenshotState) => void) =>
-    ipcRenderer.on("screenshot:updateStatus", (_event, status) => cb(status)),
-  onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) =>
-    ipcRenderer.on("screenshot:newMetadata", (_event, storyMetadataList) => cb(storyMetadataList)),
-  onUpdateStoryState: (
-    cb: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
-  ) =>
-    ipcRenderer.on("screenshot:updateStoryState", (_event, storyId, state, browserName, storyErr) =>
-      cb(storyId, state, browserName, storyErr),
-    ),
-
-  openInExplorer: () => ipcRenderer.send("screenshot:openInExplorer"),
-  getLocalIPAddress: () => ipcRenderer.invoke("screenshot:getLocalIPAddress"),
-  startScreenshot: (url: string) => ipcRenderer.invoke("screenshot:startScreenshot", url),
-  saveScreenshot: (project: string, branch: string, type: SaveScreenshotType) =>
-    ipcRenderer.invoke("screenshot:save", project, branch, type),
-});
+contextBridge.exposeInMainWorld("screenshotApi", screenshotApi);
 
 contextBridge.exposeInMainWorld("compareApi", {
   openInExplorer: () => ipcRenderer.send("compare:openInExplorer"),
