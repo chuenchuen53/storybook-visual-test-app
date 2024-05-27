@@ -121,6 +121,7 @@ const updateTestUuid = (e: SelectChangeEvent) => {
   updateTestSetUuid(e.value);
 };
 
+// todo: move to page
 onMounted(() => {
   refreshData();
 });

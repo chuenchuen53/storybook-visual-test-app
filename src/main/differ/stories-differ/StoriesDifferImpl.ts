@@ -10,9 +10,8 @@ import {
   compareResultFilename,
   screenshotMetadataFilename,
 } from "../../Filepath";
-import type { StoriesDiffResult } from "../../../shared/type";
+import type { SavedMetadata, StoriesDiffResult } from "../../../shared/type";
 import type { StoriesDiffer } from "./StoriesDiffer";
-import type { SavedMetadata } from "../../crawler/type";
 import type { ImgDiffer } from "../img-differ/ImgDiffer";
 
 export class StoriesDifferImpl implements StoriesDiffer {

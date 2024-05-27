@@ -3,10 +3,13 @@ import type {
   GetAvailableSetResponse,
   GetImgResponse,
   GlobalMessage,
+  RefTestSavedInfo,
   SavedScreenshotResponse,
+  SavedSets,
   SaveScreenshotType,
   ScreenshotState,
   StoryMetadata,
+  StoryScreenshotMetadata,
   StoryState,
 } from "./shared/type";
 
@@ -54,6 +57,18 @@ export interface CompareApi {
   saveComparisonResult: () => Promise<SavedScreenshotResponse>;
 }
 
+export interface SavedSetApi {
+  getAllRefOrTestBranches: (type: SaveScreenshotType, project: string) => Promise<string[]>;
+  getAllRefOrTestSavedSets: (type: SaveScreenshotType, project: string, branch: string) => Promise<RefTestSavedInfo[]>;
+  getAllSavedSets: (project: string) => Promise<SavedSets>;
+  getRefOrTestSavedSetMetadata: (
+    type: SaveScreenshotType,
+    project: string,
+    branch: string,
+    setId: string,
+  ) => Promise<StoryScreenshotMetadata[]>;
+}
+
 declare global {
   interface Window {
     globalApi: GlobalApi;
@@ -61,5 +76,6 @@ declare global {
     imgApi: ImgApi;
     screenshotApi: ScreenshotApi;
     compareApi: CompareApi;
+    savedSetApi: SavedSetApi;
   }
 }

@@ -1,20 +1,22 @@
 <template>
-  <div class="flex justify-between">
-    <div>
+  <div class="flex w-full justify-between overflow-hidden">
+    <div class="scrollbar-hidden flex basis-[calc(100%-35px)] flex-nowrap overflow-x-auto">
       <Button
         v-for="x in allProjectsInTab"
         :key="x"
         :text="x !== selected"
         :severity="x === selected ? 'primary' : 'secondary'"
         size="small"
-        class="!rounded-none"
+        class="flex-shrink-0 whitespace-nowrap !rounded-none"
         @click="$emit('clickProject', x)"
       >
         {{ x }}
       </Button>
     </div>
-    <div>
-      <Button severity="secondary" size="small" text class="!rounded-none" @click="$emit('clickAdd')">+</Button>
+    <div class="flex-shrink-0 flex-grow-0 basis-[35px]">
+      <Button severity="secondary" size="small" text class="!w-[35px] !rounded-none" @click="$emit('clickAdd')"
+        >+</Button
+      >
     </div>
   </div>
 </template>
@@ -33,3 +35,9 @@ defineEmits<{
   clickAdd: [];
 }>();
 </script>
+
+<style scoped>
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+</style>

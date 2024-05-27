@@ -10,7 +10,10 @@ import { ImgServiceImpl } from "./main/service/ImgServiceImpl";
 import { registerScreenshotHandlers } from "./main/ipc-handlers/screenshot-handlers";
 import { registerCompareHandlers } from "./main/ipc-handlers/compare-handlers";
 import { registerImgHandlers } from "./main/ipc-handlers/img-handlers";
+import { registerSavedSetHandlers } from "./main/ipc-handlers/saved-set-handler";
 import { DockerContainer } from "./main/docker-helper/DockerContainer";
+import { SavedSetServiceImpl } from "./main/service/SavedSetServiceImpl";
+import type { SavedSetService } from "./main/service/SavedSetService";
 import type { UserSettingService } from "./main/service/UserSettingService";
 import type { CompareService } from "./main/service/CompareService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
@@ -22,6 +25,7 @@ const userSettingService: UserSettingService = UserSettingServiceImpl.getInstanc
 const imgService: ImgService = ImgServiceImpl.getInstance();
 const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
 const compareService: CompareService = CompareServiceImpl.getInstance();
+const savedSetService: SavedSetService = SavedSetServiceImpl.getInstance();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -62,6 +66,7 @@ app.on("ready", () => {
   registerUserSettingHandlers(userSettingService);
   registerScreenshotHandlers(screenshotService);
   registerCompareHandlers(compareService);
+  registerSavedSetHandlers(savedSetService);
   void DockerContainer.ensureAllStopped();
 
   createWindow();

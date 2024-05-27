@@ -47,3 +47,13 @@ contextBridge.exposeInMainWorld("compareApi", {
     ipcRenderer.invoke("compare:compare", relativeRefDir, relativeTestDir),
   saveComparisonResult: () => ipcRenderer.invoke("compare:saveComparison"),
 });
+
+contextBridge.exposeInMainWorld("savedSetApi", {
+  getAllRefOrTestBranches: (type: SaveScreenshotType, project: string) =>
+    ipcRenderer.invoke("savedSet:getAllRefOrTestBranches", type, project),
+  getAllRefOrTestSavedSets: (type: SaveScreenshotType, project: string, branch: string) =>
+    ipcRenderer.invoke("savedSet:getAllRefOrTestSavedSets", type, project, branch),
+  getAllSavedSets: (project: string) => ipcRenderer.invoke("savedSet:getAllSavedSets", project),
+  getRefOrTestSavedSetMetadata: (type: SaveScreenshotType, project: string, branch: string, setId: string) =>
+    ipcRenderer.invoke("savedSet:getRefOrTestSavedSetMetadata", type, project, branch, setId),
+});

@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import theme from "tailwindcss/defaultTheme";
 import { ref } from "vue";
 import { useToast } from "primevue/usetoast";
 

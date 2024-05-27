@@ -70,3 +70,18 @@ export async function getAllFolders(dir: string): Promise<string[]> {
   }
   return folders;
 }
+
+export async function getFolderSize(dir: string): Promise<number> {
+  const entries = await fs.readdir(dir);
+  let size = 0;
+  for (const entry of entries) {
+    const entryPath = path.join(dir, entry);
+    const stat = await fs.stat(entryPath);
+    if (stat.isDirectory()) {
+      size += await getFolderSize(entryPath);
+    } else {
+      size += stat.size;
+    }
+  }
+  return size;
+}

@@ -21,7 +21,7 @@ import { ref } from "vue";
 import TabMenu from "primevue/tabmenu";
 
 const items = ref([
-  { label: "Reference", icon: "pi pi-book", route: "/reference" },
+  { label: "Saved", icon: "pi pi-book", route: "/saved-set" },
   { label: "Screenshot", icon: "pi pi-camera", route: "/screenshot" },
   { label: "Compare", icon: "pi pi-eye", route: "/compare" },
 ]);

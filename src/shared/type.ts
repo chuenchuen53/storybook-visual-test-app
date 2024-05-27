@@ -81,3 +81,55 @@ export interface GetImgResponse {
 export interface UserSetting {
   projectsInTab?: string[];
 }
+
+export interface RefTestSavedInfo {
+  id: string;
+  createdAt: string;
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  viewport: Viewport;
+  name: string;
+  fileSize: string;
+  stories: number;
+  errStories: number;
+}
+
+export interface ComparisonSavedInfo$Result {
+  same: number;
+  added: number;
+  removed: number;
+  diff: number;
+}
+
+export interface ComparisonSavedInfo {
+  id: string;
+  createdAt: string;
+  project: string;
+  name: string;
+  refBranch: string;
+  testBranch: string;
+  refSetId: string;
+  testSetId: string;
+  refSetName: string;
+  testSetName: string;
+  viewport: Viewport;
+  result: ComparisonSavedInfo$Result;
+}
+
+export interface SavedSets {
+  ref: RefTestSavedInfo[];
+  test: RefTestSavedInfo[];
+  comparison: ComparisonSavedInfo[];
+}
+
+export interface StoryScreenshotMetadata extends StoryMetadata {
+  storyErr: boolean;
+}
+
+export interface SavedMetadata {
+  uuid: string;
+  createAt: string;
+  viewport: Viewport;
+  storyMetadataList: StoryScreenshotMetadata[];
+}

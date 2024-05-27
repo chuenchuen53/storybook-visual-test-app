@@ -8,9 +8,9 @@ import { screenshotDir, screenshotMetadataFilename } from "../Filepath";
 import { logger } from "../logger";
 import { ScreenshotManager } from "./ScreenshotManager";
 import { getStorybookMetadata } from "./client-code";
-import type { StoryMetadata, StoryState, Viewport } from "../../shared/type";
+import type { SavedMetadata, StoryMetadata, StoryState, Viewport } from "../../shared/type";
 import type { Crawler } from "./Crawler";
-import type { GetStoriesMetadataResult, SavedMetadata, ScreenshotStoriesResult } from "./type";
+import type { GetStoriesMetadataResult, ScreenshotStoriesResult } from "./type";
 import type { NamedBrowser } from "./ScreenshotManager";
 import type { Browser } from "puppeteer-core";
 
