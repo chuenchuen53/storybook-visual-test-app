@@ -49,11 +49,11 @@ export interface StoriesDiffResult {
 
 export interface CompareResponse$Data {
   uuid: string;
-  createAt: string;
+  createdAt: string;
   project: string;
   refBranch: string;
   testBranch: string;
-  refId: string;
+  refSetId: string;
   testSetId: string;
   result: StoriesDiffResult;
 }
@@ -65,7 +65,7 @@ export interface CompareResponse {
 
 export interface BranchScreenshotSet {
   branch: string;
-  setList: { uuid: string; createAt: string; viewport: { width: number; height: number } }[];
+  setList: { uuid: string; createdAt: string; viewport: { width: number; height: number } }[];
 }
 
 export interface GetAvailableSetResponse {
@@ -129,7 +129,7 @@ export interface StoryScreenshotMetadata extends StoryMetadata {
 
 export interface SavedMetadata {
   uuid: string;
-  createAt: string;
+  createdAt: string;
   viewport: Viewport;
   storyMetadataList: StoryScreenshotMetadata[];
 }

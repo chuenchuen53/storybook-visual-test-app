@@ -74,7 +74,7 @@ export class CompareServiceImpl implements CompareService {
       const testSetSavedInfo = await fs.readJSON(testSetSavedInfoFilepath);
 
       // todo: change naming
-      const refId = refSavedInfo.uuid;
+      const refSetId = refSavedInfo.uuid;
       const testSetId = testSetSavedInfo.uuid;
 
       const project = testSetSavedInfo.project;
@@ -94,12 +94,11 @@ export class CompareServiceImpl implements CompareService {
       const result = await differ.computeDiff(refDir, testDir, tolerance);
       const metadata: CompareResponse$Data = {
         uuid,
-        // todo naming
-        createAt: now.toISOString(),
+        createdAt: now.toISOString(),
         project,
         refBranch,
         testBranch,
-        refId,
+        refSetId,
         testSetId,
         result,
       };
@@ -144,8 +143,7 @@ export class CompareServiceImpl implements CompareService {
               const metadata = await fs.readJSON(path.join(branchDir, uuid, screenshotMetadataFilename));
               return {
                 uuid,
-                // todo rename
-                createAt: metadata.createAt,
+                createdAt: metadata.createdAt,
                 viewport: metadata.viewport,
               };
             }),

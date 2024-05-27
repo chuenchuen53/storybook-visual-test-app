@@ -56,7 +56,7 @@ export class SavedSetServiceImpl implements SavedSetService {
 
       return {
         id: metadata.uuid,
-        createdAt: metadata.createAt,
+        createdAt: metadata.createdAt,
         type,
         project,
         branch,
@@ -104,12 +104,12 @@ export class SavedSetServiceImpl implements SavedSetService {
 
       return {
         id: metadata.uuid,
-        createdAt: metadata.createAt,
+        createdAt: metadata.createdAt,
         project,
         name: "todo",
         refBranch: metadata.refBranch,
         testBranch: metadata.testBranch,
-        refSetId: metadata.refId,
+        refSetId: metadata.refSetId,
         testSetId: metadata.testSetId,
         refSetName: "todo",
         testSetName: "todo",

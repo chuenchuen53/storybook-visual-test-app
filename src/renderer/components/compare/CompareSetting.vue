@@ -97,7 +97,7 @@ const availableRefSets = computed(() => {
       .find(x => x.branch === refSet.value.branch)
       ?.setList.map(x => ({
         ...x,
-        label: `${x.viewport.width}x${x.viewport.height} - ${new Date(x.createAt).toLocaleString()}`,
+        label: `${x.viewport.width}x${x.viewport.height} - ${new Date(x.createdAt).toLocaleString()}`,
       })) ?? []
   );
 });
@@ -108,7 +108,7 @@ const availableTestSets = computed(() => {
       .find(x => x.branch === testSet.value.branch)
       ?.setList.map(x => ({
         ...x,
-        label: `${x.viewport.width}x${x.viewport.height} - ${new Date(x.createAt).toLocaleString()}`,
+        label: `${x.viewport.width}x${x.viewport.height} - ${new Date(x.createdAt).toLocaleString()}`,
       })) ?? []
   );
 });

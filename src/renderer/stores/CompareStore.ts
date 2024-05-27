@@ -245,12 +245,12 @@ export const useCompareStore = defineStore("compare", () => {
   const getSameImg = async (id: string) => {
     const localResult = _compareResult.value;
     if (localResult === null) return;
-    const { project, refBranch, refId, testBranch, testSetId } = localResult;
+    const { project, refBranch, refSetId, testBranch, testSetId } = localResult;
     console.log(testSetId);
     displaySameImg.value.ref = { loading: true, isExist: null, base64: null };
     displaySameImg.value.test = { loading: true, isExist: null, base64: null };
     const [refImg, testImg] = await Promise.all([
-      window.imgApi.getSavedImg("reference", project, refBranch, refId, id),
+      window.imgApi.getSavedImg("reference", project, refBranch, refSetId, id),
       window.imgApi.getSavedImg("test", project, testBranch, testSetId, id),
     ]);
     displaySameImg.value.ref = { loading: false, isExist: refImg.isExist, base64: refImg.base64 };
@@ -264,12 +264,12 @@ export const useCompareStore = defineStore("compare", () => {
   const getDiffImg = async (id: string) => {
     const localResult = _compareResult.value;
     if (localResult === null) return;
-    const { project, refBranch, refId, testBranch, testSetId } = localResult;
+    const { project, refBranch, refSetId, testBranch, testSetId } = localResult;
     displayingDiffImg.value.ref = { loading: true, isExist: null, base64: null };
     displayingDiffImg.value.test = { loading: true, isExist: null, base64: null };
     displayingDiffImg.value.diff = { loading: true, isExist: null, base64: null };
     const [refImg, testImg, diffImg] = await Promise.all([
-      window.imgApi.getSavedImg("reference", project, refBranch, refId, id),
+      window.imgApi.getSavedImg("reference", project, refBranch, refSetId, id),
       window.imgApi.getSavedImg("test", project, testBranch, testSetId, id),
       window.imgApi.getCompareDiffImg(id),
     ]);

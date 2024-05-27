@@ -165,7 +165,7 @@ export class CrawlerImpl implements Crawler {
 
       const saveMetaData: SavedMetadata = {
         uuid,
-        createAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         viewport,
         storyMetadataList: result,
       };

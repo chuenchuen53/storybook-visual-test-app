@@ -7,11 +7,11 @@ describe("generateTreeFromRespData", () => {
   it("should handle empty result arrays without errors", () => {
     const data: CompareResponse$Data = {
       uuid: "124",
-      createAt: "2023-01-02T00:00:00Z",
+      createdAt: "2023-01-02T00:00:00Z",
       project: "ProjectY",
       refBranch: "dev",
       testBranch: "release",
-      refId: "ref124",
+      refSetId: "ref124",
       testSetId: "test124",
       result: {
         same: [],
@@ -31,11 +31,11 @@ describe("generateTreeFromRespData", () => {
   it("should correctly process multiple entries in each result type", () => {
     const compareResponse = {
       uuid: "123",
-      createAt: "2023-01-01T00:00:00Z",
+      createdAt: "2023-01-01T00:00:00Z",
       project: "ProjectX",
       refBranch: "main",
       testBranch: "feature",
-      refId: "ref123",
+      refSetId: "ref123",
       testSetId: "test123",
       result: {
         same: ["comp1--view1", "comp2--view2"],
