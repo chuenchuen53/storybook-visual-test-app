@@ -127,9 +127,21 @@ export interface StoryScreenshotMetadata extends StoryMetadata {
   storyErr: boolean;
 }
 
-export interface SavedMetadata {
-  uuid: string;
+export interface TempScreenshotMetadata {
+  id: string;
   createdAt: string;
   viewport: Viewport;
   storyMetadataList: StoryScreenshotMetadata[];
+}
+
+export interface SavedScreenshotMetadata {
+  id: string;
+  createdAt: string;
+  viewport: Viewport;
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  name: string;
+  size: number;
+  storyMetadataList: StoryMetadata[];
 }

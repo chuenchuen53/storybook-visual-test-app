@@ -21,7 +21,7 @@ export function registerScreenshotHandlers(service: ScreenshotService) {
         return service.getLocalIPAddress();
       },
       saveScreenshot: async (_, req) => {
-        return await service.saveScreenshot(req.project, req.branch, req.type);
+        return await service.saveScreenshot(req.type, req.project, req.branch, req.name);
       },
     },
   };
@@ -33,6 +33,4 @@ export function registerScreenshotHandlers(service: ScreenshotService) {
   ipcMain.handle(ScreenshotChannelKey.invoke.getLocalIPAddress, handler.invoke.getLocalIPAddress);
 
   ipcMain.handle(ScreenshotChannelKey.invoke.saveScreenshot, handler.invoke.saveScreenshot);
-
-  ipcMain.handle(ScreenshotChannelKey.invoke.saveScreenshot, e => console.log(e));
 }

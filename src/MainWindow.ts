@@ -22,6 +22,7 @@ export class MainWindow {
     throw new Error("MainWindow has not been registered");
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static send(channel: string, ...args: any[]) {
     if (MainWindow.instance === null) {
       logger.error("send is called before MainWindow registered");

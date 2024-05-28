@@ -1,34 +1,39 @@
 import os from "os";
 import path from "path";
 import fs from "fs-extra";
+import { v4 as uuidv4 } from "uuid";
 import { CrawlerImpl } from "../crawler/CrawlerImpl";
 import { isDockerAvailable } from "../docker-helper/is-docker-available";
-import { checkDockerImage, CHROME_IMAGE, pullDockerImage } from "../docker-helper/docker-image";
-import {
-  savedInfoFilename,
-  savedReferenceDir,
-  savedTestDir,
-  screenshotDir,
-  screenshotMetadataFilename,
-} from "../Filepath";
+import { checkDockerImage, pullDockerImage } from "../docker-helper/docker-image";
+import { savedReferenceDir, savedTestDir, screenshotDir } from "../Filepath";
 import { ScreenshotState } from "../../shared/type";
-import { logger } from "../logger";
 import { GlobalChannel } from "../message-emitter/GlobalChannel";
 import { ScreenshotChannel } from "../message-emitter/ScreenshotChannel";
-import type { SavedScreenshotResponse, SaveScreenshotType } from "../../shared/type";
+import { Log } from "../decorator/Log";
+import { CatchError, HandledError } from "../decorator/CatchError";
+import { TempScreenshotMetadataHelper } from "../data-files/TempScreenshotMetadataHelper";
+import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
+import { sumPngFileSize } from "../utils";
+import type {
+  SavedScreenshotResponse,
+  SaveScreenshotType,
+  StoryMetadata,
+  StoryScreenshotMetadata,
+  TempScreenshotMetadata,
+  Viewport,
+  SavedScreenshotMetadata,
+} from "../../shared/type";
 import type { ScreenshotService } from "./ScreenshotService";
 import type { Crawler } from "../crawler/Crawler";
 
 export class ScreenshotServiceImpl implements ScreenshotService {
   private static readonly instance: ScreenshotService = new ScreenshotServiceImpl();
 
-  private constructor() {
-    // singleton
-  }
-
   public static getInstance(): ScreenshotService {
     return ScreenshotServiceImpl.instance;
   }
+
+  private constructor() {}
 
   public getLocalIPAddress(): string | undefined {
     const interfaces = os.networkInterfaces();
@@ -43,109 +48,129 @@ export class ScreenshotServiceImpl implements ScreenshotService {
     return ips[0];
   }
 
+  @CatchErrorInformRenderer("Fail to take screenshot")
+  @Log()
   public async newScreenshotSet(url: string): Promise<void> {
-    try {
-      logger.info("Start new screenshot");
+    await this.checkDockerAvailability();
+    await this.ensureDockerImage();
 
-      if (!isDockerAvailable()) {
-        this.sendFailStatusAndErrMsg("Docker is not available");
-        return;
-      }
-    } catch (e) {
-      logger.error(e);
-      this.sendFailStatusAndErrMsg("Fail to check docker availability");
-      return;
-    }
+    await fs.emptydir(screenshotDir);
 
-    try {
-      const isDockerImageAvailable = await checkDockerImage();
-      if (!isDockerImageAvailable) {
-        await pullDockerImage();
-      }
-    } catch (e) {
-      logger.error(e);
-      this.sendFailStatusAndErrMsg("Failed to pull docker image: " + CHROME_IMAGE);
-      return;
-    }
+    ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_METADATA_BROWSER);
+    const storyMetadataList = await this.getStoryMetadataList(url);
 
-    try {
-      await fs.remove(screenshotDir);
-      await fs.ensureDir(screenshotDir);
+    ScreenshotChannel.newMetadata(storyMetadataList);
+    ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_SCREENSHOT_BROWSER);
 
-      const crawler: Crawler = CrawlerImpl.getInstance();
-      const metadataResult = await crawler.getStoriesMetadata(
-        url,
-        () => ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_METADATA_BROWSER),
-        () => ScreenshotChannel.updateStatus(ScreenshotState.COMPUTING_METADATA),
-        (err: unknown) => logger.error(err),
-      );
+    const viewport: Viewport = { width: 1920, height: 1080 };
+    const storyScreenshotMetadataList = await this.screenshotStories(url, storyMetadataList, viewport);
 
-      if (metadataResult.success === false || metadataResult.storyMetadataList === null) {
-        this.sendFailStatusAndErrMsg("Failed to get stories metadata.\n See log for more details.");
-        return;
-      }
+    const id = uuidv4();
+    const saveMetaData: TempScreenshotMetadata = {
+      id,
+      createdAt: new Date().toISOString(),
+      viewport,
+      storyMetadataList: storyScreenshotMetadataList,
+    };
+    await TempScreenshotMetadataHelper.save(saveMetaData);
 
-      ScreenshotChannel.newMetadata(metadataResult.storyMetadataList);
-      ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_SCREENSHOT_BROWSER);
-      const result = await crawler.screenshotStories(
-        url,
-        metadataResult.storyMetadataList,
-        {
-          width: 1920,
-          height: 1080,
-        },
-        8,
-        () => ScreenshotChannel.updateStatus(ScreenshotState.CAPTURING_SCREENSHOT),
-        (storyId, state, browserName, storyErr) =>
-          ScreenshotChannel.updateStoryState({ storyId, state, browserName, storyErr }),
-      );
-
-      if (result.success === false) {
-        this.sendFailStatusAndErrMsg("Failed to take screenshot");
-        return;
-      }
-      ScreenshotChannel.updateStatus(ScreenshotState.FINISHED);
-
-      logger.info("End of screenshot");
-    } catch (e) {
-      logger.error(e);
-      this.sendFailStatusAndErrMsg("Failed to take screenshot");
-    }
+    ScreenshotChannel.updateStatus(ScreenshotState.FINISHED);
   }
 
+  @CatchError<SavedScreenshotResponse>(() => ({ success: false, errMsg: "Fail to save screenshot" }), false)
+  @Log()
   public async saveScreenshot(
+    type: SaveScreenshotType,
     project: string,
     branch: string,
-    type: SaveScreenshotType,
+    name: string,
   ): Promise<SavedScreenshotResponse> {
-    try {
-      const srcDir = screenshotDir;
+    const metadata = await TempScreenshotMetadataHelper.read();
+    if (metadata === null) return { success: false, errMsg: "Fail to read metadata" };
 
-      const metadata = await fs.readJSON(path.join(srcDir, screenshotMetadataFilename));
-      const uuid = metadata.uuid;
+    const { id, createdAt, viewport, storyMetadataList } = metadata;
 
-      const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
-      const destDir = path.join(typeDir, project, branch, uuid);
-      await fs.ensureDir(destDir);
-      await fs.copy(srcDir, destDir, { overwrite: true });
-      const savedInfo = {
-        uuid,
-        type,
-        project,
-        branch,
-      };
-      const savedInfoPath = path.join(destDir, savedInfoFilename);
-      await fs.writeJson(savedInfoPath, savedInfo);
-      return { success: true };
-    } catch (e) {
-      const typedError = e as Error;
-      logger.error(e);
-      return { success: false, errMsg: typedError.message };
+    const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
+    const destDir = path.join(typeDir, project, branch, id);
+    await fs.ensureDir(destDir);
+    await fs.copy(screenshotDir, destDir, { overwrite: true });
+
+    const size = await sumPngFileSize(destDir);
+
+    const savedScreenshotSetMetadata: SavedScreenshotMetadata = {
+      id,
+      createdAt,
+      viewport,
+      type,
+      project,
+      branch,
+      name,
+      size,
+      storyMetadataList,
+    };
+    await SavedScreenshotMetadataHelper.save(savedScreenshotSetMetadata);
+
+    return { success: true };
+  }
+
+  @CatchErrorInformRenderer()
+  @Log()
+  private async checkDockerAvailability(): Promise<void> {
+    if (!isDockerAvailable()) throw new Error("Docker is not available");
+  }
+
+  @CatchErrorInformRenderer("Fail to pull docker image")
+  @Log()
+  private async ensureDockerImage(): Promise<void> {
+    const isDockerImageAvailable = await checkDockerImage();
+    if (!isDockerImageAvailable) {
+      await pullDockerImage();
     }
   }
 
-  private sendFailStatusAndErrMsg(errorMsg: string) {
-    GlobalChannel.sendGlobalMessage("error", errorMsg);
-    ScreenshotChannel.updateStatus(ScreenshotState.FAILED);
+  @CatchErrorInformRenderer("Fail to get stories metadata.")
+  @Log()
+  private async getStoryMetadataList(url: string): Promise<StoryMetadata[]> {
+    const crawler: Crawler = CrawlerImpl.getInstance();
+    const { storyMetadataList } = await crawler.getStoriesMetadata(url, () =>
+      ScreenshotChannel.updateStatus(ScreenshotState.COMPUTING_METADATA),
+    );
+
+    return storyMetadataList;
   }
+
+  @CatchErrorInformRenderer("Fail to take screenshot.")
+  @Log()
+  private async screenshotStories(
+    url: string,
+    storyMetadataList: StoryMetadata[],
+    viewport: Viewport,
+  ): Promise<StoryScreenshotMetadata[]> {
+    const crawler: Crawler = CrawlerImpl.getInstance();
+    const result = await crawler.screenshotStories(
+      url,
+      storyMetadataList,
+      viewport,
+      8,
+      () => ScreenshotChannel.updateStatus(ScreenshotState.CAPTURING_SCREENSHOT),
+      (storyId, state, browserName, storyErr) =>
+        ScreenshotChannel.updateStoryState({ storyId, state, browserName, storyErr }),
+    );
+
+    return result.storyScreenshotMetadataList;
+  }
+}
+
+function sendFailStatusAndErrMsg(errorMsg: string): void {
+  GlobalChannel.sendGlobalMessage({ type: "error", message: errorMsg });
+  ScreenshotChannel.updateStatus(ScreenshotState.FAILED);
+}
+
+function CatchErrorInformRenderer(errMsg?: string) {
+  return CatchError(e => {
+    if (!(e instanceof HandledError)) {
+      const msg = errMsg ?? (e instanceof Error ? e.message : "Non-Error type");
+      sendFailStatusAndErrMsg(msg);
+    }
+  }, "handled");
 }

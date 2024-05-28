@@ -12,6 +12,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "strict": true,
+    "experimentalDecorators": true,
     "paths": {
       "@main/*": ["./src/main/*"],
       "@renderer/*": ["./src/renderer/*"]

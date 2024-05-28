@@ -10,7 +10,7 @@ import {
   compareResultFilename,
   screenshotMetadataFilename,
 } from "../../Filepath";
-import type { SavedMetadata, StoriesDiffResult } from "../../../shared/type";
+import type { TempScreenshotMetadata, StoriesDiffResult } from "../../../shared/type";
 import type { StoriesDiffer } from "./StoriesDiffer";
 import type { ImgDiffer } from "../img-differ/ImgDiffer";
 
@@ -71,7 +71,7 @@ export class StoriesDifferImpl implements StoriesDiffer {
     return result;
   }
 
-  private async readMetadata(dir: string): Promise<SavedMetadata> {
+  private async readMetadata(dir: string): Promise<TempScreenshotMetadata> {
     const metadataPath = path.join(dir, screenshotMetadataFilename);
     return fs.readJson(metadataPath);
   }

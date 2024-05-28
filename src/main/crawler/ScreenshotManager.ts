@@ -119,10 +119,10 @@ export class ScreenshotManager {
       if (trialTimes === maxTrials) {
         // todo: this case are mostly happen when the story have element that is absolute or fixed, like modal, tooltip, etc
         logger.warn("Cannot detect size of story " + story.id);
-        GlobalChannel.sendGlobalMessage(
-          "warn",
-          `Cannot detect size of story ${story.id}\nscreenshotting the whole page instead`,
-        );
+        GlobalChannel.sendGlobalMessage({
+          type: "warn",
+          message: `Cannot detect size of story ${story.id}\nscreenshotting the whole page instead`,
+        });
         await page.screenshot({ path: filepath });
       } else {
         await captureElement.screenshot({ path: filepath });

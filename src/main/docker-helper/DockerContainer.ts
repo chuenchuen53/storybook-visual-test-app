@@ -20,15 +20,6 @@ export class DockerContainer {
     screenshot: new DockerContainer("screenshot"),
   };
 
-  private readonly containerNamePrefix: string;
-  private readonly startPort: number;
-  private containers: ContainerInfo[] = [];
-
-  private constructor(containerType: DockerContainerType) {
-    this.containerNamePrefix = `${DockerContainer.COMMON_PREFIX}-${containerType}`;
-    this.startPort = DockerContainer.portMap[containerType];
-  }
-
   public static getInstance(containerType: DockerContainerType): DockerContainer {
     return DockerContainer.instances[containerType];
   }
@@ -43,6 +34,15 @@ export class DockerContainer {
     await execa("docker", ["stop", ...allContainerIds]);
     DockerContainer.instances.metadata.containers = [];
     DockerContainer.instances.screenshot.containers = [];
+  }
+
+  private readonly containerNamePrefix: string;
+  private readonly startPort: number;
+  private containers: ContainerInfo[] = [];
+
+  private constructor(containerType: DockerContainerType) {
+    this.containerNamePrefix = `${DockerContainer.COMMON_PREFIX}-${containerType}`;
+    this.startPort = DockerContainer.portMap[containerType];
   }
 
   public getContainerInfo(): ContainerInfo[] {

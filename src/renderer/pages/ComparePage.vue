@@ -21,7 +21,7 @@
               @cancel="displayTabsSetting = false"
             />
           </div>
-          <div v-else>
+          <div v-else class="h-full overflow-y-auto">
             <div class="w-full p-6">
               <CompareSetting />
             </div>

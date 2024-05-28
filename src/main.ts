@@ -82,7 +82,7 @@ app.on("window-all-closed", async () => {
   }
 });
 
-app.on("before-quit", async event => {
+app.on("before-quit", async _event => {
   logger.info("app quit");
 });
 

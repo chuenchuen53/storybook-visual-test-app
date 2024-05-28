@@ -14,13 +14,11 @@ import type { ImgService } from "./ImgService";
 export class ImgServiceImpl implements ImgService {
   private static instance: ImgService = new ImgServiceImpl();
 
-  private constructor() {
-    // singleton
-  }
-
   public static getInstance(): ImgService {
     return ImgServiceImpl.instance;
   }
+
+  private constructor() {}
 
   public async getScreenshotImg(id: string): Promise<GetImgResponse> {
     const filepath = path.join(screenshotDir, id + ".png");

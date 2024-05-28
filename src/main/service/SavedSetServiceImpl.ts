@@ -13,7 +13,7 @@ import type {
   CompareResponse$Data,
   ComparisonSavedInfo,
   RefTestSavedInfo,
-  SavedMetadata,
+  TempScreenshotMetadata,
   SavedSets,
   SaveScreenshotType,
   StoryScreenshotMetadata,
@@ -23,13 +23,11 @@ import type { SavedSetService } from "./SavedSetService";
 export class SavedSetServiceImpl implements SavedSetService {
   private static instance: SavedSetService = new SavedSetServiceImpl();
 
-  private constructor() {
-    // singleton
-  }
-
   public static getInstance(): SavedSetService {
     return SavedSetServiceImpl.instance;
   }
+
+  private constructor() {}
 
   public async getAllRefOrTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
     let dir = type === "reference" ? savedReferenceDir : savedTestDir;
@@ -52,10 +50,10 @@ export class SavedSetServiceImpl implements SavedSetService {
       const metadataPath = path.join(dir, setId, screenshotMetadataFilename);
       const exist = await fs.pathExists(metadataPath);
       if (!exist) return null;
-      const metadata: SavedMetadata = await fs.readJSON(metadataPath);
+      const metadata: TempScreenshotMetadata = await fs.readJSON(metadataPath);
 
       return {
-        id: metadata.uuid,
+        id: metadata.id,
         createdAt: metadata.createdAt,
         type,
         project,
@@ -141,7 +139,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     const metadataPath = path.join(dir, screenshotMetadataFilename);
     const exist = await fs.pathExists(metadataPath);
     if (!exist) return [];
-    const metadata: SavedMetadata = await fs.readJSON(metadataPath);
+    const metadata: TempScreenshotMetadata = await fs.readJSON(metadataPath);
     return metadata.storyMetadataList;
   }
 

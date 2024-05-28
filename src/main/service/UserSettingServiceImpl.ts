@@ -7,13 +7,11 @@ import type { UserSettingService } from "./UserSettingService";
 export class UserSettingServiceImpl implements UserSettingService {
   private static readonly instance: UserSettingService = new UserSettingServiceImpl();
 
-  private constructor() {
-    // singleton
-  }
-
   public static getInstance(): UserSettingService {
     return UserSettingServiceImpl.instance;
   }
+
+  private constructor() {}
 
   public async getProjectsInTab(): Promise<string[]> {
     try {

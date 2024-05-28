@@ -9,13 +9,13 @@ import {
   compareMetadataFilename,
   compareRemovedDir,
   savedComparisonDir,
-  savedInfoFilename,
   savedReferenceDir,
   savedTestDir,
   screenshotMetadataFilename,
 } from "../Filepath";
 import { logger } from "../logger";
 import { getAllFolders } from "../utils";
+import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
 import type {
   BranchScreenshotSet,
   CompareResponse,
@@ -29,13 +29,11 @@ import type { StoriesDiffer } from "../differ/stories-differ/StoriesDiffer";
 export class CompareServiceImpl implements CompareService {
   public static instance: CompareService = new CompareServiceImpl();
 
-  private constructor() {
-    // singleton
-  }
-
   public static getInstance() {
     return this.instance;
   }
+
+  private constructor() {}
 
   public async getAvailableProjects(): Promise<string[]> {
     const [refs, tests] = await Promise.all([getAllFolders(savedReferenceDir), getAllFolders(savedTestDir)]);
@@ -68,19 +66,20 @@ export class CompareServiceImpl implements CompareService {
 
       logger.info("Start new comparison");
 
-      const refSavedInfoFilepath = path.join(refDir, savedInfoFilename);
-      const refSavedInfo = await fs.readJSON(refSavedInfoFilepath);
-      const testSetSavedInfoFilepath = path.join(testDir, savedInfoFilename);
-      const testSetSavedInfo = await fs.readJSON(testSetSavedInfoFilepath);
+      const refArr = refDir.split("/");
+      const testArr = testDir.split("/");
 
-      // todo: change naming
-      const refSetId = refSavedInfo.uuid;
-      const testSetId = testSetSavedInfo.uuid;
+      const refSetId = refArr[refArr.length - 1];
+      const refBranch = refArr[refArr.length - 2];
+      const refProject = refArr[refArr.length - 3];
+
+      const testSetId = testArr[testArr.length - 1];
+      const testBranch = testArr[testArr.length - 2];
+      const testProject = testArr[testArr.length - 3];
+
+      const testSetSavedInfo = (await SavedScreenshotMetadataHelper.read("test", testProject, testBranch, testSetId))!;
 
       const project = testSetSavedInfo.project;
-
-      const refBranch = refSavedInfo.branch;
-      const testBranch = testSetSavedInfo.branch;
 
       await fs.remove(compareDir);
 

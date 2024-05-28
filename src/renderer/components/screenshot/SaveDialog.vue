@@ -16,6 +16,8 @@
       <InputText id="save-screenshot-project-input" v-model="saveInfo.project" class="flex-auto" autocomplete="off" />
       <label for="save-screenshot-branch-input" class="font-semibold leading-[42px]">Branch</label>
       <InputText id="save-screenshot-branch-input" v-model="saveInfo.branch" class="flex-auto" autocomplete="off" />
+      <label for="save-screenshot-name-input" class="font-semibold leading-[42px]">Name</label>
+      <InputText id="save-screenshot-name-input" v-model="saveInfo.name" class="flex-auto" autocomplete="off" />
     </div>
 
     <div class="mt-8 flex justify-end gap-2">

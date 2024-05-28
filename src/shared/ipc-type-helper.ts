@@ -1,5 +1,7 @@
 import type { IpcMainInvokeEvent } from "electron";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export interface IpcApi {
   listen: Record<string, (cb: (...args: any[]) => void) => void>;
   send: Record<string, (...args: any[]) => void>;

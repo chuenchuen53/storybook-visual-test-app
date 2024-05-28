@@ -2,9 +2,10 @@ import type { IpcApi, IpcChannel } from "./ipc-type-helper";
 import type { SavedScreenshotResponse, SaveScreenshotType, ScreenshotState, StoryMetadata, StoryState } from "./type";
 
 export interface SaveScreenshotRequest {
+  type: SaveScreenshotType;
   project: string;
   branch: string;
-  type: SaveScreenshotType;
+  name: string;
 }
 
 export interface StoryUpdateEventData {

@@ -2,6 +2,7 @@ import os from "os";
 import path from "path";
 import execa from "execa";
 import fs from "fs-extra";
+import { logger } from "./logger";
 
 export async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -71,17 +72,25 @@ export async function getAllFolders(dir: string): Promise<string[]> {
   return folders;
 }
 
-export async function getFolderSize(dir: string): Promise<number> {
-  const entries = await fs.readdir(dir);
-  let size = 0;
-  for (const entry of entries) {
-    const entryPath = path.join(dir, entry);
-    const stat = await fs.stat(entryPath);
-    if (stat.isDirectory()) {
-      size += await getFolderSize(entryPath);
-    } else {
-      size += stat.size;
+/**
+ * @returns A promise that resolves to the total size of all PNG files in megabytes.
+ */
+export async function sumPngFileSize(dirPath: string): Promise<number> {
+  try {
+    const files = await fs.readdir(dirPath);
+    let totalSize = 0;
+
+    for (const file of files) {
+      if (path.extname(file).toLowerCase() === ".png") {
+        const filePath = path.join(dirPath, file);
+        const stats = await fs.stat(filePath);
+        totalSize += stats.size;
+      }
     }
+
+    return totalSize;
+  } catch (error) {
+    logger.error("Error reading directory:", error);
+    throw error;
   }
-  return size;
 }

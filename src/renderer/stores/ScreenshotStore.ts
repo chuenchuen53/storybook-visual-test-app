@@ -16,6 +16,7 @@ interface SaveInfo {
   type: SaveScreenshotType;
   project: string;
   branch: string;
+  name: string;
 }
 
 export const useScreenshotStore = defineStore("screenshot", () => {
@@ -101,6 +102,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     type: "reference",
     project: "my-project",
     branch: "main",
+    name: "my-screenshot",
   });
 
   const getDefaultStorybookUrl = async () => {
@@ -170,9 +172,10 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     try {
       isSaving.value = true;
       const result = await window.screenshotApi.invoke.saveScreenshot({
+        type: saveInfo.value.type,
         project: saveInfo.value.project,
         branch: saveInfo.value.branch,
-        type: saveInfo.value.type,
+        name: saveInfo.value.name,
       });
 
       if (result.success) {

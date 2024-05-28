@@ -1,9 +1,9 @@
 import { MainWindow } from "../../MainWindow";
-import type { GlobalMessage } from "../../shared/type";
+import type { GlobalApi } from "../../shared/GlobalApi";
+import type { FirstParamTypeForListener } from "../../shared/ipc-type-helper";
 
 export class GlobalChannel {
-  public static sendGlobalMessage(type: "success" | "info" | "warn" | "error", message: string, title?: string) {
-    const globalMessage: GlobalMessage = { type, title, message };
-    MainWindow.send("global:message", globalMessage);
+  public static sendGlobalMessage(message: FirstParamTypeForListener<GlobalApi, "onReceiveGlobalMessage">) {
+    MainWindow.send("global:message", message);
   }
 }

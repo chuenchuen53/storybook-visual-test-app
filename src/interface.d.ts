@@ -2,7 +2,6 @@ import type {
   CompareResponse,
   GetAvailableSetResponse,
   GetImgResponse,
-  GlobalMessage,
   RefTestSavedInfo,
   SavedScreenshotResponse,
   SavedSets,
@@ -11,10 +10,6 @@ import type {
 } from "./shared/type";
 
 import type { ScreenshotApi } from "./shared/ScreenshotApi";
-
-export interface GlobalApi {
-  onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) => void;
-}
 
 export interface ImgApi {
   getScreenshotImg: (id: string) => Promise<GetImgResponse>;

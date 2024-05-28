@@ -22,7 +22,6 @@ const compareMetadataFilename = "metadata.json";
 const savedReferenceDir = path.join(savedDir, "reference");
 const savedTestDir = path.join(savedDir, "test");
 const savedComparisonDir = path.join(savedDir, "comparison");
-const savedInfoFilename = "saved-info.json";
 
 const userSettingFilepath = path.join(appDataRootDir, "user-setting.json");
 
@@ -38,7 +37,6 @@ export {
   compareMetadataFilename,
   savedReferenceDir,
   savedTestDir,
-  savedInfoFilename,
   savedComparisonDir,
   userSettingFilepath,
 };

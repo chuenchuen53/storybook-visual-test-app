@@ -54,7 +54,36 @@ module.exports = {
       "error",
       { prefer: "type-imports", disallowTypeAnnotations: true, fixStyle: "separate-type-imports" },
     ],
-    "@typescript-eslint/member-ordering": "warn",
+    "@typescript-eslint/member-ordering": [
+      "warn",
+      {
+        default: {
+          memberTypes: [
+            "public-static-field",
+            "protected-static-field",
+            "private-static-field",
+            "public-static-method",
+            "protected-static-method",
+            "private-static-method",
+            "public-instance-field",
+            "protected-instance-field",
+            "private-instance-field",
+            "public-abstract-field",
+            "protected-abstract-field",
+            "public-constructor",
+            "protected-constructor",
+            "private-constructor",
+            "public-instance-method",
+            "protected-instance-method",
+            "private-instance-method",
+            "public-abstract-method",
+            "protected-abstract-method",
+          ],
+          order: "as-written",
+        },
+      },
+    ],
+    "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {

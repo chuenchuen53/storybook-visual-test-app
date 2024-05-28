@@ -1,11 +1,9 @@
-import type { SavedMetadata, StoryMetadata } from "../../shared/type";
+import type { StoryMetadata, StoryScreenshotMetadata } from "../../shared/type";
 
 export interface GetStoriesMetadataResult {
-  success: boolean;
-  storyMetadataList: StoryMetadata[] | null;
+  storyMetadataList: StoryMetadata[];
 }
 
 export interface ScreenshotStoriesResult {
-  success: boolean;
-  data: SavedMetadata | null;
+  storyScreenshotMetadataList: StoryScreenshotMetadata[];
 }
