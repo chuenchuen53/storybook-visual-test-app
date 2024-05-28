@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { onMounted } from "vue";
 import { useSavedSetStore } from "../../stores/SavedSetStore";
 import RefTestSetSelector from "./RefTestSetSelector.vue";
 

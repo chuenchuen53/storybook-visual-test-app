@@ -25,6 +25,7 @@ import type {
   SaveScreenshotType,
   SetData,
   SetItem,
+  StoryScreenshotMetadata,
 } from "../../shared/type";
 import type { ComparisonService } from "./ComparisonService";
 import type { StoriesDiffer } from "../differ/stories-differ/StoriesDiffer";
@@ -62,7 +63,7 @@ export class ComparisonServiceImpl implements ComparisonService {
     return result;
   }
 
-  @CatchError<ComparisonResponse>(() => ({ success: false, data: null }), false)
+  @CatchError<ComparisonResponse>(() => ({ success: false, data: null, storyMetadataList: null }), false)
   @Log()
   public async compare(refSet: SetData, testSet: SetData): Promise<ComparisonResponse> {
     const id = uuidv4();
@@ -76,7 +77,12 @@ export class ComparisonServiceImpl implements ComparisonService {
     const testBranch = testSet.branch;
     const testProject = testSet.project;
 
-    const testSetMetadata = (await SavedScreenshotMetadataHelper.read("test", testProject, testBranch, testSetId))!;
+    const refSetMetadata = await SavedScreenshotMetadataHelper.read("reference", refProject, refBranch, refSetId);
+    const testSetMetadata = await SavedScreenshotMetadataHelper.read("test", testProject, testBranch, testSetId);
+
+    if (!refSetMetadata || !testSetMetadata) {
+      throw new Error("Metadata not found for provided ref or test directory.");
+    }
 
     const project = testSetMetadata.project;
 
@@ -91,6 +97,16 @@ export class ComparisonServiceImpl implements ComparisonService {
     const differ: StoriesDiffer = new StoriesDifferImpl();
     const tolerance = 5;
     const result = await differ.computeDiff(refDir, testDir, tolerance);
+
+    const map = new Map<string, StoryScreenshotMetadata>();
+    for (const x of refSetMetadata.storyMetadataList) {
+      map.set(x.id, x);
+    }
+    for (const x of testSetMetadata.storyMetadataList) {
+      map.set(x.id, x);
+    }
+    const storyMetadataList = Array.from(map.values());
+
     const metadata: ComparisonResponse$Data = {
       id,
       createdAt: now.toISOString(),
@@ -103,7 +119,7 @@ export class ComparisonServiceImpl implements ComparisonService {
     };
     await TempComparisonMetadataHelper.save(metadata);
 
-    return { success: true, data: metadata };
+    return { success: true, data: metadata, storyMetadataList };
   }
 
   @CatchError<SavedScreenshotResponse>(

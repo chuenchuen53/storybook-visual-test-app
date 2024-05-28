@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import ProgressSpinner from "primevue/progressspinner";
 import { storeToRefs } from "pinia";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import Image from "../Image.vue";
 import { useScreenshotStore } from "../../stores/ScreenshotStore";
 import { StoryState } from "../../../shared/type";

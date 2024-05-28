@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import { comparisonDir, comparisonMetadataFilename } from "../Filepath";
 import { logger } from "../logger";
-import type { ComparisonResponse$Data, StoriesDiffResult } from "../../shared/type";
+import type { ComparisonResponse$Data } from "../../shared/type";
 
 export class TempComparisonMetadataHelper {
   private static readonly resultFilePath = path.join(comparisonDir, comparisonMetadataFilename);

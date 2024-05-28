@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateTreeFromRespData } from "@renderer/components/compare/comparison-result-explorer/helper";
+import { generateTreeFromRespData } from "@renderer/components/comparison/comparison-result-explorer/helper";
 import type { ComparisonResponse$Data } from "@shared/type";
 
 describe("generateTreeFromRespData", () => {

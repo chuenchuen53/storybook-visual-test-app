@@ -2,7 +2,7 @@ import type { IpcApi, IpcChannel } from "./ipc-type-helper";
 import type { ComparisonRequest, ComparisonResponse, GetAvailableSetResponse, SavedScreenshotResponse } from "./type";
 
 export interface ComparisonApi extends IpcApi {
-  listen: {};
+  listen: Record<string, never>;
   send: {
     openInExplorer: () => void;
   };

@@ -25,12 +25,13 @@ export function getAllNonLeafKeys(x: NodeData): string[] {
   if (isLeaf(x)) {
     return [];
   }
-  return [x.key, ...x.children.flatMap(child => getAllNonLeafKeys(child))];
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return [x.key, ...x.children!.flatMap(child => getAllNonLeafKeys(child))];
 }
 
 export function checkSingleBranchAndGetLeaf(x: NodeData): CheckSingleBranchAndGetLeafResult {
   const nonLeafKeys: string[] = [];
-  let leafKey: string = null;
+  let leafKey: string | null = null;
 
   let leafNode: NodeData | null = null;
 
@@ -50,7 +51,7 @@ export function checkSingleBranchAndGetLeaf(x: NodeData): CheckSingleBranchAndGe
 
   traverse(x);
 
-  if (leafNode === null) {
+  if (leafNode === null || leafKey === null) {
     return { isSingleBranch: false, leafKey: null, nonLeafKeys: null, leafNode: null };
   }
 

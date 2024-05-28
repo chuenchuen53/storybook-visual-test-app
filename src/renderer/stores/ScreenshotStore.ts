@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, h, ref } from "vue";
+import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import { generateTreeFromFlatData } from "../utils/story-tree-utils";

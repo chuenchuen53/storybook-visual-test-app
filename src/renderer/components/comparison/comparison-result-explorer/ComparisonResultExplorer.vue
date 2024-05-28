@@ -2,8 +2,13 @@
   <div class="relative flex h-full flex-col bg-[--p-content-background]">
     <div class="flex justify-between gap-2 px-2 py-1">
       <div class="flex gap-[2px]">
-        <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="saveDialogOpen = true" />
-        <IconButton v-if="true" v-tooltip.bottom="'Save'" :disabled="false" icon="pi pi-save" @click="openSaveDialog" />
+        <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
+        <IconButton
+          v-if="explorerTreeData"
+          v-tooltip.bottom="'Save'"
+          icon="pi pi-save"
+          @click="saveDialogOpen = true"
+        />
       </div>
       <div class="flex gap-[2px]">
         <IconButton icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" @click="expandAll" />
@@ -54,26 +59,19 @@ import InputIcon from "primevue/inputicon";
 import ScrollPanel from "primevue/scrollpanel";
 import SelectButton from "primevue/selectbutton";
 import StyledTree from "../../general/tree/StyledTree.vue";
-import { useCompareStore } from "../../../stores/CompareStore";
+import { useComparisonStore } from "../../../stores/ComparisonStore";
 import IconButton from "../../general/IconButton.vue";
+import type { ComparisonResultTreeLeaf } from "./helper";
+import type { StoriesDiffResult } from "../../../../shared/type";
 import type { NodeData } from "../../general/tree/type";
 
-const store = useCompareStore();
+const store = useComparisonStore();
 
 const { explorerTreeData, highlightKey, expandedKeys, saveDialogOpen, searchText, typeOptions, selectedType } =
   storeToRefs(store);
-const {
-  openInExplorer,
-  getAddedImg,
-  getRemovedImg,
-  getSameImg,
-  getDiffImg,
-  setCurrentDisplayingImgType,
-  expandAll,
-  collapseAll,
-} = store;
+const { openInExplorer, expandAll, collapseAll, handleNodeSelect } = store;
 
-const selectOptions = [
+const selectOptions: { name: string; value: keyof StoriesDiffResult }[] = [
   { name: "Diff", value: "diff" },
   { name: "Added", value: "added" },
   { name: "Removed", value: "removed" },
@@ -82,24 +80,9 @@ const selectOptions = [
 
 const onNodeSelect = (node: NodeData) => {
   if (node.data) {
-    const storyId = node.data.storyId;
-    const resultType = node.data.resultType;
-    setCurrentDisplayingImgType(resultType);
-
-    switch (resultType) {
-      case "same":
-        getSameImg(storyId);
-        return;
-      case "added":
-        getAddedImg(storyId);
-        return;
-      case "removed":
-        getRemovedImg(storyId);
-        return;
-      case "diff":
-        getDiffImg(storyId);
-        return;
-    }
+    const data: ComparisonResultTreeLeaf = node.data;
+    console.log(data);
+    handleNodeSelect(data);
   }
 };
 </script>

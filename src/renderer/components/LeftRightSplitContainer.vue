@@ -23,7 +23,6 @@
 import Splitter from "primevue/splitter";
 import SplitterPanel from "primevue/splitterpanel";
 import { nextTick, onMounted, onUnmounted, ref } from "vue";
-import { root } from "postcss";
 import IconButton from "./general/IconButton.vue";
 
 // the main usage of this component is to split the screen into two parts

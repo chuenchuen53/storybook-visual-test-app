@@ -23,7 +23,7 @@
       <div>
         <Select
           class="w-full"
-          :model-value="refSet.id"
+          :model-value="refSet.setId"
           :options="availableRefSets"
           option-label="label"
           option-value="id"
@@ -33,7 +33,7 @@
       <div>
         <Select
           class="w-full"
-          :model-value="testSet.id"
+          :model-value="testSet.setId"
           :options="availableTestSets"
           option-label="label"
           option-value="id"
@@ -52,23 +52,23 @@ import { computed, onMounted } from "vue";
 import Button from "primevue/button";
 import Select from "primevue/select";
 import { storeToRefs } from "pinia";
-import { useCompareStore } from "../../stores/CompareStore";
+import { useComparisonStore } from "../../stores/ComparisonStore";
 import type { SelectChangeEvent } from "primevue/select";
 
-const store = useCompareStore();
+const store = useComparisonStore();
 const { isComparing, project, availableSets, refSet, testSet } = storeToRefs(store);
 const {
   refreshData,
   updateProject,
   updateRefSetBranch,
   updateTestSetBranch,
-  updateRefSetUuid,
-  updateTestSetUuid,
+  updateRefSetId,
+  updateTestSetId,
   compare,
 } = store;
 
 const disableCompareBtn = computed(() => {
-  return !project.value || !refSet.value.branch || !testSet.value.branch || !refSet.value.id || !testSet.value.id;
+  return !project.value || !refSet.value.branch || !testSet.value.branch || !refSet.value.setId || !testSet.value.setId;
 });
 
 const handleSelectionChange = (e: SelectChangeEvent) => {
@@ -114,11 +114,11 @@ const availableTestSets = computed(() => {
 });
 
 const updateRefUuid = (e: SelectChangeEvent) => {
-  updateRefSetUuid(e.value);
+  updateRefSetId(e.value);
 };
 
 const updateTestUuid = (e: SelectChangeEvent) => {
-  updateTestSetUuid(e.value);
+  updateTestSetId(e.value);
 };
 
 // todo: move to page

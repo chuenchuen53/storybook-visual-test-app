@@ -72,6 +72,7 @@ export interface ComparisonRequest {
 export interface ComparisonResponse {
   success: boolean;
   data: ComparisonResponse$Data | null;
+  storyMetadataList: StoryScreenshotMetadata[] | null;
 }
 
 export interface SetItem {
@@ -164,5 +165,5 @@ export interface SavedScreenshotMetadata {
   branch: string;
   name: string;
   size: number;
-  storyMetadataList: StoryMetadata[];
+  storyMetadataList: StoryScreenshotMetadata[];
 }

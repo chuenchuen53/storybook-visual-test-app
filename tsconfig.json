@@ -10,13 +10,8 @@
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "strict": true,
-    "experimentalDecorators": true,
-    "paths": {
-      "@main/*": ["./src/main/*"],
-      "@renderer/*": ["./src/renderer/*"]
-    }
+    "experimentalDecorators": true
   },
   "include": ["main.ts", "preload.ts", "renderer.ts", "forge.env.d.ts", "src/**/*.ts"],
   "exclude": ["**/*.test.ts"]

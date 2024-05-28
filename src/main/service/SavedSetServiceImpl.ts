@@ -89,6 +89,21 @@ export class SavedSetServiceImpl implements SavedSetService {
     };
   }
 
+  public async getRefOrTestSavedSetMetadata(
+    type: SaveScreenshotType,
+    project: string,
+    branch: string,
+    setId: string,
+  ): Promise<StoryScreenshotMetadata[]> {
+    let dir = type === "reference" ? savedReferenceDir : savedTestDir;
+    dir = path.join(dir, project, branch, setId);
+    const metadataPath = path.join(dir, screenshotMetadataFilename);
+    const exist = await fs.pathExists(metadataPath);
+    if (!exist) return [];
+    const metadata: TempScreenshotMetadata = await fs.readJSON(metadataPath);
+    return metadata.storyMetadataList;
+  }
+
   private async getSaveComparisonSets(project: string): Promise<ComparisonSavedInfo[]> {
     const dir = path.join(savedComparisonDir, project);
     if (!(await fs.pathExists(dir))) return [];
@@ -126,21 +141,6 @@ export class SavedSetServiceImpl implements SavedSetService {
     };
 
     return (await Promise.all(allSets.map(getSavedInfo))).filter((info): info is ComparisonSavedInfo => info !== null);
-  }
-
-  public async getRefOrTestSavedSetMetadata(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-    setId: string,
-  ): Promise<StoryScreenshotMetadata[]> {
-    let dir = type === "reference" ? savedReferenceDir : savedTestDir;
-    dir = path.join(dir, project, branch, setId);
-    const metadataPath = path.join(dir, screenshotMetadataFilename);
-    const exist = await fs.pathExists(metadataPath);
-    if (!exist) return [];
-    const metadata: TempScreenshotMetadata = await fs.readJSON(metadataPath);
-    return metadata.storyMetadataList;
   }
 
   private sortSavedRefTestSets(savedSets: RefTestSavedInfo[]): RefTestSavedInfo[] {

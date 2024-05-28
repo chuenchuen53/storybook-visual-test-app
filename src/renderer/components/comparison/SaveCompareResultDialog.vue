@@ -12,9 +12,9 @@
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import { storeToRefs } from "pinia";
-import { useCompareStore } from "../../stores/CompareStore";
+import { useComparisonStore } from "../../stores/ComparisonStore";
 
-const store = useCompareStore();
+const store = useComparisonStore();
 const { savingDialogOpen, isSaving } = storeToRefs(store);
 const { saveScreenshot } = store;
 </script>
