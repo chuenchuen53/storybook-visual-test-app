@@ -4,18 +4,18 @@ import { registerUserSettingHandlers } from "./main/ipc-handlers/user-setting-ha
 import { UserSettingServiceImpl } from "./main/service/UserSettingServiceImpl";
 import { MainWindow } from "./MainWindow";
 import { ScreenshotServiceImpl } from "./main/service/ScreenshotServiceImpl";
-import { CompareServiceImpl } from "./main/service/CompareServiceImpl";
+import { ComparisonServiceImpl } from "./main/service/ComparisonServiceImpl";
 import { logger } from "./main/logger";
 import { ImgServiceImpl } from "./main/service/ImgServiceImpl";
 import { registerScreenshotHandlers } from "./main/ipc-handlers/screenshot-handlers";
-import { registerCompareHandlers } from "./main/ipc-handlers/compare-handlers";
+import { registerComparisonHandlers } from "./main/ipc-handlers/comparison-handlers";
 import { registerImgHandlers } from "./main/ipc-handlers/img-handlers";
 import { registerSavedSetHandlers } from "./main/ipc-handlers/saved-set-handler";
 import { DockerContainer } from "./main/docker-helper/DockerContainer";
 import { SavedSetServiceImpl } from "./main/service/SavedSetServiceImpl";
 import type { SavedSetService } from "./main/service/SavedSetService";
 import type { UserSettingService } from "./main/service/UserSettingService";
-import type { CompareService } from "./main/service/CompareService";
+import type { ComparisonService } from "./main/service/ComparisonService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
 import type { ImgService } from "./main/service/ImgService";
 
@@ -24,7 +24,7 @@ logger.info("app start");
 const userSettingService: UserSettingService = UserSettingServiceImpl.getInstance();
 const imgService: ImgService = ImgServiceImpl.getInstance();
 const screenshotService: ScreenshotService = ScreenshotServiceImpl.getInstance();
-const compareService: CompareService = CompareServiceImpl.getInstance();
+const comparisonService: ComparisonService = ComparisonServiceImpl.getInstance();
 const savedSetService: SavedSetService = SavedSetServiceImpl.getInstance();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -65,7 +65,7 @@ app.on("ready", () => {
   registerImgHandlers(imgService);
   registerUserSettingHandlers(userSettingService);
   registerScreenshotHandlers(screenshotService);
-  registerCompareHandlers(compareService);
+  registerComparisonHandlers(comparisonService);
   registerSavedSetHandlers(savedSetService);
   void DockerContainer.ensureAllStopped();
 

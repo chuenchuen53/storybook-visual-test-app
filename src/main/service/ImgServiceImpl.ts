@@ -1,9 +1,9 @@
 import path from "path";
 import fs from "fs-extra";
 import {
-  compareAddedDir,
-  compareDiffDir,
-  compareRemovedDir,
+  comparisonAddedDir,
+  comparisonDiffDir,
+  comparisonRemovedDir,
   savedReferenceDir,
   savedTestDir,
   screenshotDir,
@@ -26,17 +26,17 @@ export class ImgServiceImpl implements ImgService {
   }
 
   public async getCompareAddedImg(id: string): Promise<GetImgResponse> {
-    const filepath = path.join(compareAddedDir, id + ".png");
+    const filepath = path.join(comparisonAddedDir, id + ".png");
     return await this.getImg(filepath);
   }
 
   public async getCompareRemovedImg(id: string): Promise<GetImgResponse> {
-    const filepath = path.join(compareRemovedDir, id + ".png");
+    const filepath = path.join(comparisonRemovedDir, id + ".png");
     return await this.getImg(filepath);
   }
 
   public async getCompareDiffImg(id: string): Promise<GetImgResponse> {
-    const filepath = path.join(compareDiffDir, id + ".png");
+    const filepath = path.join(comparisonDiffDir, id + ".png");
     return await this.getImg(filepath);
   }
 

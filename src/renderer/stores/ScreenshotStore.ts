@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, h, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import { generateTreeFromFlatData } from "../utils/story-tree-utils";
@@ -8,11 +8,11 @@ import {
   getScreenshotPageTreeData,
   type StoryMetadataInExplorer,
 } from "../components/screenshot/story-explorer/helper";
-import type { SaveScreenshotType } from "../../shared/type";
+import type { Viewport, SaveScreenshotType } from "../../shared/type";
 
 export type StoryTypeFilter = "all" | "error";
 
-interface SaveInfo {
+export interface SaveInfo {
   type: SaveScreenshotType;
   project: string;
   branch: string;
@@ -20,9 +20,7 @@ interface SaveInfo {
 }
 
 export const useScreenshotStore = defineStore("screenshot", () => {
-  const toast = useToast();
-
-  const storybookUrl = ref<string>("");
+  const _toast = useToast();
 
   const state = ref<ScreenshotState>(ScreenshotState.IDLE);
   const activeStep = computed<number>(() => {
@@ -47,7 +45,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
         return 0;
     }
   });
-  const processing = computed(() => {
+  const isProcessing = computed<boolean>(() => {
     return (
       state.value !== ScreenshotState.IDLE &&
       state.value !== ScreenshotState.FINISHED &&
@@ -55,30 +53,43 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     );
   });
 
+  const storybookUrl = ref<string>("");
+  const viewport = ref<Viewport>({ width: 1920, height: 1080 });
+
+  const getDefaultStorybookUrl = async () => {
+    const ip = await window.screenshotApi.invoke.getLocalIPAddress();
+    if (ip) storybookUrl.value = `http://${ip}:6006`;
+  };
+
+  const startScreenshot = async () => {
+    if (isProcessing.value) return;
+    state.value = ScreenshotState.CHECKING_SERVICE;
+    void window.screenshotApi.send.startScreenshot(storybookUrl.value);
+  };
+
   const _metadata = ref<null | StoryMetadataInExplorer[]>(null);
   // a map of id to index of _metadata for faster search (no need ref as no related to view)
   const _metadataKeyMap = new Map<string, number>();
   const storySearchText = ref<string>("");
-  const storyTypeFilterInExplorer = ref<StoryTypeFilter>("all");
+  const storyTypeFilter = ref<StoryTypeFilter>("all");
   const highlightKey = ref<string | null>(null);
   const expandedKeys = ref(new Set<string>());
-  const selectedStoryId = ref<string | null>(null);
-
+  const selectedStory = ref<StoryMetadataInExplorer | null>(null);
+  const displayingImg = ref<{ loading: boolean; isExist: boolean | null; base64: string | null }>({
+    loading: false,
+    isExist: null,
+    base64: null,
+  });
   const _filteredMetadata = computed<null | StoryMetadataInExplorer[]>(() => {
     if (_metadata.value === null) return null;
-    const arr =
-      storyTypeFilterInExplorer.value === "all" ? _metadata.value : _metadata.value.filter(item => item.storyErr);
-    return storySearchText.value
-      ? arr.filter(item => {
-          const lowerCaseSearchText = storySearchText.value.toLowerCase();
-          return (
-            item.title.toLowerCase().includes(lowerCaseSearchText) ||
-            item.name.toLowerCase().includes(lowerCaseSearchText)
-          );
-        })
-      : arr;
+    const lowerCaseSearchText = storySearchText.value.toLowerCase();
+    return _metadata.value.filter(
+      item =>
+        (storyTypeFilter.value === "all" || item.storyErr) &&
+        (item.title.toLowerCase().includes(lowerCaseSearchText) ||
+          item.name.toLowerCase().includes(lowerCaseSearchText)),
+    );
   });
-
   const explorerTreeData = computed(() => {
     return _filteredMetadata.value === null
       ? []
@@ -96,36 +107,34 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     expandedKeys.value.clear();
   };
 
+  const _getImg = async (id: string) => {
+    displayingImg.value = { loading: true, isExist: null, base64: null };
+    const { isExist, base64 } = await window.imgApi.getScreenshotImg(id);
+    displayingImg.value = { loading: false, isExist, base64 };
+  };
+
+  const handleSelectStory = async (id: string) => {
+    if (id === selectedStory.value?.id) return;
+    const index = _metadataKeyMap.get(id);
+    const story = index !== undefined ? _metadata.value?.[index] ?? null : null;
+    selectedStory.value = story;
+    if (story) {
+      if (story.state !== StoryState.FINISHED) {
+        displayingImg.value = { loading: false, isExist: null, base64: null };
+      } else {
+        await _getImg(id);
+      }
+    }
+  };
+
   const isSaving = ref(false);
-  const savingDialogOpen = ref(false);
+  const saveDialogOpen = ref(false);
   const saveInfo = ref<SaveInfo>({
     type: "reference",
     project: "my-project",
     branch: "main",
-    name: "my-screenshot",
+    name: "feature 123",
   });
-
-  const getDefaultStorybookUrl = async () => {
-    const ip = await window.screenshotApi.invoke.getLocalIPAddress();
-    if (ip) storybookUrl.value = `http://${ip}:6006`;
-  };
-
-  const startScreenshot = async () => {
-    state.value = ScreenshotState.CHECKING_SERVICE;
-    void window.screenshotApi.send.startScreenshot(storybookUrl.value);
-  };
-
-  const displayingImg = ref<{ loading: boolean; isExist: boolean | null; base64: string | null }>({
-    loading: false,
-    isExist: null,
-    base64: null,
-  });
-
-  const updateDisplayingImg = async (id: string) => {
-    displayingImg.value = { loading: true, isExist: null, base64: null };
-    const result = await window.imgApi.getScreenshotImg(id);
-    displayingImg.value = { loading: false, isExist: result.isExist, base64: result.base64 };
-  };
 
   window.screenshotApi.listen.onUpdateStatus(status => {
     state.value = status;
@@ -149,10 +158,11 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     });
     highlightKey.value = null;
     expandedKeys.value.clear();
-    selectedStoryId.value = null;
+    selectedStory.value = null;
+    displayingImg.value = { loading: false, isExist: null, base64: null };
   });
 
-  window.screenshotApi.listen.onUpdateStoryState(({ storyId, state, browserName, storyErr }) => {
+  window.screenshotApi.listen.onUpdateStoryState(async ({ storyId, state, browserName, storyErr }) => {
     const idx = _metadataKeyMap.get(storyId);
     const story = idx !== undefined ? _metadata.value?.[idx] : null;
     if (story) {
@@ -164,6 +174,9 @@ export const useScreenshotStore = defineStore("screenshot", () => {
         story.startTime = new Date().toISOString();
       } else if (state === StoryState.FINISHED) {
         story.endTime = new Date().toISOString();
+        if (storyId === selectedStory.value?.id) {
+          await _getImg(storyId);
+        }
       }
     }
   });
@@ -179,10 +192,20 @@ export const useScreenshotStore = defineStore("screenshot", () => {
       });
 
       if (result.success) {
-        toast.add({ severity: "success", summary: "Success", detail: "Successfully saved the screenshot", life: 5000 });
-        savingDialogOpen.value = false;
+        _toast.add({
+          severity: "success",
+          summary: "Success",
+          detail: "Successfully saved the screenshot",
+          life: 5000,
+        });
+        saveDialogOpen.value = false;
       } else {
-        toast.add({ severity: "error", summary: "Error", detail: "Fail to saved the screenshot", life: 5000 });
+        _toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Fail to saved the screenshot",
+          life: 5000,
+        });
         console.log(result.errMsg);
       }
     } finally {
@@ -194,32 +217,28 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     window.screenshotApi.send.openInExplorer();
   };
 
-  const openSaveDialog = () => {
-    savingDialogOpen.value = true;
-  };
-
   return {
     state,
     storybookUrl,
-    processing,
+    viewport,
+    isProcessing,
     activeStep,
     explorerTreeData,
     expandedKeys,
     highlightKey,
-    storyTypeFilterInExplorer,
+    storyTypeFilter,
     storySearchText,
     displayingImg,
     saveInfo,
     isSaving,
-    savingDialogOpen,
-    selectedStoryId,
+    saveDialogOpen,
+    selectedStory,
+    handleSelectStory,
     getDefaultStorybookUrl,
     startScreenshot,
     expandAll,
     collapseAll,
-    updateDisplayingImg,
     openInExplorer,
     saveScreenshot,
-    openSaveDialog,
   };
 });

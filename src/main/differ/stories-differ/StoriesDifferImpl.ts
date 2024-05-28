@@ -2,15 +2,9 @@ import path from "path";
 import fs from "fs-extra";
 import { PixelmatchDiffer } from "../img-differ/PixelmatchDiffer";
 import { computeArrDiff } from "../../utils";
-import {
-  compareAddedDir,
-  compareDiffDir,
-  compareDir,
-  compareRemovedDir,
-  compareResultFilename,
-  screenshotMetadataFilename,
-} from "../../Filepath";
-import type { TempScreenshotMetadata, StoriesDiffResult } from "../../../shared/type";
+import { comparisonAddedDir, comparisonDiffDir, comparisonRemovedDir } from "../../Filepath";
+import { SavedScreenshotMetadataHelper } from "../../data-files/SavedScreenshotMetadataHelper";
+import type { StoriesDiffResult } from "../../../shared/type";
 import type { StoriesDiffer } from "./StoriesDiffer";
 import type { ImgDiffer } from "../img-differ/ImgDiffer";
 
@@ -23,12 +17,19 @@ export class StoriesDifferImpl implements StoriesDiffer {
       diff: [],
     };
 
-    const [refMetadata, testMetadata] = await Promise.all([this.readMetadata(refDir), this.readMetadata(testDir)]);
+    const [refMetadata, testMetadata] = await Promise.all([
+      SavedScreenshotMetadataHelper.readInDir(refDir),
+      SavedScreenshotMetadataHelper.readInDir(testDir),
+    ]);
 
-    const refIds = refMetadata.storyMetadataList.map(x => x.id);
-    const testIds = testMetadata.storyMetadataList.map(x => x.id);
+    if (!refMetadata || !testMetadata) {
+      throw new Error("Metadata not found for provided ref or test directory.");
+    }
 
-    const arrDiff = computeArrDiff(refIds, testIds);
+    const refStoryIds = refMetadata.storyMetadataList.map(x => x.id);
+    const testStoryIds = testMetadata.storyMetadataList.map(x => x.id);
+
+    const arrDiff = computeArrDiff(refStoryIds, testStoryIds);
     const sameIds = arrDiff.same;
     const addedIds = arrDiff.added;
     const removedIds = arrDiff.removed;
@@ -38,13 +39,13 @@ export class StoriesDifferImpl implements StoriesDiffer {
 
     const copyAddedPromises = addedIds.map(id => {
       const oriImg = path.join(testDir, id + ".png");
-      const destImg = path.join(compareAddedDir, id + ".png");
+      const destImg = path.join(comparisonAddedDir, id + ".png");
       return fs.copy(oriImg, destImg);
     });
 
     const copyRemovedPromises = removedIds.map(id => {
       const oriImg = path.join(refDir, id + ".png");
-      const destImg = path.join(compareRemovedDir, id + ".png");
+      const destImg = path.join(comparisonRemovedDir, id + ".png");
       return fs.copy(oriImg, destImg);
     });
 
@@ -55,7 +56,7 @@ export class StoriesDifferImpl implements StoriesDiffer {
     for (const id of sameIds) {
       const refPath = path.join(refDir, id + ".png");
       const testPath = path.join(testDir, id + ".png");
-      const diffPath = path.join(compareDiffDir, id + ".png");
+      const diffPath = path.join(comparisonDiffDir, id + ".png");
 
       const isSame = await imgDiffer.isSame(refPath, testPath, diffPath, tolerance);
       if (isSame) {
@@ -65,14 +66,6 @@ export class StoriesDifferImpl implements StoriesDiffer {
       }
     }
 
-    const resultPath = path.join(compareDir, compareResultFilename);
-    await fs.writeJson(resultPath, result);
-
     return result;
-  }
-
-  private async readMetadata(dir: string): Promise<TempScreenshotMetadata> {
-    const metadataPath = path.join(dir, screenshotMetadataFilename);
-    return fs.readJson(metadataPath);
   }
 }

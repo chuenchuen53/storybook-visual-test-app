@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { ScreenshotChannelKey } from "./shared/ScreenshotApi";
+import { ComparisonChannelKey } from "./shared/ComparisonApi";
+import type { ComparisonApi } from "./shared/ComparisonApi";
 import type { IpcRendererHandler } from "./shared/ipc-type-helper";
 import type { ScreenshotApi } from "./shared/ScreenshotApi";
 import type { GlobalMessage, SaveScreenshotType } from "./shared/type";
@@ -25,6 +27,19 @@ const screenshotApi: IpcRendererHandler<ScreenshotApi> = {
   },
 };
 
+const comparisonApi: IpcRendererHandler<ComparisonApi> = {
+  listen: {},
+  send: {
+    openInExplorer: () => ipcRenderer.send(ComparisonChannelKey.send.openInExplorer),
+  },
+  invoke: {
+    getAvailableProjects: () => ipcRenderer.invoke(ComparisonChannelKey.invoke.getAvailableProjects),
+    getAvailableSets: project => ipcRenderer.invoke(ComparisonChannelKey.invoke.getAvailableSets, project),
+    compare: req => ipcRenderer.invoke(ComparisonChannelKey.invoke.compare, req),
+    saveComparisonResult: () => ipcRenderer.invoke(ComparisonChannelKey.invoke.saveComparisonResult),
+  },
+};
+
 contextBridge.exposeInMainWorld("globalApi", {
   onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) =>
     ipcRenderer.on("global:message", (_event, msg) => cb(msg)),
@@ -46,14 +61,7 @@ contextBridge.exposeInMainWorld("userSettingApi", {
 
 contextBridge.exposeInMainWorld("screenshotApi", screenshotApi);
 
-contextBridge.exposeInMainWorld("compareApi", {
-  openInExplorer: () => ipcRenderer.send("compare:openInExplorer"),
-  getAvailableProjects: () => ipcRenderer.invoke("compare:getAvailableProjects"),
-  getAvailableSets: (project: string) => ipcRenderer.invoke("compare:getAvailableSets", project),
-  compare: (relativeRefDir: string, relativeTestDir: string) =>
-    ipcRenderer.invoke("compare:compare", relativeRefDir, relativeTestDir),
-  saveComparisonResult: () => ipcRenderer.invoke("compare:saveComparison"),
-});
+contextBridge.exposeInMainWorld("comparisonApi", comparisonApi);
 
 contextBridge.exposeInMainWorld("savedSetApi", {
   getAllRefOrTestBranches: (type: SaveScreenshotType, project: string) =>

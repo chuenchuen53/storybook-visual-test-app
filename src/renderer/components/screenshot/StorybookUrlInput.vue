@@ -5,11 +5,11 @@
       id="storybook-url-input"
       v-model="storybookUrl"
       class="w-[350px]"
-      :disabled="processing"
+      :disabled="isProcessing"
       type="text"
       placeholder="input local ip, not localhost"
     />
-    <Button :disabled="processing || storybookUrl === ''" @click="startScreenshot">screenshot</Button>
+    <Button :disabled="isProcessing || storybookUrl === ''" @click="startScreenshot">screenshot</Button>
   </div>
 </template>
 
@@ -21,7 +21,7 @@ import { onMounted } from "vue";
 import { useScreenshotStore } from "../../stores/ScreenshotStore";
 
 const store = useScreenshotStore();
-const { storybookUrl, processing } = storeToRefs(store);
+const { storybookUrl, isProcessing } = storeToRefs(store);
 const { getDefaultStorybookUrl, startScreenshot } = store;
 
 onMounted(() => {

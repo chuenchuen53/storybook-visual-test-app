@@ -21,7 +21,17 @@ export class SavedScreenshotMetadataHelper {
       const metadataFilePath = SavedScreenshotMetadataHelper.getFilepath(type, project, branch, id);
       return await fs.readJSON(metadataFilePath);
     } catch (error) {
-      logger.error("Error reading metadata:", error);
+      logger.error(error, "Error reading metadata:");
+      return null;
+    }
+  }
+
+  public static async readInDir(dir: string): Promise<SavedScreenshotMetadata | null> {
+    try {
+      const metadataFilePath = path.join(dir, screenshotMetadataFilename);
+      return await fs.readJSON(metadataFilePath);
+    } catch (error) {
+      logger.error(error, "Error reading metadata:");
       return null;
     }
   }

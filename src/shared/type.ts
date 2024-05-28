@@ -47,25 +47,46 @@ export interface StoriesDiffResult {
   diff: string[];
 }
 
-export interface CompareResponse$Data {
-  uuid: string;
+export interface ComparisonResponse$Data {
+  id: string;
   createdAt: string;
   project: string;
   refBranch: string;
-  testBranch: string;
   refSetId: string;
+  testBranch: string;
   testSetId: string;
   result: StoriesDiffResult;
 }
 
-export interface CompareResponse {
+export interface SetData {
+  project: string;
+  branch: string;
+  setId: string;
+}
+
+export interface ComparisonRequest {
+  ref: SetData;
+  test: SetData;
+}
+
+export interface ComparisonResponse {
   success: boolean;
-  data: CompareResponse$Data | null;
+  data: ComparisonResponse$Data | null;
+}
+
+export interface SetItem {
+  id: string;
+  createdAt: string;
+  viewport: {
+    width: number;
+    height: number;
+  };
+  name: string;
 }
 
 export interface BranchScreenshotSet {
   branch: string;
-  setList: { uuid: string; createdAt: string; viewport: { width: number; height: number } }[];
+  setList: SetItem[];
 }
 
 export interface GetAvailableSetResponse {

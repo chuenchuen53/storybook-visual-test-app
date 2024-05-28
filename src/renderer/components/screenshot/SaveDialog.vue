@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model:visible="savingDialogOpen" modal header="Save Screenshot" :style="{ minWidth: '400px' }">
+  <Dialog v-model:visible="saveDialogOpen" modal header="Save Screenshot" :style="{ minWidth: '400px' }">
     <div class="grid grid-cols-[auto_1fr] gap-x-8 gap-y-4">
       <label for="save-screenshot-type-select" class="font-semibold leading-[42px]">Type</label>
       <Select
@@ -37,7 +37,7 @@ import { ref } from "vue";
 import { useScreenshotStore } from "../../stores/ScreenshotStore";
 
 const store = useScreenshotStore();
-const { savingDialogOpen, saveInfo, isSaving } = storeToRefs(store);
+const { saveDialogOpen, saveInfo, isSaving } = storeToRefs(store);
 const { saveScreenshot } = store;
 
 // todo: add typing

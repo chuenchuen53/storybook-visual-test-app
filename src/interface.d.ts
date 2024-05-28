@@ -1,15 +1,13 @@
+import type { ComparisonApi } from "./shared/ComparisonApi";
 import type {
-  CompareResponse,
-  GetAvailableSetResponse,
   GetImgResponse,
   RefTestSavedInfo,
-  SavedScreenshotResponse,
   SavedSets,
   SaveScreenshotType,
   StoryScreenshotMetadata,
 } from "./shared/type";
-
 import type { ScreenshotApi } from "./shared/ScreenshotApi";
+import type { GlobalApi } from "./shared/GlobalApi";
 
 export interface ImgApi {
   getScreenshotImg: (id: string) => Promise<GetImgResponse>;
@@ -30,14 +28,6 @@ export interface UserSettingApi {
   updateProjectsInTab: (projects: string[]) => Promise<boolean>;
 }
 
-export interface CompareApi {
-  openInExplorer: () => void;
-  getAvailableProjects: () => Promise<string[]>;
-  getAvailableSets: (projectName: string) => Promise<GetAvailableSetResponse>;
-  compare: (relativeRefDir: string, relativeTestDir: string) => Promise<CompareResponse>;
-  saveComparisonResult: () => Promise<SavedScreenshotResponse>;
-}
-
 export interface SavedSetApi {
   getAllRefOrTestBranches: (type: SaveScreenshotType, project: string) => Promise<string[]>;
   getAllRefOrTestSavedSets: (type: SaveScreenshotType, project: string, branch: string) => Promise<RefTestSavedInfo[]>;
@@ -56,7 +46,7 @@ declare global {
     userSettingApi: UserSettingApi;
     imgApi: ImgApi;
     screenshotApi: ScreenshotApi;
-    compareApi: CompareApi;
+    comparisonApi: ComparisonApi;
     savedSetApi: SavedSetApi;
   }
 }

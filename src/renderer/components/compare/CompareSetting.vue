@@ -23,20 +23,20 @@
       <div>
         <Select
           class="w-full"
-          :model-value="refSet.uuid"
+          :model-value="refSet.id"
           :options="availableRefSets"
           option-label="label"
-          option-value="uuid"
+          option-value="id"
           @change="updateRefUuid"
         />
       </div>
       <div>
         <Select
           class="w-full"
-          :model-value="testSet.uuid"
+          :model-value="testSet.id"
           :options="availableTestSets"
           option-label="label"
-          option-value="uuid"
+          option-value="id"
           @change="updateTestUuid"
         />
       </div>
@@ -68,7 +68,7 @@ const {
 } = store;
 
 const disableCompareBtn = computed(() => {
-  return !project.value || !refSet.value.branch || !testSet.value.branch || !refSet.value.uuid || !testSet.value.uuid;
+  return !project.value || !refSet.value.branch || !testSet.value.branch || !refSet.value.id || !testSet.value.id;
 });
 
 const handleSelectionChange = (e: SelectChangeEvent) => {

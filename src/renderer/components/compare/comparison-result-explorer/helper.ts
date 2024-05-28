@@ -1,5 +1,5 @@
 import { treeNodesForUi } from "../../general/tree/tree-helper";
-import type { CompareResponse$Data, StoriesDiffResult } from "src/shared/type";
+import type { ComparisonResponse$Data, StoriesDiffResult } from "src/shared/type";
 import type { TreeObj } from "src/renderer/utils/story-tree-utils";
 
 export type CompareResultType = keyof StoriesDiffResult;
@@ -11,7 +11,10 @@ export type CompareResultTreeLeaf = {
 
 export type CompareResultTree = TreeObj<CompareResultTreeLeaf>;
 
-export function generateTreeFromRespData(data: CompareResponse$Data, resultType: CompareResultType): CompareResultTree {
+export function generateTreeFromRespData(
+  data: ComparisonResponse$Data,
+  resultType: CompareResultType,
+): CompareResultTree {
   const leafs: CompareResultTreeLeaf[] = data.result[resultType].map(storyId => ({ storyId, resultType }));
 
   const root: CompareResultTree = {};

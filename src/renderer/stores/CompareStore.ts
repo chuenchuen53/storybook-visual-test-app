@@ -6,11 +6,11 @@ import {
   getCompareResultTreeData,
 } from "../components/compare/comparison-result-explorer/helper";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
-import type { CompareResponse$Data, GetAvailableSetResponse } from "../../shared/type";
+import type { ComparisonRequest, ComparisonResponse$Data, GetAvailableSetResponse } from "../../shared/type";
 
 interface CompareSet {
   branch: string | null;
-  uuid: string | null;
+  id: string | null;
 }
 
 interface ImgState {
@@ -40,7 +40,7 @@ export const useCompareStore = defineStore("compare", () => {
     test: [],
   });
 
-  const _compareResult = ref<null | CompareResponse$Data>(null);
+  const _compareResult = ref<null | ComparisonResponse$Data>(null);
   const isComparing = ref(false);
   const expandedKeys = ref(new Set<string>());
   const highlightKey = ref<null | string>(null);
@@ -85,14 +85,19 @@ export const useCompareStore = defineStore("compare", () => {
     diff: { loading: false, isExist: null, base64: null },
   });
 
-  const savingDialogOpen = ref(false);
+  const saveDialogOpen = ref(false);
   const isSaving = ref(false);
 
   const compare = async () => {
+    if (!project.value || !refSet.value.branch || !refSet.value.id || !testSet.value.branch || !testSet.value.id)
+      return;
+
     isComparing.value = true;
-    const relativeRefDir = `${project.value}/${refSet.value.branch}/${refSet.value.uuid}`;
-    const relativeTestDir = `${project.value}/${testSet.value.branch}/${testSet.value.uuid}`;
-    const response = await window.compareApi.compare(relativeRefDir, relativeTestDir);
+    const req: ComparisonRequest = {
+      ref: { project: project.value, branch: refSet.value.branch, setId: refSet.value.id },
+      test: { project: project.value, branch: testSet.value.branch, setId: testSet.value.id },
+    };
+    const response = await window.comparisonApi.invoke.compare(req);
 
     if (response.success) {
       _compareResult.value = response.data;
@@ -114,7 +119,7 @@ export const useCompareStore = defineStore("compare", () => {
   };
 
   const refreshData = async () => {
-    availableProjects.value = await window.compareApi.getAvailableProjects();
+    availableProjects.value = await window.comparisonApi.invoke.getAvailableProjects();
     projectsInTab.value = await window.userSettingApi.getProjectsInTab();
 
     if (projectsInTab.value.length === 0) {
@@ -125,11 +130,11 @@ export const useCompareStore = defineStore("compare", () => {
       };
       refSet.value = {
         branch: null,
-        uuid: null,
+        id: null,
       };
       testSet.value = {
         branch: null,
-        uuid: null,
+        id: null,
       };
       return;
     }
@@ -146,24 +151,24 @@ export const useCompareStore = defineStore("compare", () => {
     ) {
       const oldRefBranch = refSet.value.branch;
       const oldTestBranch = testSet.value.branch;
-      const oldRefUuid = refSet.value.uuid;
-      const oldTestUuid = testSet.value.uuid;
+      const oldRefUuid = refSet.value.id;
+      const oldTestUuid = testSet.value.id;
 
       await updateProject(project.value, false);
 
       const oldRefBranchData = availableSets.value.ref.find(x => x.branch === oldRefBranch);
       if (oldRefBranchData) {
         refSet.value.branch = oldRefBranch;
-        if (oldRefUuid && oldRefBranchData.setList.find(x => x.uuid === oldRefUuid)) {
-          refSet.value.uuid = oldRefUuid;
+        if (oldRefUuid && oldRefBranchData.setList.find(x => x.id === oldRefUuid)) {
+          refSet.value.id = oldRefUuid;
         }
       }
 
       const oldTestBranchData = availableSets.value.test.find(x => x.branch === oldTestBranch);
       if (oldTestBranchData) {
         testSet.value.branch = oldTestBranch;
-        if (oldTestUuid && oldTestBranchData.setList.find(x => x.uuid === oldTestUuid)) {
-          testSet.value.uuid = oldTestUuid;
+        if (oldTestUuid && oldTestBranchData.setList.find(x => x.id === oldTestUuid)) {
+          testSet.value.id = oldTestUuid;
         }
       }
     }
@@ -175,14 +180,14 @@ export const useCompareStore = defineStore("compare", () => {
     project.value = projectName;
     refSet.value = {
       branch: null,
-      uuid: null,
+      id: null,
     };
     testSet.value = {
       branch: null,
-      uuid: null,
+      id: null,
     };
 
-    const result = await window.compareApi.getAvailableSets(projectName);
+    const result = await window.comparisonApi.invoke.getAvailableSets(projectName);
     availableSets.value = result;
   };
 
@@ -196,36 +201,36 @@ export const useCompareStore = defineStore("compare", () => {
 
   const refSet = ref<CompareSet>({
     branch: null,
-    uuid: null,
+    id: null,
   });
 
   const testSet = ref<CompareSet>({
     branch: null,
-    uuid: null,
+    id: null,
   });
 
   const updateRefSetBranch = (x: string) => {
     if (x === refSet.value.branch) return;
     refSet.value.branch = x;
-    refSet.value.uuid = null;
+    refSet.value.id = null;
   };
 
   const updateTestSetBranch = (x: string) => {
     if (x === testSet.value.branch) return;
     testSet.value.branch = x;
-    testSet.value.uuid = null;
+    testSet.value.id = null;
   };
 
   const updateRefSetUuid = (x: string) => {
-    refSet.value.uuid = x;
+    refSet.value.id = x;
   };
 
   const updateTestSetUuid = (x: string) => {
-    testSet.value.uuid = x;
+    testSet.value.id = x;
   };
 
   const openInExplorer = () => {
-    window.compareApi.openInExplorer();
+    window.comparisonApi.send.openInExplorer();
   };
 
   const getAddedImg = async (id: string) => {
@@ -296,7 +301,7 @@ export const useCompareStore = defineStore("compare", () => {
 
   const saveScreenshot = async () => {
     isSaving.value = true;
-    const result = await window.compareApi.saveComparisonResult();
+    const result = await window.comparisonApi.invoke.saveComparisonResult();
     isSaving.value = false;
 
     if (result.success) {
@@ -306,7 +311,7 @@ export const useCompareStore = defineStore("compare", () => {
         detail: "Successfully saved the comparison result",
         life: 5000,
       });
-      savingDialogOpen.value = false;
+      saveDialogOpen.value = false;
     } else {
       toast.add({
         severity: "error",
@@ -316,10 +321,6 @@ export const useCompareStore = defineStore("compare", () => {
       });
       console.log(result.errMsg);
     }
-  };
-
-  const openSaveDialog = () => {
-    savingDialogOpen.value = true;
   };
 
   return {
@@ -338,7 +339,7 @@ export const useCompareStore = defineStore("compare", () => {
     displaySameImg,
     displayingSingleImg,
     isSaving,
-    savingDialogOpen,
+    saveDialogOpen,
     searchText,
     typeOptions,
     projectsInTab,
@@ -357,7 +358,6 @@ export const useCompareStore = defineStore("compare", () => {
     getDiffImg,
     setCurrentDisplayingImgType,
     saveScreenshot,
-    openSaveDialog,
     expandAll,
     collapseAll,
     updateProjectsInTab,

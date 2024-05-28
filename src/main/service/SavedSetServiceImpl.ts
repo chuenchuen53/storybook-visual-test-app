@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import { getAllFolders } from "../utils";
 import {
-  compareMetadataFilename,
+  comparisonMetadataFilename,
   savedComparisonDir,
   savedReferenceDir,
   savedTestDir,
@@ -10,7 +10,7 @@ import {
 } from "../Filepath";
 import { logger } from "../logger";
 import type {
-  CompareResponse$Data,
+  ComparisonResponse$Data,
   ComparisonSavedInfo,
   RefTestSavedInfo,
   TempScreenshotMetadata,
@@ -95,13 +95,13 @@ export class SavedSetServiceImpl implements SavedSetService {
     const allSets = await getAllFolders(dir);
 
     const getSavedInfo = async (setId: string): Promise<ComparisonSavedInfo | null> => {
-      const metadataPath = path.join(dir, setId, compareMetadataFilename);
+      const metadataPath = path.join(dir, setId, comparisonMetadataFilename);
       const exist = await fs.pathExists(metadataPath);
       if (!exist) return null;
-      const metadata: CompareResponse$Data = await fs.readJSON(metadataPath);
+      const metadata: ComparisonResponse$Data = await fs.readJSON(metadataPath);
 
       return {
-        id: metadata.uuid,
+        id: metadata.id,
         createdAt: metadata.createdAt,
         project,
         name: "todo",

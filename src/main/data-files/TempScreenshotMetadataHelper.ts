@@ -15,7 +15,7 @@ export class TempScreenshotMetadataHelper {
     try {
       return await fs.readJSON(TempScreenshotMetadataHelper.metadataFilePath);
     } catch (error) {
-      logger.error("Error reading metadata:", error);
+      logger.error(error, "Error reading metadata:");
       return null;
     }
   }

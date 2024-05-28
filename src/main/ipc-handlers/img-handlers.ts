@@ -1,12 +1,12 @@
 import { ipcMain } from "electron";
 import { openInExplorer } from "../utils";
-import { compareDir } from "../Filepath";
+import { comparisonDir } from "../Filepath";
 import type { ImgService } from "../service/ImgService";
 import type { SaveScreenshotType } from "../../shared/type";
 
 export function registerImgHandlers(imgService: ImgService) {
   ipcMain.on("compare:openInExplorer", () => {
-    openInExplorer(compareDir);
+    openInExplorer(comparisonDir);
   });
 
   ipcMain.handle("img:getScreenshotImg", async (_event, id: string) => {

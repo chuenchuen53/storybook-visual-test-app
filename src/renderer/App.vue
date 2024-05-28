@@ -3,12 +3,14 @@
     <RouterView />
   </AppLayout>
   <Toast />
+  <Lightbox />
 </template>
 
 <script setup lang="ts">
 import { RouterView } from "vue-router";
 import Toast from "primevue/toast";
 import AppLayout from "./AppLayout.vue";
+import Lightbox from "./components/Lightbox.vue";
 import { useGlobalStore } from "./stores/GlobalStore";
 
 useGlobalStore();

@@ -7,7 +7,7 @@
           v-if="state === ScreenshotState.FINISHED"
           v-tooltip.bottom="'Save'"
           icon="pi pi-save"
-          @click="openSaveDialog"
+          @click="saveDialogOpen = true"
         />
       </div>
       <div class="flex gap-[2px]">
@@ -15,11 +15,7 @@
           <IconButton icon="pi pi-filter" @click="menu.toggle($event)" />
           <Menu ref="menu" :model="items" :popup="true" :pt="{ root: { style: { transform: 'translateX(-165px)' } } }">
             <template #item="{ item, props }">
-              <div
-                class="flex"
-                :class="{ 'active-menu-item': item.key === storyTypeFilterInExplorer }"
-                v-bind="props.action"
-              >
+              <div class="flex" :class="{ 'active-menu-item': item.key === storyTypeFilter }" v-bind="props.action">
                 <span :class="item.icon" />
                 <span class="ml-1">{{ item.label }}</span>
               </div>
@@ -79,15 +75,15 @@ import IconButton from "../../general/IconButton.vue";
 import { useScreenshotStore } from "../../../stores/ScreenshotStore";
 import { ScreenshotState, StoryState } from "../../../../shared/type";
 import StyledTree from "../../general/tree/StyledTree.vue";
-import { checkSingleBranchAndGetLeaf, isLeaf } from "../../general/tree/tree-helper";
+import { isLeaf } from "../../general/tree/tree-helper";
 import { timeSpent } from "../../../utils/time-utils";
-import type { StoryMetadataInExplorer } from "../story-explorer/helper";
+import type { StoryMetadataInExplorer } from "./helper";
 import type { NodeData } from "../../general/tree/type";
 
 const store = useScreenshotStore();
-const { explorerTreeData, expandedKeys, highlightKey, storyTypeFilterInExplorer, state, storySearchText } =
+const { saveDialogOpen, explorerTreeData, expandedKeys, highlightKey, storyTypeFilter, state, storySearchText } =
   storeToRefs(store);
-const { updateDisplayingImg, openInExplorer, openSaveDialog, expandAll, collapseAll } = store;
+const { handleSelectStory, openInExplorer, expandAll, collapseAll } = store;
 
 const search = ref("");
 
@@ -111,13 +107,13 @@ const items = ref([
         key: "all",
         label: "All",
         icon: "pi pi-list",
-        command: () => (storyTypeFilterInExplorer.value = "all"),
+        command: () => (storyTypeFilter.value = "all"),
       },
       {
         key: "error",
         label: "Error Stories",
         icon: "pi pi-exclamation-triangle",
-        command: () => (storyTypeFilterInExplorer.value = "error"),
+        command: () => (storyTypeFilter.value = "error"),
       },
     ],
   },
@@ -126,7 +122,7 @@ const items = ref([
 const onNodeSelect = (node: NodeData) => {
   const data: StoryMetadataInExplorer | undefined = node.data;
   if (data) {
-    updateDisplayingImg(data.id);
+    handleSelectStory(data.id);
   }
 };
 

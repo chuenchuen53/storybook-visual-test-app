@@ -2,7 +2,7 @@
   <div class="relative flex h-full flex-col bg-[--p-content-background]">
     <div class="flex justify-between gap-2 px-2 py-1">
       <div class="flex gap-[2px]">
-        <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
+        <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="saveDialogOpen = true" />
         <IconButton v-if="true" v-tooltip.bottom="'Save'" :disabled="false" icon="pi pi-save" @click="openSaveDialog" />
       </div>
       <div class="flex gap-[2px]">
@@ -60,7 +60,7 @@ import type { NodeData } from "../../general/tree/type";
 
 const store = useCompareStore();
 
-const { explorerTreeData, highlightKey, expandedKeys, selectedKey, searchText, typeOptions, selectedType } =
+const { explorerTreeData, highlightKey, expandedKeys, saveDialogOpen, searchText, typeOptions, selectedType } =
   storeToRefs(store);
 const {
   openInExplorer,
@@ -69,7 +69,6 @@ const {
   getSameImg,
   getDiffImg,
   setCurrentDisplayingImgType,
-  openSaveDialog,
   expandAll,
   collapseAll,
 } = store;

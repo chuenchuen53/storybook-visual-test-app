@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { generateTreeFromRespData } from "@renderer/components/compare/comparison-result-explorer/helper";
-import type { CompareResponse$Data } from "@shared/type";
+import type { ComparisonResponse$Data } from "@shared/type";
 
 describe("generateTreeFromRespData", () => {
   // Function handles empty result arrays for same, added, removed, and diff without errors
   it("should handle empty result arrays without errors", () => {
-    const data: CompareResponse$Data = {
-      uuid: "124",
+    const data: ComparisonResponse$Data = {
+      id: "124",
       createdAt: "2023-01-02T00:00:00Z",
       project: "ProjectY",
       refBranch: "dev",
