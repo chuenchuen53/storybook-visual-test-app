@@ -1,19 +1,13 @@
 import path from "path";
 import fs from "fs-extra";
 import { getAllFolders } from "../utils";
-import {
-  comparisonMetadataFilename,
-  savedComparisonDir,
-  savedReferenceDir,
-  savedTestDir,
-  screenshotMetadataFilename,
-} from "../Filepath";
-import { logger } from "../logger";
+import { savedComparisonDir, savedReferenceDir, savedTestDir } from "../Filepath";
+import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
+import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
 import type {
-  ComparisonResponse$Data,
   ComparisonSavedInfo,
+  GetComparisonSavedSetMetadataResponse,
   RefTestSavedInfo,
-  TempScreenshotMetadata,
   SavedSets,
   SaveScreenshotType,
   StoryScreenshotMetadata,
@@ -29,58 +23,23 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   private constructor() {}
 
-  public async getAllRefOrTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
-    let dir = type === "reference" ? savedReferenceDir : savedTestDir;
-    dir = path.join(dir, project);
-    if (!(await fs.pathExists(dir))) return [];
-    return await getAllFolders(dir);
-  }
-
-  public async getAllRefOrTestSavedSets(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-  ): Promise<RefTestSavedInfo[]> {
-    let dir = type === "reference" ? savedReferenceDir : savedTestDir;
-    dir = path.join(dir, project, branch);
-    logger.info(dir);
-    const allSets = await getAllFolders(dir);
-
-    const getSavedInfo = async (setId: string): Promise<RefTestSavedInfo | null> => {
-      const metadataPath = path.join(dir, setId, screenshotMetadataFilename);
-      const exist = await fs.pathExists(metadataPath);
-      if (!exist) return null;
-      const metadata: TempScreenshotMetadata = await fs.readJSON(metadataPath);
-
-      return {
-        id: metadata.id,
-        createdAt: metadata.createdAt,
-        type,
-        project,
-        branch,
-        viewport: metadata.viewport,
-        name: "todo",
-        fileSize: "todo",
-        stories: metadata.storyMetadataList.length,
-        errStories: metadata.storyMetadataList.reduce((acc, cur) => acc + (cur.storyErr ? 1 : 0), 0),
-      };
-    };
-
-    const results = await Promise.all(allSets.map(getSavedInfo));
-    return results.filter((info): info is RefTestSavedInfo => info !== null);
+  public async getAllSavedProjects(): Promise<string[]> {
+    const [refs, tests] = await Promise.all([getAllFolders(savedReferenceDir), getAllFolders(savedTestDir)]);
+    const set = new Set([...refs, ...tests]);
+    return Array.from(set);
   }
 
   public async getAllSavedSets(project: string): Promise<SavedSets> {
-    const refSets = await this.getAllRefOrTestBranches("reference", project);
-    const testSets = await this.getAllRefOrTestBranches("test", project);
+    const [refSets, testSets] = await Promise.all([
+      this.getAllRefOrTestBranches("reference", project),
+      this.getAllRefOrTestBranches("test", project),
+    ]);
 
-    const refSetsInfo = (
-      await Promise.all(refSets.map(branch => this.getAllRefOrTestSavedSets("reference", project, branch)))
-    ).flat();
-    const testSetsInfo = (
-      await Promise.all(testSets.map(branch => this.getAllRefOrTestSavedSets("test", project, branch)))
-    ).flat();
-    const comparisonSets = await this.getSaveComparisonSets(project);
+    const [refSetsInfo, testSetsInfo, comparisonSets] = await Promise.all([
+      (await Promise.all(refSets.map(branch => this.getAllRefOrTestSavedSets("reference", project, branch)))).flat(),
+      (await Promise.all(testSets.map(branch => this.getAllRefOrTestSavedSets("test", project, branch)))).flat(),
+      this.getSaveComparisonSets(project),
+    ]);
 
     return {
       ref: this.sortSavedRefTestSets(refSetsInfo),
@@ -95,13 +54,87 @@ export class SavedSetServiceImpl implements SavedSetService {
     branch: string,
     setId: string,
   ): Promise<StoryScreenshotMetadata[]> {
+    const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, setId);
+    return metadata === null ? [] : metadata.storyMetadataList;
+  }
+
+  public async getComparisonSavedSetMetadata(
+    project: string,
+    setId: string,
+  ): Promise<GetComparisonSavedSetMetadataResponse> {
+    const metadata = await SavedComparisonMetadataHelper.read(project, setId);
+
+    if (metadata === null) return { data: null };
+
+    const refSetMetadata = await SavedScreenshotMetadataHelper.read(
+      "reference",
+      project,
+      metadata.refBranch,
+      metadata.refSetId,
+    );
+    const testSetMetadata = await SavedScreenshotMetadataHelper.read(
+      "test",
+      project,
+      metadata.testBranch,
+      metadata.testSetId,
+    );
+
+    if (metadata === null || refSetMetadata === null || testSetMetadata === null) return { data: null };
+
+    const map = new Map<string, StoryScreenshotMetadata>();
+    for (const x of refSetMetadata.storyMetadataList) {
+      map.set(x.id, x);
+    }
+    for (const x of testSetMetadata.storyMetadataList) {
+      map.set(x.id, x);
+    }
+
+    const storyMetadataList = Array.from(map.values());
+
+    return {
+      data: {
+        metadata,
+        storyMetadataList,
+      },
+    };
+  }
+
+  private async getAllRefOrTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
     let dir = type === "reference" ? savedReferenceDir : savedTestDir;
-    dir = path.join(dir, project, branch, setId);
-    const metadataPath = path.join(dir, screenshotMetadataFilename);
-    const exist = await fs.pathExists(metadataPath);
-    if (!exist) return [];
-    const metadata: TempScreenshotMetadata = await fs.readJSON(metadataPath);
-    return metadata.storyMetadataList;
+    dir = path.join(dir, project);
+    if (!(await fs.pathExists(dir))) return [];
+    return await getAllFolders(dir);
+  }
+
+  private async getAllRefOrTestSavedSets(
+    type: SaveScreenshotType,
+    project: string,
+    branch: string,
+  ): Promise<RefTestSavedInfo[]> {
+    let dir = type === "reference" ? savedReferenceDir : savedTestDir;
+    dir = path.join(dir, project, branch);
+    const allSets = await getAllFolders(dir);
+
+    const getSavedInfo = async (setId: string): Promise<RefTestSavedInfo | null> => {
+      const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, setId);
+      return metadata === null
+        ? null
+        : {
+            id: metadata.id,
+            createdAt: metadata.createdAt,
+            type: metadata.type,
+            project: metadata.project,
+            branch: metadata.branch,
+            viewport: metadata.viewport,
+            name: metadata.name,
+            fileSize: metadata.size,
+            stories: metadata.storyMetadataList.length,
+            errStories: metadata.storyMetadataList.reduce((acc, cur) => acc + (cur.storyErr ? 1 : 0), 0),
+          };
+    };
+
+    const results = await Promise.all(allSets.map(getSavedInfo));
+    return results.filter((info): info is RefTestSavedInfo => info !== null);
   }
 
   private async getSaveComparisonSets(project: string): Promise<ComparisonSavedInfo[]> {
@@ -110,27 +143,22 @@ export class SavedSetServiceImpl implements SavedSetService {
     const allSets = await getAllFolders(dir);
 
     const getSavedInfo = async (setId: string): Promise<ComparisonSavedInfo | null> => {
-      const metadataPath = path.join(dir, setId, comparisonMetadataFilename);
-      const exist = await fs.pathExists(metadataPath);
-      if (!exist) return null;
-      const metadata: ComparisonResponse$Data = await fs.readJSON(metadataPath);
+      const metadata = await SavedComparisonMetadataHelper.read(project, setId);
+
+      if (metadata === null) return null;
 
       return {
         id: metadata.id,
         createdAt: metadata.createdAt,
-        project,
-        name: "todo",
+        project: metadata.project,
+        name: metadata.name,
         refBranch: metadata.refBranch,
-        testBranch: metadata.testBranch,
         refSetId: metadata.refSetId,
+        refSetName: metadata.refSetName,
+        testBranch: metadata.testBranch,
         testSetId: metadata.testSetId,
-        refSetName: "todo",
-        testSetName: "todo",
-        // todo
-        viewport: {
-          width: 123,
-          height: 456,
-        },
+        testSetName: metadata.testSetName,
+        viewport: metadata.viewport,
         result: {
           same: metadata.result.same.length,
           added: metadata.result.added.length,

@@ -77,7 +77,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
     ScreenshotChannel.updateStatus(ScreenshotState.FINISHED);
   }
 
-  @CatchError<SavedScreenshotResponse>(() => ({ success: false, errMsg: "Fail to save screenshot" }), false)
+  @CatchError<SavedScreenshotResponse>({ success: false, errMsg: "Fail to save screenshot" })
   @Log()
   public async saveScreenshot(
     type: SaveScreenshotType,

@@ -181,8 +181,8 @@ export const useComparisonStore = defineStore("comparison", () => {
 
   const refreshData = async () => {
     const [_availableProjects, _projectsInTab] = await Promise.all([
-      window.comparisonApi.invoke.getAvailableProjects(),
-      window.userSettingApi.getProjectsInTab(),
+      window.savedSetApi.invoke.getAllSavedProjects(),
+      window.userSettingApi.invoke.getProjectsInTab(),
     ]);
 
     availableProjects.value = _availableProjects;
@@ -243,7 +243,7 @@ export const useComparisonStore = defineStore("comparison", () => {
   };
 
   const updateProjectsInTab = async (projects: string[]) => {
-    await window.userSettingApi.updateProjectsInTab(projects);
+    await window.userSettingApi.invoke.updateProjectsInTab(projects);
     projectsInTab.value = projects;
   };
 
@@ -293,11 +293,31 @@ export const useComparisonStore = defineStore("comparison", () => {
           diff: { loading: false, isExist: null, base64: null },
         };
         const [refImg, testImg] = await Promise.all([
-          window.imgApi.getSavedImg("reference", project, refBranch, refSetId, data.id),
-          window.imgApi.getSavedImg("test", project, testBranch, testSetId, data.id),
+          window.imgApi.invoke.getSavedImg({
+            type: "reference",
+            project,
+            branch: refBranch,
+            setId: refSetId,
+            id: data.id,
+          }),
+          window.imgApi.invoke.getSavedImg({
+            type: "test",
+            project,
+            branch: testBranch,
+            setId: testSetId,
+            id: data.id,
+          }),
         ]);
-        displayingImg.value.ref = { loading: false, isExist: refImg.isExist, base64: refImg.base64 };
-        displayingImg.value.test = { loading: false, isExist: testImg.isExist, base64: testImg.base64 };
+        displayingImg.value.ref = {
+          loading: false,
+          isExist: refImg.isExist,
+          base64: refImg.base64,
+        };
+        displayingImg.value.test = {
+          loading: false,
+          isExist: testImg.isExist,
+          base64: testImg.base64,
+        };
         return;
       }
       case "added": {
@@ -307,8 +327,18 @@ export const useComparisonStore = defineStore("comparison", () => {
           test: { loading: true, isExist: null, base64: null },
           diff: { loading: false, isExist: null, base64: null },
         };
-        const testImg = await window.imgApi.getSavedImg("test", project, testBranch, testSetId, data.id);
-        displayingImg.value.test = { loading: false, isExist: testImg.isExist, base64: testImg.base64 };
+        const testImg = await window.imgApi.invoke.getSavedImg({
+          type: "test",
+          project,
+          branch: testBranch,
+          setId: testSetId,
+          id: data.id,
+        });
+        displayingImg.value.test = {
+          loading: false,
+          isExist: testImg.isExist,
+          base64: testImg.base64,
+        };
         return;
       }
       case "removed": {
@@ -318,8 +348,18 @@ export const useComparisonStore = defineStore("comparison", () => {
           test: { loading: false, isExist: null, base64: null },
           diff: { loading: false, isExist: null, base64: null },
         };
-        const refImg = await window.imgApi.getSavedImg("reference", project, refBranch, refSetId, data.id);
-        displayingImg.value.ref = { loading: false, isExist: refImg.isExist, base64: refImg.base64 };
+        const refImg = await window.imgApi.invoke.getSavedImg({
+          type: "reference",
+          project,
+          branch: refBranch,
+          setId: refSetId,
+          id: data.id,
+        });
+        displayingImg.value.ref = {
+          loading: false,
+          isExist: refImg.isExist,
+          base64: refImg.base64,
+        };
         return;
       }
       case "diff": {
@@ -330,13 +370,37 @@ export const useComparisonStore = defineStore("comparison", () => {
           diff: { loading: true, isExist: null, base64: null },
         };
         const [refImg, testImg, diffImg] = await Promise.all([
-          window.imgApi.getSavedImg("reference", project, refBranch, refSetId, data.id),
-          window.imgApi.getSavedImg("test", project, testBranch, testSetId, data.id),
-          window.imgApi.getCompareDiffImg(data.id),
+          window.imgApi.invoke.getSavedImg({
+            type: "reference",
+            project,
+            branch: refBranch,
+            setId: refSetId,
+            id: data.id,
+          }),
+          window.imgApi.invoke.getSavedImg({
+            type: "test",
+            project,
+            branch: testBranch,
+            setId: testSetId,
+            id: data.id,
+          }),
+          window.imgApi.invoke.getCompareDiffImg(data.id),
         ]);
-        displayingImg.value.ref = { loading: false, isExist: refImg.isExist, base64: refImg.base64 };
-        displayingImg.value.test = { loading: false, isExist: testImg.isExist, base64: testImg.base64 };
-        displayingImg.value.diff = { loading: false, isExist: diffImg.isExist, base64: diffImg.base64 };
+        displayingImg.value.ref = {
+          loading: false,
+          isExist: refImg.isExist,
+          base64: refImg.base64,
+        };
+        displayingImg.value.test = {
+          loading: false,
+          isExist: testImg.isExist,
+          base64: testImg.base64,
+        };
+        displayingImg.value.diff = {
+          loading: false,
+          isExist: diffImg.isExist,
+          base64: diffImg.base64,
+        };
         return;
       }
     }
@@ -345,7 +409,7 @@ export const useComparisonStore = defineStore("comparison", () => {
   const saveScreenshot = async () => {
     try {
       isSaving.value = true;
-      const result = await window.comparisonApi.invoke.saveComparisonResult();
+      const result = await window.comparisonApi.invoke.saveComparisonResult(saveInfo.value.name);
       if (result.success) {
         _toast.add({
           severity: "success",

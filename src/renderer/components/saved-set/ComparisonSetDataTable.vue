@@ -26,7 +26,7 @@
     </Column>
     <Column field="actions" header="Actions">
       <template #body="{ data }">
-        <button @click="console.log(data)">View</button>
+        <button @click="handleViewClick(data)">View</button>
       </template>
     </Column>
   </DataTable>
@@ -35,9 +35,17 @@
 <script setup lang="ts">
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import type { ComparisonSavedInfo } from "../../../shared/type";
+import { useSavedSetStore } from "../../stores/SavedSetStore";
+import type { ComparisonSavedInfo, RefTestSavedInfo } from "../../../shared/type";
 
 defineProps<{
   rows: ComparisonSavedInfo[];
 }>();
+
+const store = useSavedSetStore();
+const { openComparisonSet } = store;
+
+function handleViewClick(data: RefTestSavedInfo) {
+  openComparisonSet(data);
+}
 </script>

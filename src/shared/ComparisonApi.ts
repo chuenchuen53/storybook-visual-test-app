@@ -7,10 +7,9 @@ export interface ComparisonApi extends IpcApi {
     openInExplorer: () => void;
   };
   invoke: {
-    getAvailableProjects: () => Promise<string[]>;
-    getAvailableSets: (projectName: string) => Promise<GetAvailableSetResponse>;
+    getAvailableSets: (project: string) => Promise<GetAvailableSetResponse>;
     compare: (req: ComparisonRequest) => Promise<ComparisonResponse>;
-    saveComparisonResult: () => Promise<SavedScreenshotResponse>;
+    saveComparisonResult: (name: string) => Promise<SavedScreenshotResponse>;
   };
 }
 
@@ -20,7 +19,6 @@ export const ComparisonChannelKey: IpcChannel<ComparisonApi> = {
     openInExplorer: "compare:openInExplorer",
   },
   invoke: {
-    getAvailableProjects: "compare:getAvailableProjects",
     getAvailableSets: "compare:getAvailableSets",
     compare: "compare:compare",
     saveComparisonResult: "compare:saveComparison",

@@ -42,7 +42,7 @@
       <StyledTree
         v-model:expandedKeys="expandedKeys"
         v-model:highlightKey="highlightKey"
-        :data="explorerTreeData"
+        :data="explorerTreeData ?? []"
         class="px-3 pb-8 pt-2 text-sm"
         @node-click="onNodeSelect"
       >
@@ -81,7 +81,6 @@ const selectOptions: { name: string; value: keyof StoriesDiffResult }[] = [
 const onNodeSelect = (node: NodeData) => {
   if (node.data) {
     const data: ComparisonResultTreeLeaf = node.data;
-    console.log(data);
     handleNodeSelect(data);
   }
 };

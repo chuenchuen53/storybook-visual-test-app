@@ -1,6 +1,7 @@
 import { treeNodesForUi } from "../../general/tree/tree-helper";
+import { SavedScreenshotMetadata } from "../../../../shared/type";
+import type { StoryMetadata, StoryScreenshotMetadata, StoryState } from "../../../../shared/type";
 import type { TreeObj } from "../../../utils/story-tree-utils";
-import type { StoryMetadata, StoryState } from "../../../../shared/type";
 
 export interface StoryMetadataInExplorer extends StoryMetadata {
   state: StoryState;
@@ -12,6 +13,8 @@ export interface StoryMetadataInExplorer extends StoryMetadata {
 
 export type StoryTree = TreeObj<StoryMetadataInExplorer>;
 
+export type SavedStoryTree = TreeObj<StoryScreenshotMetadata>;
+
 function isLeafNode(node: StoryTree | StoryMetadataInExplorer): node is StoryMetadataInExplorer {
   const keys = Object.keys(node);
   const requiredLeafKeys = ["id", "title", "tags", "name"];
@@ -20,4 +23,14 @@ function isLeafNode(node: StoryTree | StoryMetadataInExplorer): node is StoryMet
 
 export function getScreenshotPageTreeData(treeObj: StoryTree) {
   return treeNodesForUi(treeObj, isLeafNode);
+}
+
+function isSavedSetLeafNode(node: SavedStoryTree | StoryScreenshotMetadata): node is StoryScreenshotMetadata {
+  const keys = Object.keys(node);
+  const requiredLeafKeys = ["id", "title", "tags", "name"];
+  return requiredLeafKeys.every(key => keys.includes(key));
+}
+
+export function getSavedSetPageTreeData(treeObj: SavedStoryTree) {
+  return treeNodesForUi(treeObj, isSavedSetLeafNode);
 }

@@ -14,24 +14,19 @@ export function registerComparisonHandlers(service: ComparisonService) {
       },
     },
     invoke: {
-      getAvailableProjects: async () => {
-        return await service.getAvailableProjects();
-      },
       getAvailableSets: async (_, project) => {
         return await service.getAvailableSets(project);
       },
       compare: async (_, req) => {
         return await service.compare(req.ref, req.test);
       },
-      saveComparisonResult: async () => {
-        return await service.saveComparison();
+      saveComparisonResult: async (_, name) => {
+        return await service.saveComparison(name);
       },
     },
   };
 
   ipcMain.on(ComparisonChannelKey.send.openInExplorer, handler.send.openInExplorer);
-
-  ipcMain.handle(ComparisonChannelKey.invoke.getAvailableProjects, handler.invoke.getAvailableProjects);
 
   ipcMain.handle(ComparisonChannelKey.invoke.getAvailableSets, handler.invoke.getAvailableSets);
 

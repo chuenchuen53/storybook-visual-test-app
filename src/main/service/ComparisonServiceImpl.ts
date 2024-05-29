@@ -16,11 +16,13 @@ import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMeta
 import { Log } from "../decorator/Log";
 import { CatchError } from "../decorator/CatchError";
 import { TempComparisonMetadataHelper } from "../data-files/TempComparisonMetadataHelper";
+import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
 import type {
   BranchScreenshotSet,
   ComparisonResponse,
   ComparisonResponse$Data,
   GetAvailableSetResponse,
+  SavedComparisonMetadata,
   SavedScreenshotResponse,
   SaveScreenshotType,
   SetData,
@@ -38,12 +40,6 @@ export class ComparisonServiceImpl implements ComparisonService {
   }
 
   private constructor() {}
-
-  public async getAvailableProjects(): Promise<string[]> {
-    const [refs, tests] = await Promise.all([getAllFolders(savedReferenceDir), getAllFolders(savedTestDir)]);
-    const set = new Set([...refs, ...tests]);
-    return Array.from(set);
-  }
 
   public async getAvailableSets(project: string): Promise<GetAvailableSetResponse> {
     const result: GetAvailableSetResponse = {
@@ -63,7 +59,7 @@ export class ComparisonServiceImpl implements ComparisonService {
     return result;
   }
 
-  @CatchError<ComparisonResponse>(() => ({ success: false, data: null, storyMetadataList: null }), false)
+  @CatchError<ComparisonResponse>({ success: false, data: null, storyMetadataList: null })
   @Log()
   public async compare(refSet: SetData, testSet: SetData): Promise<ComparisonResponse> {
     const id = uuidv4();
@@ -113,8 +109,11 @@ export class ComparisonServiceImpl implements ComparisonService {
       project,
       refBranch,
       refSetId,
+      refSetName: refSetMetadata.name,
       testBranch,
       testSetId,
+      testSetName: testSetMetadata.name,
+      viewport: refSetMetadata.viewport,
       result,
     };
     await TempComparisonMetadataHelper.save(metadata);
@@ -122,17 +121,33 @@ export class ComparisonServiceImpl implements ComparisonService {
     return { success: true, data: metadata, storyMetadataList };
   }
 
-  @CatchError<SavedScreenshotResponse>(
-    e => ({ success: false, errMsg: e instanceof Error ? e.message : "Unknown error" }),
-    false,
-  )
+  @CatchError<SavedScreenshotResponse>(e => ({
+    success: false,
+    errMsg: e instanceof Error ? e.message : "Unknown error",
+  }))
   @Log()
-  public async saveComparison(): Promise<SavedScreenshotResponse> {
+  public async saveComparison(name: string): Promise<SavedScreenshotResponse> {
     const metadata = await TempComparisonMetadataHelper.read();
     if (!metadata) throw new Error("No comparison metadata found");
+
     const { id, project } = metadata;
     const destDir = path.join(savedComparisonDir, project, id);
     await fs.copy(comparisonDir, destDir, { overwrite: true });
+    const savedMetadata: SavedComparisonMetadata = {
+      id: metadata.id,
+      createdAt: metadata.createdAt,
+      project: metadata.project,
+      name,
+      refBranch: metadata.refBranch,
+      refSetId: metadata.refSetId,
+      refSetName: metadata.refSetName,
+      testBranch: metadata.testBranch,
+      testSetId: metadata.testSetId,
+      testSetName: metadata.testSetName,
+      viewport: metadata.viewport,
+      result: metadata.result,
+    };
+    await SavedComparisonMetadataHelper.save(savedMetadata);
     return { success: true };
   }
 

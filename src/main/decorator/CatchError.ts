@@ -5,7 +5,7 @@ export class HandledError extends Error {
   }
 }
 
-export function CatchError<T>(errHandling: (error: unknown) => T | void, rethrow: boolean | "handled" = true) {
+export function CatchError<T>(whenErr: T | ((error: unknown) => T | void), rethrow: boolean | "handled" = false) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
@@ -15,7 +15,7 @@ export function CatchError<T>(errHandling: (error: unknown) => T | void, rethrow
       try {
         return await originalMethod.apply(this, args);
       } catch (e) {
-        const valueWhenError = errHandling(e);
+        const valueWhenError = whenErr instanceof Function ? whenErr(e) : whenErr;
         if (rethrow === true) {
           throw e;
         } else if (rethrow === "handled") {

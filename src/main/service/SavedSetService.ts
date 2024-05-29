@@ -1,9 +1,12 @@
-import type { RefTestSavedInfo, SavedSets, SaveScreenshotType, StoryScreenshotMetadata } from "../../shared/type";
+import type {
+  GetComparisonSavedSetMetadataResponse,
+  SavedSets,
+  SaveScreenshotType,
+  StoryScreenshotMetadata,
+} from "../../shared/type";
 
 export interface SavedSetService {
-  getAllRefOrTestBranches(type: SaveScreenshotType, project: string): Promise<string[]>;
-  getAllRefOrTestSavedSets(type: SaveScreenshotType, project: string, branch: string): Promise<RefTestSavedInfo[]>;
-
+  getAllSavedProjects(): Promise<string[]>;
   getAllSavedSets(project: string): Promise<SavedSets>;
   getRefOrTestSavedSetMetadata(
     type: SaveScreenshotType,
@@ -11,4 +14,5 @@ export interface SavedSetService {
     branch: string,
     setId: string,
   ): Promise<StoryScreenshotMetadata[]>;
+  getComparisonSavedSetMetadata(project: string, setId: string): Promise<GetComparisonSavedSetMetadataResponse>;
 }

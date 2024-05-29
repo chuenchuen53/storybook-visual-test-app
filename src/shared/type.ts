@@ -53,9 +53,28 @@ export interface ComparisonResponse$Data {
   project: string;
   refBranch: string;
   refSetId: string;
+  refSetName: string;
   testBranch: string;
   testSetId: string;
+  testSetName: string;
+  viewport: Viewport;
   result: StoriesDiffResult;
+}
+
+export interface SavedComparisonMetadata extends ComparisonResponse$Data {
+  name: string;
+}
+
+export interface GetComparisonSavedSetMetadataRequest {
+  project: string;
+  setId: string;
+}
+
+export interface GetComparisonSavedSetMetadataResponse {
+  data: {
+    metadata: SavedComparisonMetadata;
+    storyMetadataList: StoryScreenshotMetadata[];
+  } | null;
 }
 
 export interface SetData {
@@ -112,7 +131,7 @@ export interface RefTestSavedInfo {
   branch: string;
   viewport: Viewport;
   name: string;
-  fileSize: string;
+  fileSize: number;
   stories: number;
   errStories: number;
 }
@@ -130,10 +149,10 @@ export interface ComparisonSavedInfo {
   project: string;
   name: string;
   refBranch: string;
-  testBranch: string;
   refSetId: string;
-  testSetId: string;
   refSetName: string;
+  testBranch: string;
+  testSetId: string;
   testSetName: string;
   viewport: Viewport;
   result: ComparisonSavedInfo$Result;
@@ -166,4 +185,19 @@ export interface SavedScreenshotMetadata {
   name: string;
   size: number;
   storyMetadataList: StoryScreenshotMetadata[];
+}
+
+export interface RetRefOrTestSavedSetMetadataRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  setId: string;
+}
+
+export interface GetSavedImgRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  setId: string;
+  id: string;
 }

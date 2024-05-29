@@ -15,7 +15,7 @@ export class TempComparisonMetadataHelper {
     try {
       return await fs.readJSON(TempComparisonMetadataHelper.resultFilePath);
     } catch (error) {
-      logger.error(error, "Error reading result:");
+      logger.error(error, "Error reading metadata:");
       return null;
     }
   }

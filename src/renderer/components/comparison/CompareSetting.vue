@@ -57,23 +57,11 @@ import type { SelectChangeEvent } from "primevue/select";
 
 const store = useComparisonStore();
 const { isComparing, project, availableSets, refSet, testSet } = storeToRefs(store);
-const {
-  refreshData,
-  updateProject,
-  updateRefSetBranch,
-  updateTestSetBranch,
-  updateRefSetId,
-  updateTestSetId,
-  compare,
-} = store;
+const { refreshData, updateRefSetBranch, updateTestSetBranch, updateRefSetId, updateTestSetId, compare } = store;
 
 const disableCompareBtn = computed(() => {
   return !project.value || !refSet.value.branch || !testSet.value.branch || !refSet.value.setId || !testSet.value.setId;
 });
-
-const handleSelectionChange = (e: SelectChangeEvent) => {
-  updateProject(e.value);
-};
 
 const availableRefBranch = computed(() => {
   return availableSets.value.ref.map(x => x.branch);

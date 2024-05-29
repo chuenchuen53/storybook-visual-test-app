@@ -109,7 +109,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
 
   const _getImg = async (id: string) => {
     displayingImg.value = { loading: true, isExist: null, base64: null };
-    const { isExist, base64 } = await window.imgApi.getScreenshotImg(id);
+    const { isExist, base64 } = await window.imgApi.invoke.getScreenshotImg(id);
     displayingImg.value = { loading: false, isExist, base64 };
   };
 

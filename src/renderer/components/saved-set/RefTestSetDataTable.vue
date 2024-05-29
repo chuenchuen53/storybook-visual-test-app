@@ -40,7 +40,6 @@ defineProps<{
 }>();
 
 function handleViewClick(data: RefTestSavedInfo) {
-  console.log(data);
   openRefTestSet(data);
 }
 </script>

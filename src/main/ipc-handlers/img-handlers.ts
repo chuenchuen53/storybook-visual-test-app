@@ -1,34 +1,24 @@
 import { ipcMain } from "electron";
-import { openInExplorer } from "../utils";
-import { comparisonDir } from "../Filepath";
+import { ImgChannelKey } from "../../shared/ImgApi";
+import type { ImgApi } from "../../shared/ImgApi";
 import type { ImgService } from "../service/ImgService";
-import type { SaveScreenshotType } from "../../shared/type";
+import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 
 export function registerImgHandlers(imgService: ImgService) {
-  ipcMain.on("compare:openInExplorer", () => {
-    openInExplorer(comparisonDir);
-  });
-
-  ipcMain.handle("img:getScreenshotImg", async (_event, id: string) => {
-    return await imgService.getScreenshotImg(id);
-  });
-
-  ipcMain.handle("img:getCompareAddImg", async (_event, id: string) => {
-    return await imgService.getCompareAddedImg(id);
-  });
-
-  ipcMain.handle("img:getCompareRemovedImg", async (_event, id: string) => {
-    return await imgService.getCompareRemovedImg(id);
-  });
-
-  ipcMain.handle("img:getCompareDiffImg", async (_event, id: string) => {
-    return await imgService.getCompareDiffImg(id);
-  });
-
-  ipcMain.handle(
-    "img:getSavedImg",
-    async (_event, type: SaveScreenshotType, project: string, branch: string, uuid: string, id: string) => {
-      return await imgService.getSavedImg(type, project, branch, uuid, id);
+  const handler: IpcMainHandler<ImgApi> = {
+    send: {},
+    invoke: {
+      getScreenshotImg: async (_, id) => await imgService.getScreenshotImg(id),
+      getCompareAddedImg: async (_, id) => await imgService.getCompareAddedImg(id),
+      getCompareRemovedImg: async (_, id) => await imgService.getCompareRemovedImg(id),
+      getCompareDiffImg: async (_, id) => await imgService.getCompareDiffImg(id),
+      getSavedImg: async (_, req) => await imgService.getSavedImg(req.type, req.project, req.branch, req.setId, req.id),
     },
-  );
+  };
+
+  ipcMain.handle(ImgChannelKey.invoke.getScreenshotImg, handler.invoke.getScreenshotImg);
+  ipcMain.handle(ImgChannelKey.invoke.getCompareAddedImg, handler.invoke.getCompareAddedImg);
+  ipcMain.handle(ImgChannelKey.invoke.getCompareRemovedImg, handler.invoke.getCompareRemovedImg);
+  ipcMain.handle(ImgChannelKey.invoke.getCompareDiffImg, handler.invoke.getCompareDiffImg);
+  ipcMain.handle(ImgChannelKey.invoke.getSavedImg, handler.invoke.getSavedImg);
 }

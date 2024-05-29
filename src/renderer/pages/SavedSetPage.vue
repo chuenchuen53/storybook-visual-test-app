@@ -27,6 +27,36 @@
             </template>
           </StyledTree>
         </div>
+        <div v-if="currentSelectedSetType === 'compare'">
+          <SelectButton
+            v-if="selectedComparisonResultType"
+            v-model="selectedComparisonResultType"
+            :options="selectOptions"
+            option-label="name"
+            option-value="value"
+            :allow-empty="false"
+            class="w-full px-3 [&>*]:flex-grow"
+          >
+            <template #option="slotProps">
+              <div class="text-nowrap text-xs">
+                <span>
+                  {{ slotProps.option.name }}
+                </span>
+                <span class="text-[10px] text-gray-400">
+                  ({{ selectedComparisonResultType[slotProps.option.value] }})
+                </span>
+              </div>
+            </template>
+          </SelectButton>
+          <StyledTree
+            v-model:expandedKeys="expandedKeys"
+            v-model:highlightKey="selectedComparisonResultType"
+            :data="comparisonExplorerTreeData ?? []"
+            class="px-3 pb-8 pt-2 text-sm"
+            @node-click="onNodeSelect"
+          >
+          </StyledTree>
+        </div>
       </template>
       <template #right>
         <div v-if="currentSelectedSetType === null" class="size-full">
@@ -50,6 +80,7 @@
           </div>
         </div>
         <div v-else-if="currentSelectedSetType === 'ref' || currentSelectedSetType === 'test'">
+          <button @click="deselectSavedSet">go back</button>
           <div class="mt-4 flex w-full justify-center">
             <div v-if="displayingImg.loading">
               <ProgressSpinner />
@@ -72,16 +103,18 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, watchEffect } from "vue";
 import Image from "primevue/image";
 import ProgressSpinner from "primevue/progressspinner";
+import SelectButton from "primevue/selectbutton";
 import { isLeaf } from "../components/general/tree/tree-helper";
 import StyledTree from "../components/general/tree/StyledTree.vue";
 import ProjectPickerList from "../components/shared/ProjectPickerList.vue";
 import ProjectTabs from "../components/shared/ProjectTabs.vue";
 import LeftRightSplitContainer from "../components/LeftRightSplitContainer.vue";
 import SavedSetsDataTables from "../components/saved-set/SavedSetsDataTables.vue";
-
 import { useSavedSetStore } from "../stores/SavedSetStore";
-import type { NodeData } from "@renderer/components/general/tree/type";
-import type { StoryMetadataInExplorer } from "@renderer/components/screenshot/story-explorer/helper";
+import type { NodeData } from "../components/general/tree/type";
+import type { StoryMetadataInExplorer } from "../components/screenshot/story-explorer/helper";
+import type { StoriesDiffResult } from "../../shared/type";
+import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
 
 const store = useSavedSetStore();
 const {
@@ -93,15 +126,19 @@ const {
   selectedKey,
   explorerTreeData,
   displayingImg,
+  selectedComparisonResultType,
+  comparisonExplorerTreeData,
 } = storeToRefs(store);
-const { refreshData, updateProject, updateProjectsInTab, getAllRefBranches, getAllTestBranches, updateDisplayingImg } =
-  store;
+const {
+  refreshData,
+  updateProject,
+  updateProjectsInTab,
+  updateDisplayingImg,
+  deselectSavedSet,
+  updateComparisonDisplayImg,
+} = store;
 
 const displayTabsSetting = ref(false);
-
-watchEffect(() => {
-  console.log(explorerTreeData.value);
-});
 
 const handlePickerConfirm = (projects: string[]) => {
   updateProjectsInTab(projects);
@@ -112,6 +149,20 @@ const onNodeSelect = (node: NodeData) => {
   const data: StoryMetadataInExplorer | undefined = node.data;
   if (data) {
     updateDisplayingImg(data.id);
+  }
+};
+
+const selectOptions: { name: string; value: keyof StoriesDiffResult }[] = [
+  { name: "Diff", value: "diff" },
+  { name: "Added", value: "added" },
+  { name: "Removed", value: "removed" },
+  { name: "Same", value: "same" },
+];
+
+const onComparisonNodeSelect = (node: NodeData) => {
+  if (node.data) {
+    const data: ComparisonResultTreeLeaf = node.data;
+    updateComparisonDisplayImg(data);
   }
 };
 

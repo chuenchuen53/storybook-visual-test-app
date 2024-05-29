@@ -1,10 +1,49 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { ScreenshotChannelKey } from "./shared/ScreenshotApi";
 import { ComparisonChannelKey } from "./shared/ComparisonApi";
+import { SavedSetChannelKey } from "./shared/SavedSetApi";
+import { ImgChannelKey } from "./shared/ImgApi";
+import { GlobalChannelKey } from "./shared/GlobalApi";
+import { UserSettingChannelKey } from "./shared/UserSettingApi";
+import type { UserSettingApi } from "./shared/UserSettingApi";
+import type { GlobalApi } from "./shared/GlobalApi";
+import type { ImgApi } from "./shared/ImgApi";
+import type { SavedSetApi } from "./shared/SavedSetApi";
 import type { ComparisonApi } from "./shared/ComparisonApi";
 import type { IpcRendererHandler } from "./shared/ipc-type-helper";
 import type { ScreenshotApi } from "./shared/ScreenshotApi";
-import type { GlobalMessage, SaveScreenshotType } from "./shared/type";
+
+const globalApi: IpcRendererHandler<GlobalApi> = {
+  listen: {
+    onReceiveGlobalMessage: cb =>
+      ipcRenderer.on(GlobalChannelKey.listen.onReceiveGlobalMessage, (_event, msg: Parameters<typeof cb>[0]) =>
+        cb(msg),
+      ),
+  },
+  send: {},
+  invoke: {},
+};
+
+const userSettingApi: IpcRendererHandler<UserSettingApi> = {
+  listen: {},
+  send: {},
+  invoke: {
+    getProjectsInTab: () => ipcRenderer.invoke(UserSettingChannelKey.invoke.getProjectsInTab),
+    updateProjectsInTab: projects => ipcRenderer.invoke(UserSettingChannelKey.invoke.updateProjectsInTab, projects),
+  },
+};
+
+const imgApi: IpcRendererHandler<ImgApi> = {
+  listen: {},
+  send: {},
+  invoke: {
+    getScreenshotImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getScreenshotImg, id),
+    getCompareAddedImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareAddedImg, id),
+    getCompareRemovedImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareRemovedImg, id),
+    getCompareDiffImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareDiffImg, id),
+    getSavedImg: req => ipcRenderer.invoke(ImgChannelKey.invoke.getSavedImg, req),
+  },
+};
 
 const screenshotApi: IpcRendererHandler<ScreenshotApi> = {
   listen: {
@@ -33,42 +72,33 @@ const comparisonApi: IpcRendererHandler<ComparisonApi> = {
     openInExplorer: () => ipcRenderer.send(ComparisonChannelKey.send.openInExplorer),
   },
   invoke: {
-    getAvailableProjects: () => ipcRenderer.invoke(ComparisonChannelKey.invoke.getAvailableProjects),
     getAvailableSets: project => ipcRenderer.invoke(ComparisonChannelKey.invoke.getAvailableSets, project),
     compare: req => ipcRenderer.invoke(ComparisonChannelKey.invoke.compare, req),
-    saveComparisonResult: () => ipcRenderer.invoke(ComparisonChannelKey.invoke.saveComparisonResult),
+    saveComparisonResult: name => ipcRenderer.invoke(ComparisonChannelKey.invoke.saveComparisonResult, name),
   },
 };
 
-contextBridge.exposeInMainWorld("globalApi", {
-  onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) =>
-    ipcRenderer.on("global:message", (_event, msg) => cb(msg)),
-});
+const savedSetApi: IpcRendererHandler<SavedSetApi> = {
+  listen: {},
+  send: {},
+  invoke: {
+    getAllSavedProjects: () => ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedProjects),
+    getAllSavedSets: project => ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedSets, project),
+    getRefOrTestSavedSetMetadata: req =>
+      ipcRenderer.invoke(SavedSetChannelKey.invoke.getRefOrTestSavedSetMetadata, req),
+    getComparisonSavedSetMetadata: req =>
+      ipcRenderer.invoke(SavedSetChannelKey.invoke.getComparisonSavedSetMetadata, req),
+  },
+};
 
-contextBridge.exposeInMainWorld("imgApi", {
-  getScreenshotImg: (id: string) => ipcRenderer.invoke("img:getScreenshotImg", id),
-  getCompareAddedImg: (id: string) => ipcRenderer.invoke("img:getCompareAddImg", id),
-  getCompareRemovedImg: (id: string) => ipcRenderer.invoke("img:getCompareRemovedImg", id),
-  getCompareDiffImg: (id: string) => ipcRenderer.invoke("img:getCompareDiffImg", id),
-  getSavedImg: (type: SaveScreenshotType, project: string, branch: string, uuid: string, id: string) =>
-    ipcRenderer.invoke("img:getSavedImg", type, project, branch, uuid, id),
-});
+contextBridge.exposeInMainWorld("globalApi", globalApi);
 
-contextBridge.exposeInMainWorld("userSettingApi", {
-  getProjectsInTab: () => ipcRenderer.invoke("userSetting:getProjectsInTab"),
-  updateProjectsInTab: (projects: string[]) => ipcRenderer.invoke("userSetting:updateProjectsInTab", projects),
-});
+contextBridge.exposeInMainWorld("userSettingApi", userSettingApi);
+
+contextBridge.exposeInMainWorld("imgApi", imgApi);
 
 contextBridge.exposeInMainWorld("screenshotApi", screenshotApi);
 
 contextBridge.exposeInMainWorld("comparisonApi", comparisonApi);
 
-contextBridge.exposeInMainWorld("savedSetApi", {
-  getAllRefOrTestBranches: (type: SaveScreenshotType, project: string) =>
-    ipcRenderer.invoke("savedSet:getAllRefOrTestBranches", type, project),
-  getAllRefOrTestSavedSets: (type: SaveScreenshotType, project: string, branch: string) =>
-    ipcRenderer.invoke("savedSet:getAllRefOrTestSavedSets", type, project, branch),
-  getAllSavedSets: (project: string) => ipcRenderer.invoke("savedSet:getAllSavedSets", project),
-  getRefOrTestSavedSetMetadata: (type: SaveScreenshotType, project: string, branch: string, setId: string) =>
-    ipcRenderer.invoke("savedSet:getRefOrTestSavedSetMetadata", type, project, branch, setId),
-});
+contextBridge.exposeInMainWorld("savedSetApi", savedSetApi);

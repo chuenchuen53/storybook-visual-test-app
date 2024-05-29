@@ -1,27 +1,24 @@
 import { ipcMain } from "electron";
-import type { SaveScreenshotType } from "../../shared/type";
+import { SavedSetChannelKey } from "../../shared/SavedSetApi";
+import type { SavedSetApi } from "../../shared/SavedSetApi";
+import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 import type { SavedSetService } from "../service/SavedSetService";
 
-export function registerSavedSetHandlers(savedSetService: SavedSetService) {
-  ipcMain.handle("savedSet:getAllRefOrTestBranches", async (event, type: SaveScreenshotType, project: string) => {
-    return await savedSetService.getAllRefOrTestBranches(type, project);
-  });
-
-  ipcMain.handle(
-    "savedSet:getAllRefOrTestSavedSets",
-    async (event, type: SaveScreenshotType, project: string, branch: string) => {
-      return await savedSetService.getAllRefOrTestSavedSets(type, project, branch);
+export function registerSavedSetHandlers(service: SavedSetService) {
+  const handler: IpcMainHandler<SavedSetApi> = {
+    send: {},
+    invoke: {
+      getAllSavedProjects: async () => service.getAllSavedProjects(),
+      getAllSavedSets: async (_, project) => await service.getAllSavedSets(project),
+      getRefOrTestSavedSetMetadata: async (_, req) =>
+        await service.getRefOrTestSavedSetMetadata(req.type, req.project, req.branch, req.setId),
+      getComparisonSavedSetMetadata: async (_, req) =>
+        await service.getComparisonSavedSetMetadata(req.project, req.setId),
     },
-  );
+  };
 
-  ipcMain.handle("savedSet:getAllSavedSets", async (event, project: string) => {
-    return await savedSetService.getAllSavedSets(project);
-  });
-
-  ipcMain.handle(
-    "savedSet:getRefOrTestSavedSetMetadata",
-    async (event, type: SaveScreenshotType, project: string, branch: string, setId: string) => {
-      return await savedSetService.getRefOrTestSavedSetMetadata(type, project, branch, setId);
-    },
-  );
+  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedProjects, handler.invoke.getAllSavedProjects);
+  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedSets, handler.invoke.getAllSavedSets);
+  ipcMain.handle(SavedSetChannelKey.invoke.getRefOrTestSavedSetMetadata, handler.invoke.getRefOrTestSavedSetMetadata);
+  ipcMain.handle(SavedSetChannelKey.invoke.getComparisonSavedSetMetadata, handler.invoke.getComparisonSavedSetMetadata);
 }
