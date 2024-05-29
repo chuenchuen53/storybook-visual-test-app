@@ -74,7 +74,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     updateItem,
     expandAll,
     collapseAll,
-  } = useStoryExplorer();
+  } = useStoryExplorer<StoryMetadataInExplorer>();
 
   const { imgState, removeImg, updateImg } = useImage();
 

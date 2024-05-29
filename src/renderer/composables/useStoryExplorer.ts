@@ -2,27 +2,33 @@ import { computed, ref } from "vue";
 import { getScreenshotPageTreeData } from "../components/screenshot/story-explorer/helper";
 import { generateTreeFromFlatData } from "../utils/story-tree-utils";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
+import type { StoryMetadata, StoryScreenshotMetadata } from "../../shared/type";
+import type { NodeData } from "../components/general/tree/type";
 import type { StoryMetadataInExplorer } from "../components/screenshot/story-explorer/helper";
 import type { ComputedRef, Ref } from "vue";
-import type { NodeData } from "../components/general/tree/type";
 
 export type StoryTypeFilter = "all" | "error";
 
-interface UseStoryExplorerReturn {
+export interface BaseStoryMetadata extends StoryMetadata {
+  storyErr: boolean | null;
+}
+
+interface UseStoryExplorerReturn<T extends BaseStoryMetadata> {
   treeData: ComputedRef<NodeData[]>;
   searchText: Ref<string>;
   storyTypeFilter: Ref<StoryTypeFilter>;
   highlightKey: Ref<string | null>;
   expandedKeys: Ref<Set<string>>;
-  replaceBackingData: (data: StoryMetadataInExplorer[]) => void;
-  getDataById: (id: string) => StoryMetadataInExplorer | null;
-  updateItem: (id: string, newItem: Partial<StoryMetadataInExplorer>) => void;
+  reset: () => void;
+  replaceBackingData: (data: T[]) => void;
+  getDataById: (id: string) => T | null;
+  updateItem: (id: string, newItem: Partial<T>) => void;
   expandAll: () => void;
   collapseAll: () => void;
 }
 
-export function useStoryExplorer(): UseStoryExplorerReturn {
-  const _backingData = ref<StoryMetadataInExplorer[] | null>(null);
+export function useStoryExplorer<T extends BaseStoryMetadata>(): UseStoryExplorerReturn<T> {
+  const _backingData: Ref<T[] | null> = ref(null);
 
   // a map of id to index of _metadata for faster search
   const _idToIndexMap = new Map<string, number>();
@@ -44,7 +50,16 @@ export function useStoryExplorer(): UseStoryExplorerReturn {
     return getScreenshotPageTreeData(generateTreeFromFlatData(filteredData));
   });
 
-  const replaceBackingData = (data: StoryMetadataInExplorer[]) => {
+  const reset = () => {
+    _idToIndexMap.clear();
+    highlightKey.value = null;
+    expandedKeys.value.clear();
+    _backingData.value = null;
+    searchText.value = "";
+    storyTypeFilter.value = "all";
+  };
+
+  const replaceBackingData = (data: T[]) => {
     _idToIndexMap.clear();
     data.forEach((x, index) => {
       _idToIndexMap.set(x.id, index);
@@ -54,7 +69,7 @@ export function useStoryExplorer(): UseStoryExplorerReturn {
     _backingData.value = data;
   };
 
-  const getDataById = (id: string): StoryMetadataInExplorer | null => {
+  const getDataById = (id: string): T | null => {
     if (!_backingData.value) return null;
     const index = _idToIndexMap.get(id);
     return index === undefined ? null : _backingData.value[index] ?? null;
@@ -83,6 +98,7 @@ export function useStoryExplorer(): UseStoryExplorerReturn {
     highlightKey,
     expandedKeys,
     treeData,
+    reset,
     replaceBackingData,
     getDataById,
     updateItem,

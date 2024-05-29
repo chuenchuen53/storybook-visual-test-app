@@ -1,36 +1,14 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import { getSavedSetPageTreeData, getScreenshotPageTreeData } from "../components/screenshot/story-explorer/helper";
-import { generateTreeFromFlatData } from "../utils/story-tree-utils";
-import {
-  generateTreeFromRespData,
-  getCompareResultTreeData,
-} from "../components/comparison/comparison-result-explorer/helper";
-import type {
-  ComparisonSavedInfo,
-  RefTestSavedInfo,
-  SavedComparisonMetadata,
-  SavedSets,
-  StoriesDiffResult,
-  StoryScreenshotMetadata,
-} from "../../shared/type";
+import { useStoryExplorer } from "../composables/useStoryExplorer";
+import { useImage } from "../composables/useImage";
+import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
+import { useComparisonImage } from "../composables/useComparisonImage";
 import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
+import type { ComparisonSavedInfo, RefTestSavedInfo, SavedSets, StoryScreenshotMetadata } from "../../shared/type";
 
 type CurrentSelectedSet = RefTestSavedInfo | ComparisonSavedInfo | null;
-
-export interface DisplayingImg {
-  type: keyof StoriesDiffResult;
-  ref: ImgState;
-  test: ImgState;
-  diff: ImgState;
-}
-
-interface ImgState {
-  loading: boolean;
-  isExist: boolean | null;
-  base64: string | null;
-}
 
 export const useSavedSetStore = defineStore("savedSet", () => {
   const _toast = useToast();
@@ -49,84 +27,39 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     return "test";
   });
 
-  const _currentSelectedRefTestStoryMetadataList = ref<StoryScreenshotMetadata[] | null>(null);
-  const refTestStoryTypeFilter = ref<"all" | "error">("all");
-  const searchText = ref("");
-  const expandedKeys = ref(new Set<string>());
   const selectedKey = ref<string | null>(null);
 
-  const _filteredStoryMetadataList = computed(() => {
-    if (_currentSelectedRefTestStoryMetadataList.value === null) return null;
-    const arr =
-      refTestStoryTypeFilter.value === "all"
-        ? _currentSelectedRefTestStoryMetadataList.value
-        : _currentSelectedRefTestStoryMetadataList.value.filter(item => item.storyErr);
-    return searchText.value
-      ? arr.filter(item => {
-          const lowerCaseSearchText = searchText.value.toLowerCase();
-          return (
-            item.title.toLowerCase().includes(lowerCaseSearchText) ||
-            item.name.toLowerCase().includes(lowerCaseSearchText)
-          );
-        })
-      : arr;
-  });
+  const {
+    searchText: refTestSearchText,
+    storyTypeFilter: refTestStoryTypeFilter,
+    highlightKey: refTestHighlightKey,
+    expandedKeys: refTestExpandedKeys,
+    treeData: refTestTreeData,
+    reset: refTestReset,
+    replaceBackingData: refTestReplaceBackingData,
+    expandAll: refTestExpandAll,
+    collapseAll: refTestCollapseAll,
+  } = useStoryExplorer<StoryScreenshotMetadata>();
+  const { imgState: refTestImgState, removeImg: refTestRemoveImg, updateImg: refTestUpdateImg } = useImage();
 
-  const explorerTreeData = computed(() => {
-    return _filteredStoryMetadataList.value === null
-      ? []
-      : getSavedSetPageTreeData(generateTreeFromFlatData(_filteredStoryMetadataList.value));
-  });
-
-  const displayingImg = ref<ImgState>({
-    loading: false,
-    isExist: null,
-    base64: null,
-  });
-
-  const _currentSelectedComparisonMetadata = ref<SavedComparisonMetadata | null>(null);
-  const _currentSelectedComparisonStoryMetadataMap = ref(new Map<string, StoryScreenshotMetadata>());
-  const comparisonDisplayingImg = ref<DisplayingImg | null>(null);
-  const selectedComparisonResultType = ref<"diff" | "added" | "removed" | "same">("diff");
-
-  const _compareResultForTree = computed<null | Record<keyof StoriesDiffResult, ComparisonResultTreeLeaf[]>>(() => {
-    if (_currentSelectedComparisonMetadata.value === null) return null;
-    const result: Record<keyof StoriesDiffResult, ComparisonResultTreeLeaf[]> = {
-      diff: [],
-      added: [],
-      removed: [],
-      same: [],
-    };
-    const localResult = _currentSelectedComparisonMetadata.value?.result;
-    if (!localResult) return result;
-
-    const keys: (keyof StoriesDiffResult)[] = ["diff", "added", "removed", "same"];
-    for (const key of keys) {
-      for (const id of localResult[key]) {
-        const data = _currentSelectedComparisonStoryMetadataMap.value.get(id);
-        if (data) {
-          result[key].push({ ...data, type: key });
-        }
-      }
-    }
-
-    return result;
-  });
-
-  const comparisonExplorerTreeData = computed(() => {
-    return _compareResultForTree.value === null
-      ? null
-      : getCompareResultTreeData(
-          generateTreeFromRespData(_compareResultForTree.value, selectedComparisonResultType.value),
-        );
-  });
+  const {
+    treeData: comparisonTreeData,
+    searchText: comparisonSearchText,
+    typeOptions: comparisonTypeOptions,
+    selectedType: comparisonSelectedType,
+    highlightKey: comparisonHighlightKey,
+    expandedKeys: comparisonExpandedKeys,
+    replaceBackingData: comparisonReplaceBackingData,
+    getSetMetadata: comparisonGetSetMetadata,
+    expandAll: comparisonExpandAll,
+    collapseAll: comparisonCollapseAll,
+  } = useComparisonResultExplorer();
+  const { comparisonImageState, resetImgs, setSameImg, setAddedImg, setRemovedImg, setDiffImg } = useComparisonImage();
 
   const updateProject = async (x: string) => {
     project.value = x;
     currentSelectedSet.value = null;
     savedSets.value = null;
-    _currentSelectedRefTestStoryMetadataList.value = null;
-    displayingImg.value = { loading: false, isExist: null, base64: null };
     await getAllSavedSets();
   };
 
@@ -170,12 +103,13 @@ export const useSavedSetStore = defineStore("savedSet", () => {
   const openRefTestSet = async (set: RefTestSavedInfo) => {
     currentSelectedSet.value = set;
     const { type, project, branch, id } = set;
-    _currentSelectedRefTestStoryMetadataList.value = await window.savedSetApi.invoke.getRefOrTestSavedSetMetadata({
+    const metadataList = await window.savedSetApi.invoke.getRefOrTestSavedSetMetadata({
       type,
       project,
       branch,
       setId: id,
     });
+    refTestReplaceBackingData(metadataList);
   };
 
   const openComparisonSet = async (set: ComparisonSavedInfo) => {
@@ -184,16 +118,11 @@ export const useSavedSetStore = defineStore("savedSet", () => {
       project: set.project,
       setId: set.id,
     });
-    console.log("data", data);
     if (!data) {
       _toast.add({ severity: "error", summary: "Error", detail: "Fail to get comparison set" });
       return;
     }
-    _currentSelectedComparisonMetadata.value = data.metadata;
-    _currentSelectedComparisonStoryMetadataMap.value.clear();
-    for (const item of data.storyMetadataList) {
-      _currentSelectedComparisonStoryMetadataMap.value.set(item.id, item);
-    }
+    comparisonReplaceBackingData(data.metadata, data.storyMetadataList);
   };
 
   const updateDisplayingImg = async (id: string) => {
@@ -204,16 +133,22 @@ export const useSavedSetStore = defineStore("savedSet", () => {
       currentSelectedSetType.value === "compare"
     )
       return;
-    displayingImg.value = { loading: true, isExist: null, base64: null };
     const { project, branch, type, id: setId } = currentSelectedSet.value;
-    const result = await window.imgApi.invoke.getSavedImg({ type, project, branch, setId, id });
-    displayingImg.value = { loading: false, isExist: result.isExist, base64: result.base64 };
+    await refTestUpdateImg(() =>
+      window.imgApi.invoke.getSavedImg({
+        type,
+        project,
+        branch,
+        setId,
+        id,
+      }),
+    );
   };
 
   const deselectSavedSet = async () => {
     currentSelectedSet.value = null;
-    _currentSelectedRefTestStoryMetadataList.value = null;
-    displayingImg.value = { loading: false, isExist: null, base64: null };
+    refTestReset();
+    refTestRemoveImg();
   };
 
   const updateComparisonDisplayImg = (data: ComparisonResultTreeLeaf) => {
@@ -225,15 +160,24 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     availableProjects,
     projectsInTab,
     savedSets,
-    explorerTreeData,
     currentSelectedSet,
     currentSelectedSetType,
-    expandedKeys,
     selectedKey,
-    imgState,
-    comparisonDisplayingImg,
-    selectedComparisonResultType,
-    comparisonExplorerTreeData,
+    refTestSearchText,
+    refTestStoryTypeFilter,
+    refTestHighlightKey,
+    refTestExpandedKeys,
+    refTestTreeData,
+    refTestImgState,
+    comparisonTreeData,
+    comparisonSearchText,
+    comparisonTypeOptions,
+    comparisonSelectedType,
+    comparisonHighlightKey,
+    comparisonExpandedKeys,
+    comparisonImageState,
+    comparisonExpandAll,
+    comparisonCollapseAll,
     deselectSavedSet,
     refreshData,
     updateProject,

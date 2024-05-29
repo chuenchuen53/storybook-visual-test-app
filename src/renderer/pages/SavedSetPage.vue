@@ -4,9 +4,9 @@
       <template #left>
         <div v-if="currentSelectedSetType === 'ref' || currentSelectedSetType === 'test'">
           <StyledTree
-            v-model:expandedKeys="expandedKeys"
+            v-model:expandedKeys="refTestExpandedKeys"
             v-model:highlightKey="selectedKey"
-            :data="explorerTreeData"
+            :data="refTestTreeData"
             class="px-3 pb-8 pt-2 text-sm"
             @node-click="onNodeSelect"
           >
@@ -29,8 +29,7 @@
         </div>
         <div v-if="currentSelectedSetType === 'compare'">
           <SelectButton
-            v-if="selectedComparisonResultType"
-            v-model="selectedComparisonResultType"
+            v-model="comparisonSelectedType"
             :options="selectOptions"
             option-label="name"
             option-value="value"
@@ -42,16 +41,16 @@
                 <span>
                   {{ slotProps.option.name }}
                 </span>
-                <span class="text-[10px] text-gray-400">
-                  ({{ selectedComparisonResultType[slotProps.option.value] }})
+                <span v-if="comparisonTypeOptions[slotProps.option.value] !== null" class="text-[10px] text-gray-400">
+                  ({{ comparisonTypeOptions[slotProps.option.value] }})
                 </span>
               </div>
             </template>
           </SelectButton>
           <StyledTree
-            v-model:expandedKeys="expandedKeys"
-            v-model:highlightKey="selectedComparisonResultType"
-            :data="comparisonExplorerTreeData ?? []"
+            v-model:expandedKeys="comparisonExpandedKeys"
+            v-model:highlightKey="comparisonHighlightKey"
+            :data="comparisonTreeData ?? []"
             class="px-3 pb-8 pt-2 text-sm"
             @node-click="onNodeSelect"
           >
@@ -81,17 +80,7 @@
         </div>
         <div v-else-if="currentSelectedSetType === 'ref' || currentSelectedSetType === 'test'">
           <button @click="deselectSavedSet">go back</button>
-          <div class="mt-4 flex w-full justify-center">
-            <div v-if="displayingImg.loading">
-              <ProgressSpinner />
-            </div>
-            <div v-else>
-              <div v-if="displayingImg.isExist && displayingImg.base64">
-                <Image :src="'data:image/png;base64,' + displayingImg.base64" alt="screenshot" preview />
-              </div>
-              <div v-else class="text-center text-gray-400">Image not exist</div>
-            </div>
-          </div>
+          <StyledImg :img="refTestImgState" alt="screenshot" />
         </div>
       </template>
     </LeftRightSplitContainer>
@@ -111,6 +100,7 @@ import ProjectTabs from "../components/shared/ProjectTabs.vue";
 import LeftRightSplitContainer from "../components/LeftRightSplitContainer.vue";
 import SavedSetsDataTables from "../components/saved-set/SavedSetsDataTables.vue";
 import { useSavedSetStore } from "../stores/SavedSetStore";
+import StyledImg from "../components/general/image/StyledImg.vue";
 import type { NodeData } from "../components/general/tree/type";
 import type { StoryMetadataInExplorer } from "../components/screenshot/story-explorer/helper";
 import type { StoriesDiffResult } from "../../shared/type";
@@ -122,12 +112,20 @@ const {
   availableProjects,
   projectsInTab,
   currentSelectedSetType,
-  expandedKeys,
   selectedKey,
-  explorerTreeData,
-  displayingImg,
-  selectedComparisonResultType,
-  comparisonExplorerTreeData,
+  refTestSearchText,
+  refTestStoryTypeFilter,
+  refTestHighlightKey,
+  refTestExpandedKeys,
+  refTestTreeData,
+  refTestImgState,
+  comparisonTreeData,
+  comparisonSearchText,
+  comparisonHighlightKey,
+  comparisonTypeOptions,
+  comparisonSelectedType,
+  comparisonExpandedKeys,
+  comparisonImageState,
 } = storeToRefs(store);
 const {
   refreshData,
