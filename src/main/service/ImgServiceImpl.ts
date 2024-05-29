@@ -8,6 +8,7 @@ import {
   savedTestDir,
   screenshotDir,
 } from "../Filepath";
+import { LogError } from "../decorator/LogError";
 import type { GetImgResponse, SaveScreenshotType } from "../../shared/type";
 import type { ImgService } from "./ImgService";
 
@@ -20,26 +21,31 @@ export class ImgServiceImpl implements ImgService {
 
   private constructor() {}
 
+  @LogError()
   public async getScreenshotImg(id: string): Promise<GetImgResponse> {
     const filepath = path.join(screenshotDir, id + ".png");
     return await this.getImg(filepath);
   }
 
+  @LogError()
   public async getCompareAddedImg(id: string): Promise<GetImgResponse> {
     const filepath = path.join(comparisonAddedDir, id + ".png");
     return await this.getImg(filepath);
   }
 
+  @LogError()
   public async getCompareRemovedImg(id: string): Promise<GetImgResponse> {
     const filepath = path.join(comparisonRemovedDir, id + ".png");
     return await this.getImg(filepath);
   }
 
+  @LogError()
   public async getCompareDiffImg(id: string): Promise<GetImgResponse> {
     const filepath = path.join(comparisonDiffDir, id + ".png");
     return await this.getImg(filepath);
   }
 
+  @LogError()
   public async getSavedImg(
     type: SaveScreenshotType,
     project: string,

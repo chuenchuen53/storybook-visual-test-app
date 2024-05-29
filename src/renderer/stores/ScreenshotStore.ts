@@ -1,16 +1,11 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
-import { generateTreeFromFlatData } from "../utils/story-tree-utils";
 import { ScreenshotState, StoryState } from "../../shared/type";
-import {
-  getScreenshotPageTreeData,
-  type StoryMetadataInExplorer,
-} from "../components/screenshot/story-explorer/helper";
+import { type StoryMetadataInExplorer } from "../components/screenshot/story-explorer/helper";
+import { useStoryExplorer } from "../composables/useStoryExplorer";
+import { useImage } from "../composables/useImage";
 import type { Viewport, SaveScreenshotType } from "../../shared/type";
-
-export type StoryTypeFilter = "all" | "error";
 
 export interface SaveInfo {
   type: SaveScreenshotType;
@@ -67,62 +62,31 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     void window.screenshotApi.send.startScreenshot(storybookUrl.value);
   };
 
-  const _metadata = ref<null | StoryMetadataInExplorer[]>(null);
-  // a map of id to index of _metadata for faster search (no need ref as no related to view)
-  const _metadataKeyMap = new Map<string, number>();
-  const storySearchText = ref<string>("");
-  const storyTypeFilter = ref<StoryTypeFilter>("all");
-  const highlightKey = ref<string | null>(null);
-  const expandedKeys = ref(new Set<string>());
   const selectedStory = ref<StoryMetadataInExplorer | null>(null);
-  const displayingImg = ref<{ loading: boolean; isExist: boolean | null; base64: string | null }>({
-    loading: false,
-    isExist: null,
-    base64: null,
-  });
-  const _filteredMetadata = computed<null | StoryMetadataInExplorer[]>(() => {
-    if (_metadata.value === null) return null;
-    const lowerCaseSearchText = storySearchText.value.toLowerCase();
-    return _metadata.value.filter(
-      item =>
-        (storyTypeFilter.value === "all" || item.storyErr) &&
-        (item.title.toLowerCase().includes(lowerCaseSearchText) ||
-          item.name.toLowerCase().includes(lowerCaseSearchText)),
-    );
-  });
-  const explorerTreeData = computed(() => {
-    return _filteredMetadata.value === null
-      ? []
-      : getScreenshotPageTreeData(generateTreeFromFlatData(_filteredMetadata.value));
-  });
+  const {
+    searchText,
+    storyTypeFilter,
+    highlightKey,
+    expandedKeys,
+    treeData,
+    replaceBackingData,
+    getDataById,
+    updateItem,
+    expandAll,
+    collapseAll,
+  } = useStoryExplorer();
 
-  const expandAll = () => {
-    const allKeys = explorerTreeData.value.map(node => getAllNonLeafKeys(node)).flat();
-    for (const key of allKeys) {
-      expandedKeys.value.add(key);
-    }
-  };
-
-  const collapseAll = () => {
-    expandedKeys.value.clear();
-  };
-
-  const _getImg = async (id: string) => {
-    displayingImg.value = { loading: true, isExist: null, base64: null };
-    const { isExist, base64 } = await window.imgApi.invoke.getScreenshotImg(id);
-    displayingImg.value = { loading: false, isExist, base64 };
-  };
+  const { imgState, removeImg, updateImg } = useImage();
 
   const handleSelectStory = async (id: string) => {
     if (id === selectedStory.value?.id) return;
-    const index = _metadataKeyMap.get(id);
-    const story = index !== undefined ? _metadata.value?.[index] ?? null : null;
-    selectedStory.value = story;
+    const story = getDataById(id);
     if (story) {
+      selectedStory.value = story;
       if (story.state !== StoryState.FINISHED) {
-        displayingImg.value = { loading: false, isExist: null, base64: null };
+        removeImg();
       } else {
-        await _getImg(id);
+        await updateImg(() => window.imgApi.invoke.getScreenshotImg(id));
       }
     }
   };
@@ -134,51 +98,6 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     project: "my-project",
     branch: "main",
     name: "feature 123",
-  });
-
-  window.screenshotApi.listen.onUpdateStatus(status => {
-    state.value = status;
-  });
-
-  window.screenshotApi.listen.onNewMetadata(storyMetadataList => {
-    _metadata.value = storyMetadataList.map(x => ({
-      id: x.id,
-      title: x.title,
-      name: x.name,
-      tags: x.tags,
-      state: StoryState.WAITING,
-      browserName: null,
-      startTime: null,
-      endTime: null,
-      storyErr: null,
-    }));
-    _metadataKeyMap.clear();
-    storyMetadataList.forEach((item, index) => {
-      _metadataKeyMap.set(item.id, index);
-    });
-    highlightKey.value = null;
-    expandedKeys.value.clear();
-    selectedStory.value = null;
-    displayingImg.value = { loading: false, isExist: null, base64: null };
-  });
-
-  window.screenshotApi.listen.onUpdateStoryState(async ({ storyId, state, browserName, storyErr }) => {
-    const idx = _metadataKeyMap.get(storyId);
-    const story = idx !== undefined ? _metadata.value?.[idx] : null;
-    if (story) {
-      story.state = state;
-      story.browserName = browserName;
-      story.storyErr = storyErr;
-
-      if (state === StoryState.CAPTURING) {
-        story.startTime = new Date().toISOString();
-      } else if (state === StoryState.FINISHED) {
-        story.endTime = new Date().toISOString();
-        if (storyId === selectedStory.value?.id) {
-          await _getImg(storyId);
-        }
-      }
-    }
   });
 
   const saveScreenshot = async () => {
@@ -217,18 +136,64 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     window.screenshotApi.send.openInExplorer();
   };
 
+  window.screenshotApi.listen.onUpdateStatus(status => {
+    state.value = status;
+  });
+
+  window.screenshotApi.listen.onNewMetadata(storyMetadataList => {
+    replaceBackingData(
+      storyMetadataList.map(x => ({
+        id: x.id,
+        title: x.title,
+        name: x.name,
+        tags: x.tags,
+        state: StoryState.WAITING,
+        browserName: null,
+        startTime: null,
+        endTime: null,
+        storyErr: null,
+      })),
+    );
+    selectedStory.value = null;
+    removeImg();
+  });
+
+  window.screenshotApi.listen.onUpdateStoryState(async ({ storyId, state, browserName, storyErr }) => {
+    const story = getDataById(storyId);
+    if (story) {
+      if (state === StoryState.CAPTURING) {
+        updateItem(storyId, {
+          state,
+          browserName,
+          storyErr,
+          startTime: new Date().toISOString(),
+        });
+      } else if (state === StoryState.FINISHED) {
+        updateItem(storyId, {
+          state,
+          browserName,
+          storyErr,
+          endTime: new Date().toISOString(),
+        });
+        if (storyId === selectedStory.value?.id) {
+          await updateImg(() => window.imgApi.invoke.getScreenshotImg(storyId));
+        }
+      }
+    }
+  });
+
   return {
     state,
     storybookUrl,
     viewport,
     isProcessing,
     activeStep,
-    explorerTreeData,
+    treeData,
     expandedKeys,
     highlightKey,
     storyTypeFilter,
-    storySearchText,
-    displayingImg,
+    searchText,
+    imgState,
     saveInfo,
     isSaving,
     saveDialogOpen,

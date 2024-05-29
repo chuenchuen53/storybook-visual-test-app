@@ -230,7 +230,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     currentSelectedSetType,
     expandedKeys,
     selectedKey,
-    displayingImg,
+    imgState,
     comparisonDisplayingImg,
     selectedComparisonResultType,
     comparisonExplorerTreeData,

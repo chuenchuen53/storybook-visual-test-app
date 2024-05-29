@@ -13,6 +13,6 @@
     "strict": true,
     "experimentalDecorators": true
   },
-  "include": ["main.ts", "preload.ts", "renderer.ts", "forge.env.d.ts", "src/**/*.ts"],
+  "include": ["main.ts", "preload.ts", "renderer.ts", "forge.env.d.ts", "src/**/*.ts", "src/**/*.vue"],
   "exclude": ["**/*.test.ts"]
 }

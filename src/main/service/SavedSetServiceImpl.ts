@@ -4,6 +4,7 @@ import { getAllFolders } from "../utils";
 import { savedComparisonDir, savedReferenceDir, savedTestDir } from "../Filepath";
 import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
+import { LogError } from "../decorator/LogError";
 import type {
   ComparisonSavedInfo,
   GetComparisonSavedSetMetadataResponse,
@@ -23,12 +24,14 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   private constructor() {}
 
+  @LogError()
   public async getAllSavedProjects(): Promise<string[]> {
     const [refs, tests] = await Promise.all([getAllFolders(savedReferenceDir), getAllFolders(savedTestDir)]);
     const set = new Set([...refs, ...tests]);
     return Array.from(set);
   }
 
+  @LogError()
   public async getAllSavedSets(project: string): Promise<SavedSets> {
     const [refSets, testSets] = await Promise.all([
       this.getAllRefOrTestBranches("reference", project),
@@ -48,6 +51,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     };
   }
 
+  @LogError()
   public async getRefOrTestSavedSetMetadata(
     type: SaveScreenshotType,
     project: string,
@@ -58,6 +62,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     return metadata === null ? [] : metadata.storyMetadataList;
   }
 
+  @LogError()
   public async getComparisonSavedSetMetadata(
     project: string,
     setId: string,

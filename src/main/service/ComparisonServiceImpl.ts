@@ -17,6 +17,7 @@ import { Log } from "../decorator/Log";
 import { CatchError } from "../decorator/CatchError";
 import { TempComparisonMetadataHelper } from "../data-files/TempComparisonMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
+import { LogError } from "../decorator/LogError";
 import type {
   BranchScreenshotSet,
   ComparisonResponse,
@@ -41,6 +42,7 @@ export class ComparisonServiceImpl implements ComparisonService {
 
   private constructor() {}
 
+  @LogError()
   public async getAvailableSets(project: string): Promise<GetAvailableSetResponse> {
     const result: GetAvailableSetResponse = {
       ref: [],

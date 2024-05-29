@@ -100,7 +100,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, ref } from "vue";
 import Image from "primevue/image";
 import ProgressSpinner from "primevue/progressspinner";
 import SelectButton from "primevue/selectbutton";

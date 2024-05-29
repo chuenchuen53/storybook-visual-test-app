@@ -34,7 +34,7 @@
       <StyledTree
         v-model:expandedKeys="expandedKeys"
         v-model:highlightKey="highlightKey"
-        :data="explorerTreeData"
+        :data="treeData"
         class="px-3 pb-8 pt-2 text-sm"
         @node-click="onNodeSelect"
       >
@@ -81,8 +81,7 @@ import type { StoryMetadataInExplorer } from "./helper";
 import type { NodeData } from "../../general/tree/type";
 
 const store = useScreenshotStore();
-const { saveDialogOpen, explorerTreeData, expandedKeys, highlightKey, storyTypeFilter, state, storySearchText } =
-  storeToRefs(store);
+const { saveDialogOpen, treeData, expandedKeys, highlightKey, storyTypeFilter, state, searchText } = storeToRefs(store);
 const { handleSelectStory, openInExplorer, expandAll, collapseAll } = store;
 
 const search = ref("");
@@ -90,7 +89,7 @@ const search = ref("");
 watchDebounced(
   search,
   value => {
-    storySearchText.value = value;
+    searchText.value = value;
   },
   {
     debounce: 300,

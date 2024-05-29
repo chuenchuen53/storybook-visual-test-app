@@ -1,15 +1,14 @@
 <template>
-  <div>{{ JSON.stringify(displayingImg) }}</div>
-  <div v-if="displayingImg">
-    <div v-if="displayingImg.type === 'added'">
+  <div v-if="comparisonImageState.type">
+    <div v-if="comparisonImageState.type === 'added'">
       <div class="text-lg">Added</div>
-      <StyledImg :img="displayingImg.test" alt="screenshot" />
+      <StyledImg :img="comparisonImageState.testImg" alt="screenshot" />
     </div>
-    <div v-if="displayingImg.type === 'removed'">
+    <div v-if="comparisonImageState.type === 'removed'">
       <div class="text-lg">Removed</div>
-      <StyledImg :img="displayingImg.ref" alt="screenshot" />
+      <StyledImg :img="comparisonImageState.refImg" alt="screenshot" />
     </div>
-    <div v-if="displayingImg.type === 'same'">
+    <div v-if="comparisonImageState.type === 'same'">
       <div class="text-lg">Same</div>
       <div class="mb-4 flex justify-end gap-[2px]">
         <Button
@@ -30,11 +29,11 @@
         </Button>
       </div>
       <div class="grid gap-2" :class="diffViewInVertical ? 'grid-cols-1 grid-rows-2' : 'grid-cols-2 grid-rows-1'">
-        <StyledImg :img="displayingImg.ref" alt="screenshot" />
-        <StyledImg :img="displayingImg.test" alt="screenshot" />
+        <StyledImg :img="comparisonImageState.refImg" alt="screenshot" />
+        <StyledImg :img="comparisonImageState.testImg" alt="screenshot" />
       </div>
     </div>
-    <div v-if="displayingImg.type === 'diff'">
+    <div v-if="comparisonImageState.type === 'diff'">
       <div class="text-lg">Diff</div>
       <div class="mb-4 flex justify-end gap-[2px]">
         <Button text class="!h-8 !py-0" :severity="!showDiffImg ? undefined : 'secondary'" @click="showDiffImg = false"
@@ -61,9 +60,9 @@
         </Button>
       </div>
       <div class="grid gap-2" :class="diffViewInVertical ? 'grid-cols-1 grid-rows-2' : 'grid-cols-2 grid-rows-1'">
-        <StyledImg :img="displayingImg.ref" alt="screenshot" />
-        <StyledImg v-if="showDiffImg" :img="displayingImg.diff" alt="screenshot" />
-        <StyledImg v-else :img="displayingImg.test" alt="screenshot" />
+        <StyledImg :img="comparisonImageState.refImg" alt="screenshot" />
+        <StyledImg v-if="showDiffImg" :img="comparisonImageState.diffImg" alt="screenshot" />
+        <StyledImg v-else :img="comparisonImageState.testImg" alt="screenshot" />
       </div>
     </div>
   </div>
@@ -74,8 +73,8 @@ import { storeToRefs } from "pinia";
 import Button from "primevue/button";
 import SplitIcon from "../shared/SplitIcon.vue";
 import { useComparisonStore } from "../../stores/ComparisonStore";
-import StyledImg from "../StyledImg.vue";
+import StyledImg from "../general/image/StyledImg.vue";
 
 const store = useComparisonStore();
-const { showDiffImg, diffViewInVertical, displayingImg } = storeToRefs(store);
+const { showDiffImg, diffViewInVertical, comparisonImageState } = storeToRefs(store);
 </script>

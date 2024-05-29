@@ -13,6 +13,7 @@ import { registerImgHandlers } from "./main/ipc-handlers/img-handlers";
 import { registerSavedSetHandlers } from "./main/ipc-handlers/saved-set-handler";
 import { DockerContainer } from "./main/docker-helper/DockerContainer";
 import { SavedSetServiceImpl } from "./main/service/SavedSetServiceImpl";
+import { isDockerAvailable } from "./main/docker-helper/is-docker-available";
 import type { SavedSetService } from "./main/service/SavedSetService";
 import type { UserSettingService } from "./main/service/UserSettingService";
 import type { ComparisonService } from "./main/service/ComparisonService";
@@ -67,8 +68,8 @@ app.on("ready", () => {
   registerScreenshotHandlers(screenshotService);
   registerComparisonHandlers(comparisonService);
   registerSavedSetHandlers(savedSetService);
-  void DockerContainer.ensureAllStopped();
 
+  if (isDockerAvailable()) void DockerContainer.ensureAllStopped();
   createWindow();
 });
 

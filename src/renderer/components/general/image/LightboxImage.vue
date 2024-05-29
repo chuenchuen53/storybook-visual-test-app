@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { useLightboxStore } from "../stores/LightboxStore";
+import { useLightboxStore } from "../../../stores/LightboxStore";
 
 const store = useLightboxStore();
 const { open } = store;

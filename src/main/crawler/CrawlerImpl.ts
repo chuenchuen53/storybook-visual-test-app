@@ -18,13 +18,12 @@ export class CrawlerImpl implements Crawler {
     return CrawlerImpl.instance;
   }
 
-  private constructor() {
-    // singleton
-  }
+  private constructor() {}
 
   /**
    * only work in storybook v8
    * */
+  @Log("CrawlerImpl.getStoriesMetadata")
   public async getStoriesMetadata(
     storybookUrl: string,
     onComputingMetadata: () => void,
@@ -57,6 +56,7 @@ export class CrawlerImpl implements Crawler {
     }
   }
 
+  @Log("CrawlerImpl.screenshotStories")
   public async screenshotStories(
     storybookUrl: string,
     storyMetadataList: StoryMetadata[],

@@ -3,12 +3,7 @@
     <div class="flex justify-between gap-2 px-2 py-1">
       <div class="flex gap-[2px]">
         <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
-        <IconButton
-          v-if="explorerTreeData"
-          v-tooltip.bottom="'Save'"
-          icon="pi pi-save"
-          @click="saveDialogOpen = true"
-        />
+        <IconButton v-if="treeData" v-tooltip.bottom="'Save'" icon="pi pi-save" @click="saveDialogOpen = true" />
       </div>
       <div class="flex gap-[2px]">
         <IconButton icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" @click="expandAll" />
@@ -33,16 +28,17 @@
           <span>
             {{ slotProps.option.name }}
           </span>
-          <span class="text-[10px] text-gray-400"> ({{ typeOptions[slotProps.option.value] }}) </span>
+          <span v-if="typeOptions[slotProps.option.value] !== null" class="text-[10px] text-gray-400">
+            ({{ typeOptions[slotProps.option.value] }})
+          </span>
         </div>
       </template>
     </SelectButton>
-
     <ScrollPanel class="scroll-panel-height">
       <StyledTree
         v-model:expandedKeys="expandedKeys"
         v-model:highlightKey="highlightKey"
-        :data="explorerTreeData ?? []"
+        :data="treeData ?? []"
         class="px-3 pb-8 pt-2 text-sm"
         @node-click="onNodeSelect"
       >
@@ -67,7 +63,7 @@ import type { NodeData } from "../../general/tree/type";
 
 const store = useComparisonStore();
 
-const { explorerTreeData, highlightKey, expandedKeys, saveDialogOpen, searchText, typeOptions, selectedType } =
+const { treeData, highlightKey, expandedKeys, saveDialogOpen, searchText, typeOptions, selectedType } =
   storeToRefs(store);
 const { openInExplorer, expandAll, collapseAll, handleNodeSelect } = store;
 

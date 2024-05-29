@@ -1,5 +1,4 @@
 import { treeNodesForUi } from "../../general/tree/tree-helper";
-import { SavedScreenshotMetadata } from "../../../../shared/type";
 import type { StoryMetadata, StoryScreenshotMetadata, StoryState } from "../../../../shared/type";
 import type { TreeObj } from "../../../utils/story-tree-utils";
 

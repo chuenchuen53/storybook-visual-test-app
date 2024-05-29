@@ -1,7 +1,6 @@
 import fs from "fs-extra";
 import { userSettingFilepath } from "../Filepath";
 import { UserSettingHelper } from "../data-files/UserSettingHelper";
-import { Log } from "../decorator/Log";
 import { CatchError } from "../decorator/CatchError";
 import { LogError } from "../decorator/LogError";
 import type { UserSettingService } from "./UserSettingService";
@@ -24,7 +23,7 @@ export class UserSettingServiceImpl implements UserSettingService {
   }
 
   @CatchError<boolean>(false)
-  @Log()
+  @LogError()
   public async updateProjectsInTab(projects: string[]): Promise<boolean> {
     const setting: UserSetting = (await UserSettingHelper.read()) ?? {};
     setting.projectsInTab = projects;

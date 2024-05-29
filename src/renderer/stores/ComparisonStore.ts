@@ -1,43 +1,14 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import {
-  generateTreeFromRespData,
-  getCompareResultTreeData,
-} from "../components/comparison/comparison-result-explorer/helper";
-import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
+import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
+import { useComparisonImage } from "../composables/useComparisonImage";
 import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
-import type {
-  ComparisonRequest,
-  ComparisonResponse$Data,
-  GetAvailableSetResponse,
-  StoriesDiffResult,
-  StoryScreenshotMetadata,
-} from "../../shared/type";
+import type { ComparisonRequest, GetAvailableSetResponse } from "../../shared/type";
 
 export interface CompareSet {
   branch: string | null;
   setId: string | null;
-}
-
-export interface ImgState {
-  loading: boolean;
-  isExist: boolean | null;
-  base64: string | null;
-}
-
-export interface TypeOptions {
-  same: number;
-  diff: number;
-  added: number;
-  removed: number;
-}
-
-export interface DisplayingImg {
-  type: keyof StoriesDiffResult;
-  ref: ImgState;
-  test: ImgState;
-  diff: ImgState;
 }
 
 export interface SaveInfo {
@@ -56,60 +27,25 @@ export const useComparisonStore = defineStore("comparison", () => {
     test: [],
   });
 
-  const _compareResult = ref<null | ComparisonResponse$Data>(null);
-  const _storyMetadataMap = ref(new Map<string, StoryScreenshotMetadata>());
   const isComparing = ref(false);
-  const expandedKeys = ref(new Set<string>());
-  const highlightKey = ref<null | string>(null);
   const selectedKey = ref<null | string>(null);
-  const searchText = ref("");
-  const typeOptions = ref<null | TypeOptions>(null);
-  const selectedType = ref<"diff" | "added" | "removed" | "same">("diff");
-  const displayingImg = ref<DisplayingImg | null>(null);
   const diffViewInVertical = ref(false);
   const showDiffImg = ref(false);
 
-  const _compareResultForTree = computed<null | Record<keyof StoriesDiffResult, ComparisonResultTreeLeaf[]>>(() => {
-    if (_compareResult.value === null) return null;
-    const result: Record<keyof StoriesDiffResult, ComparisonResultTreeLeaf[]> = {
-      diff: [],
-      added: [],
-      removed: [],
-      same: [],
-    };
-    const localResult = _compareResult.value?.result;
-    if (!localResult) return result;
+  const {
+    treeData,
+    searchText,
+    typeOptions,
+    selectedType,
+    highlightKey,
+    expandedKeys,
+    replaceBackingData,
+    getSetMetadata,
+    expandAll,
+    collapseAll,
+  } = useComparisonResultExplorer();
 
-    const keys: (keyof StoriesDiffResult)[] = ["diff", "added", "removed", "same"];
-    for (const key of keys) {
-      for (const id of localResult[key]) {
-        const data = _storyMetadataMap.value.get(id);
-        if (data) {
-          result[key].push({ ...data, type: key });
-        }
-      }
-    }
-
-    return result;
-  });
-
-  const explorerTreeData = computed(() => {
-    return _compareResultForTree.value === null
-      ? null
-      : getCompareResultTreeData(generateTreeFromRespData(_compareResultForTree.value, selectedType.value));
-  });
-
-  const expandAll = () => {
-    if (!explorerTreeData.value) return;
-    const allKeys = explorerTreeData.value.map(node => getAllNonLeafKeys(node)).flat();
-    for (const key of allKeys) {
-      expandedKeys.value.add(key);
-    }
-  };
-
-  const collapseAll = () => {
-    expandedKeys.value.clear();
-  };
+  const { comparisonImageState, resetImgs, setSameImg, setAddedImg, setRemovedImg, setDiffImg } = useComparisonImage();
 
   const saveDialogOpen = ref(false);
   const isSaving = ref(false);
@@ -131,20 +67,8 @@ export const useComparisonStore = defineStore("comparison", () => {
       const { success, data, storyMetadataList } = await window.comparisonApi.invoke.compare(req);
 
       if (success && data && storyMetadataList) {
-        _compareResult.value = data;
-        _storyMetadataMap.value.clear();
-        for (const x of storyMetadataList) {
-          _storyMetadataMap.value.set(x.id, x);
-        }
-        expandedKeys.value.clear();
-        highlightKey.value = null;
+        replaceBackingData(data, storyMetadataList);
         selectedType.value = "diff";
-        typeOptions.value = {
-          same: data.result.same.length,
-          diff: data.result.diff.length,
-          added: data.result.added.length,
-          removed: data.result.removed.length,
-        };
         _toast.add({
           severity: "success",
           summary: "Success",
@@ -202,7 +126,7 @@ export const useComparisonStore = defineStore("comparison", () => {
         branch: null,
         setId: null,
       };
-      displayingImg.value = null;
+      resetImgs();
 
       return;
     }
@@ -282,125 +206,42 @@ export const useComparisonStore = defineStore("comparison", () => {
   };
 
   const handleNodeSelect = async (data: ComparisonResultTreeLeaf) => {
-    if (!_compareResult.value) return;
-    const { project, refBranch, refSetId, testBranch, testSetId } = _compareResult.value;
+    const setMetadata = getSetMetadata();
+    if (!setMetadata) return;
+    const { project, refBranch, testBranch, refSetId, testSetId } = setMetadata;
+    const getRefImgFn = () =>
+      window.imgApi.invoke.getSavedImg({
+        type: "reference",
+        project,
+        branch: refBranch,
+        setId: refSetId,
+        id: data.id,
+      });
+    const getTestImgFn = () =>
+      window.imgApi.invoke.getSavedImg({
+        type: "test",
+        project,
+        branch: testBranch,
+        setId: testSetId,
+        id: data.id,
+      });
+    const getDiffImgFn = () => window.imgApi.invoke.getCompareDiffImg(data.id);
+
     switch (data.type) {
       case "same": {
-        displayingImg.value = {
-          type: "same",
-          ref: { loading: true, isExist: null, base64: null },
-          test: { loading: true, isExist: null, base64: null },
-          diff: { loading: false, isExist: null, base64: null },
-        };
-        const [refImg, testImg] = await Promise.all([
-          window.imgApi.invoke.getSavedImg({
-            type: "reference",
-            project,
-            branch: refBranch,
-            setId: refSetId,
-            id: data.id,
-          }),
-          window.imgApi.invoke.getSavedImg({
-            type: "test",
-            project,
-            branch: testBranch,
-            setId: testSetId,
-            id: data.id,
-          }),
-        ]);
-        displayingImg.value.ref = {
-          loading: false,
-          isExist: refImg.isExist,
-          base64: refImg.base64,
-        };
-        displayingImg.value.test = {
-          loading: false,
-          isExist: testImg.isExist,
-          base64: testImg.base64,
-        };
+        await setSameImg(getRefImgFn, getTestImgFn);
         return;
       }
       case "added": {
-        displayingImg.value = {
-          type: "added",
-          ref: { loading: false, isExist: null, base64: null },
-          test: { loading: true, isExist: null, base64: null },
-          diff: { loading: false, isExist: null, base64: null },
-        };
-        const testImg = await window.imgApi.invoke.getSavedImg({
-          type: "test",
-          project,
-          branch: testBranch,
-          setId: testSetId,
-          id: data.id,
-        });
-        displayingImg.value.test = {
-          loading: false,
-          isExist: testImg.isExist,
-          base64: testImg.base64,
-        };
+        await setAddedImg(getTestImgFn);
         return;
       }
       case "removed": {
-        displayingImg.value = {
-          type: "removed",
-          ref: { loading: true, isExist: null, base64: null },
-          test: { loading: false, isExist: null, base64: null },
-          diff: { loading: false, isExist: null, base64: null },
-        };
-        const refImg = await window.imgApi.invoke.getSavedImg({
-          type: "reference",
-          project,
-          branch: refBranch,
-          setId: refSetId,
-          id: data.id,
-        });
-        displayingImg.value.ref = {
-          loading: false,
-          isExist: refImg.isExist,
-          base64: refImg.base64,
-        };
+        await setRemovedImg(getRefImgFn);
         return;
       }
       case "diff": {
-        displayingImg.value = {
-          type: "diff",
-          ref: { loading: true, isExist: null, base64: null },
-          test: { loading: true, isExist: null, base64: null },
-          diff: { loading: true, isExist: null, base64: null },
-        };
-        const [refImg, testImg, diffImg] = await Promise.all([
-          window.imgApi.invoke.getSavedImg({
-            type: "reference",
-            project,
-            branch: refBranch,
-            setId: refSetId,
-            id: data.id,
-          }),
-          window.imgApi.invoke.getSavedImg({
-            type: "test",
-            project,
-            branch: testBranch,
-            setId: testSetId,
-            id: data.id,
-          }),
-          window.imgApi.invoke.getCompareDiffImg(data.id),
-        ]);
-        displayingImg.value.ref = {
-          loading: false,
-          isExist: refImg.isExist,
-          base64: refImg.base64,
-        };
-        displayingImg.value.test = {
-          loading: false,
-          isExist: testImg.isExist,
-          base64: testImg.base64,
-        };
-        displayingImg.value.diff = {
-          loading: false,
-          isExist: diffImg.isExist,
-          base64: diffImg.base64,
-        };
+        await setDiffImg(getRefImgFn, getTestImgFn, getDiffImgFn);
         return;
       }
     }
@@ -439,7 +280,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     availableSets,
     refSet,
     testSet,
-    explorerTreeData,
+    treeData,
     highlightKey,
     expandedKeys,
     selectedKey,
@@ -450,8 +291,8 @@ export const useComparisonStore = defineStore("comparison", () => {
     projectsInTab,
     selectedType,
     saveInfo,
-    displayingImg,
     diffViewInVertical,
+    comparisonImageState,
     showDiffImg,
     updateProject,
     compare,

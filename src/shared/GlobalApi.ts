@@ -5,8 +5,8 @@ export interface GlobalApi extends IpcApi {
   listen: {
     onReceiveGlobalMessage: (cb: (msg: GlobalMessage) => void) => void;
   };
-  send: {};
-  invoke: {};
+  send: Record<string, never>;
+  invoke: Record<string, never>;
 }
 
 export const GlobalChannelKey: IpcChannel<GlobalApi> = {

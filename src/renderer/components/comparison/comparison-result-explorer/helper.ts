@@ -10,12 +10,8 @@ export interface ComparisonResultTreeLeaf extends StoryScreenshotMetadata {
 
 export type CompareResultTree = TreeObj<ComparisonResultTreeLeaf>;
 
-export function generateTreeFromRespData(
-  data: Record<keyof StoriesDiffResult, ComparisonResultTreeLeaf[]>,
-  resultType: CompareResultType,
-): CompareResultTree {
-  const treeBranch = data[resultType];
-  return generateTreeFromFlatData(treeBranch);
+export function generateTreeFromRespData(data: ComparisonResultTreeLeaf[]): CompareResultTree {
+  return generateTreeFromFlatData(data);
 }
 
 function isCompareResultLeaf(node: CompareResultTree | ComparisonResultTreeLeaf): node is ComparisonResultTreeLeaf {

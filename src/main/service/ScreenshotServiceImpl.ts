@@ -14,6 +14,7 @@ import { CatchError, HandledError } from "../decorator/CatchError";
 import { TempScreenshotMetadataHelper } from "../data-files/TempScreenshotMetadataHelper";
 import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
 import { sumPngFileSize } from "../utils";
+import { LogError } from "../decorator/LogError";
 import type {
   SavedScreenshotResponse,
   SaveScreenshotType,
@@ -35,6 +36,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
 
   private constructor() {}
 
+  @LogError()
   public getLocalIPAddress(): string | undefined {
     const interfaces = os.networkInterfaces();
     const ips = Object.keys(interfaces)
