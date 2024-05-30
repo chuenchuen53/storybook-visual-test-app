@@ -1,8 +1,8 @@
-import type { SavedScreenshotResponse, SaveScreenshotType } from "../../shared/type";
+import type { SavedScreenshotResponse, SaveScreenshotType, Viewport } from "../../shared/type";
 
 export interface ScreenshotService {
   getLocalIPAddress(): string | undefined;
-  newScreenshotSet(url: string): Promise<void>;
+  newScreenshotSet(storybookUrl: string, viewport: Viewport, concurrency: number): Promise<void>;
   saveScreenshot(
     type: SaveScreenshotType,
     project: string,

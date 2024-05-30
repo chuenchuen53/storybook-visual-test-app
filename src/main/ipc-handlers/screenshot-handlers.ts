@@ -12,8 +12,8 @@ export function registerScreenshotHandlers(service: ScreenshotService) {
       openInExplorer: () => {
         openInExplorer(screenshotDir);
       },
-      startScreenshot: (_, url) => {
-        void service.newScreenshotSet(url);
+      startScreenshot: (_, req) => {
+        void service.newScreenshotSet(req.storybookUrl, req.viewport, req.concurrency);
       },
     },
     invoke: {

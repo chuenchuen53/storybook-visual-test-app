@@ -58,7 +58,7 @@ const screenshotApi: IpcRendererHandler<ScreenshotApi> = {
   },
   send: {
     openInExplorer: () => ipcRenderer.send(ScreenshotChannelKey.send.openInExplorer),
-    startScreenshot: url => ipcRenderer.send(ScreenshotChannelKey.send.startScreenshot, url),
+    startScreenshot: req => ipcRenderer.send(ScreenshotChannelKey.send.startScreenshot, req),
   },
   invoke: {
     getLocalIPAddress: () => ipcRenderer.invoke(ScreenshotChannelKey.invoke.getLocalIPAddress),

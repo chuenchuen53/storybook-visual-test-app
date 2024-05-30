@@ -2,10 +2,10 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { ScreenshotState, StoryState } from "../../shared/type";
-import { type StoryMetadataInExplorer } from "../components/screenshot/story-explorer/helper";
+import { type StoryMetadataInExplorer } from "../components/shared/story-explorer/helper";
 import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
-import type { Viewport, SaveScreenshotType } from "../../shared/type";
+import type { Viewport, SaveScreenshotType, StartScreenshotRequest } from "../../shared/type";
 
 export interface SaveInfo {
   type: SaveScreenshotType;
@@ -50,6 +50,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
 
   const storybookUrl = ref<string>("");
   const viewport = ref<Viewport>({ width: 1920, height: 1080 });
+  const concurrency = ref(10);
 
   const getDefaultStorybookUrl = async () => {
     const ip = await window.screenshotApi.invoke.getLocalIPAddress();
@@ -59,7 +60,14 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const startScreenshot = async () => {
     if (isProcessing.value) return;
     state.value = ScreenshotState.CHECKING_SERVICE;
-    void window.screenshotApi.send.startScreenshot(storybookUrl.value);
+    let req: StartScreenshotRequest = {
+      storybookUrl: storybookUrl.value,
+      viewport: viewport.value,
+      concurrency: concurrency.value,
+    };
+    // drop reactive to allow object clone
+    req = JSON.parse(JSON.stringify(req));
+    void window.screenshotApi.send.startScreenshot(req);
   };
 
   const selectedStory = ref<StoryMetadataInExplorer | null>(null);
@@ -186,6 +194,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     state,
     storybookUrl,
     viewport,
+    concurrency,
     isProcessing,
     activeStep,
     treeData,

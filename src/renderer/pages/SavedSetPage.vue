@@ -90,8 +90,6 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
-import Image from "primevue/image";
-import ProgressSpinner from "primevue/progressspinner";
 import SelectButton from "primevue/selectbutton";
 import { isLeaf } from "../components/general/tree/tree-helper";
 import StyledTree from "../components/general/tree/StyledTree.vue";
@@ -102,7 +100,7 @@ import SavedSetsDataTables from "../components/saved-set/SavedSetsDataTables.vue
 import { useSavedSetStore } from "../stores/SavedSetStore";
 import StyledImg from "../components/general/image/StyledImg.vue";
 import type { NodeData } from "../components/general/tree/type";
-import type { StoryMetadataInExplorer } from "../components/screenshot/story-explorer/helper";
+import type { StoryMetadataInExplorer } from "../components/shared/story-explorer/helper";
 import type { StoriesDiffResult } from "../../shared/type";
 import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
 

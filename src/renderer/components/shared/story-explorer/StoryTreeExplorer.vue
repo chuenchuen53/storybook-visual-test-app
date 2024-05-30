@@ -3,19 +3,14 @@
     <div class="flex justify-between gap-2 px-2 py-1">
       <div class="flex gap-[2px]">
         <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
-        <IconButton
-          v-if="state === ScreenshotState.FINISHED"
-          v-tooltip.bottom="'Save'"
-          icon="pi pi-save"
-          @click="saveDialogOpen = true"
-        />
+        <IconButton v-if="allowSave" v-tooltip.bottom="'Save'" icon="pi pi-save" @click="saveDialogOpen = true" />
       </div>
       <div class="flex gap-[2px]">
         <div>
           <IconButton icon="pi pi-filter" @click="menu.toggle($event)" />
           <Menu ref="menu" :model="items" :popup="true" :pt="{ root: { style: { transform: 'translateX(-165px)' } } }">
-            <template #item="{ item, props }">
-              <div class="flex" :class="{ 'active-menu-item': item.key === storyTypeFilter }" v-bind="props.action">
+            <template #item="{ item, props: slotProps }">
+              <div class="flex" :class="{ 'active-menu-item': item.key === storyTypeFilter }" v-bind="slotProps.action">
                 <span :class="item.icon" />
                 <span class="ml-1">{{ item.label }}</span>
               </div>
@@ -63,7 +58,6 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
 import Menu from "primevue/menu";
 import { ref } from "vue";
 import IconField from "primevue/iconfield";
@@ -72,17 +66,28 @@ import InputText from "primevue/inputtext";
 import { watchDebounced } from "@vueuse/core";
 import ScrollPanel from "primevue/scrollpanel";
 import IconButton from "../../general/IconButton.vue";
-import { useScreenshotStore } from "../../../stores/ScreenshotStore";
-import { ScreenshotState, StoryState } from "../../../../shared/type";
+import { StoryState } from "../../../../shared/type";
 import StyledTree from "../../general/tree/StyledTree.vue";
 import { isLeaf } from "../../general/tree/tree-helper";
 import { timeSpent } from "../../../utils/time-utils";
 import type { StoryMetadataInExplorer } from "./helper";
 import type { NodeData } from "../../general/tree/type";
+import type { StoryTypeFilter } from "../../../composables/useStoryExplorer";
 
-const store = useScreenshotStore();
-const { saveDialogOpen, treeData, expandedKeys, highlightKey, storyTypeFilter, state, searchText } = storeToRefs(store);
-const { handleSelectStory, openInExplorer, expandAll, collapseAll } = store;
+const saveDialogOpen = defineModel<boolean>("saveDialogOpen", { required: true });
+const expandedKeys = defineModel<Set<string>>("expandedKeys", { required: true });
+const highlightKey = defineModel<string | null>("highlightKey", { required: true });
+const storyTypeFilter = defineModel<StoryTypeFilter>("storyTypeFilter", { required: true });
+const searchText = defineModel<string>("searchText", { required: true });
+
+const props = defineProps<{
+  treeData: NodeData[];
+  allowSave: boolean;
+  openInExplorer: () => void;
+  expandAll: () => void;
+  collapseAll: () => void;
+  handleSelectStory: (id: string) => Promise<void>;
+}>();
 
 const search = ref("");
 
@@ -121,7 +126,7 @@ const items = ref([
 const onNodeSelect = (node: NodeData) => {
   const data: StoryMetadataInExplorer | undefined = node.data;
   if (data) {
-    handleSelectStory(data.id);
+    props.handleSelectStory(data.id);
   }
 };
 

@@ -1,5 +1,12 @@
+import type {
+  StartScreenshotRequest,
+  SavedScreenshotResponse,
+  SaveScreenshotType,
+  ScreenshotState,
+  StoryMetadata,
+  StoryState,
+} from "./type";
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
-import type { SavedScreenshotResponse, SaveScreenshotType, ScreenshotState, StoryMetadata, StoryState } from "./type";
 
 export interface SaveScreenshotRequest {
   type: SaveScreenshotType;
@@ -23,7 +30,7 @@ export interface ScreenshotApi extends IpcApi {
   };
   send: {
     openInExplorer: () => void;
-    startScreenshot: (url: string) => void;
+    startScreenshot: (req: StartScreenshotRequest) => void;
   };
   invoke: {
     getLocalIPAddress: () => Promise<string | undefined>;

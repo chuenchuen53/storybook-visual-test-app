@@ -8,7 +8,7 @@ export interface Crawler {
     storybookUrl: string,
     storyMetadataList: StoryMetadata[],
     viewport: Viewport,
-    parallel: number,
+    concurrency: number,
     onStartScreenshot: () => void,
     onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ): Promise<ScreenshotStoriesResult>;

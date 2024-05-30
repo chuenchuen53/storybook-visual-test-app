@@ -201,3 +201,9 @@ export interface GetSavedImgRequest {
   setId: string;
   id: string;
 }
+
+export interface StartScreenshotRequest {
+  storybookUrl: string;
+  viewport: Viewport;
+  concurrency: number;
+}

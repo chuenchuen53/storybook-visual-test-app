@@ -52,20 +52,24 @@ export class ScreenshotServiceImpl implements ScreenshotService {
 
   @CatchErrorInformRenderer("Fail to take screenshot")
   @Log()
-  public async newScreenshotSet(url: string): Promise<void> {
+  public async newScreenshotSet(storybookUrl: string, viewport: Viewport, concurrency: number): Promise<void> {
     await this.checkDockerAvailability();
     await this.ensureDockerImage();
 
     await fs.emptydir(screenshotDir);
 
     ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_METADATA_BROWSER);
-    const storyMetadataList = await this.getStoryMetadataList(url);
+    const storyMetadataList = await this.getStoryMetadataList(storybookUrl);
 
     ScreenshotChannel.newMetadata(storyMetadataList);
     ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_SCREENSHOT_BROWSER);
 
-    const viewport: Viewport = { width: 1920, height: 1080 };
-    const storyScreenshotMetadataList = await this.screenshotStories(url, storyMetadataList, viewport);
+    const storyScreenshotMetadataList = await this.screenshotStories(
+      storyMetadataList,
+      storybookUrl,
+      viewport,
+      concurrency,
+    );
 
     const id = uuidv4();
     const saveMetaData: TempScreenshotMetadata = {
@@ -144,16 +148,17 @@ export class ScreenshotServiceImpl implements ScreenshotService {
   @CatchErrorInformRenderer("Fail to take screenshot.")
   @Log()
   private async screenshotStories(
-    url: string,
     storyMetadataList: StoryMetadata[],
+    url: string,
     viewport: Viewport,
+    concurrency: number,
   ): Promise<StoryScreenshotMetadata[]> {
     const crawler: Crawler = CrawlerImpl.getInstance();
     const result = await crawler.screenshotStories(
       url,
       storyMetadataList,
       viewport,
-      8,
+      concurrency,
       () => ScreenshotChannel.updateStatus(ScreenshotState.CAPTURING_SCREENSHOT),
       (storyId, state, browserName, storyErr) =>
         ScreenshotChannel.updateStoryState({ storyId, state, browserName, storyErr }),

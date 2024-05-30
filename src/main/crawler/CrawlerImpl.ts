@@ -61,7 +61,7 @@ export class CrawlerImpl implements Crawler {
     storybookUrl: string,
     storyMetadataList: StoryMetadata[],
     viewport: Viewport,
-    parallel: number,
+    concurrency: number,
     onStartScreenshot: () => void,
     onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ): Promise<ScreenshotStoriesResult> {
@@ -69,14 +69,14 @@ export class CrawlerImpl implements Crawler {
     const browsers: NamedBrowser[] = [];
 
     try {
-      container = await this.startScreenshotBrowser(parallel);
+      container = await this.startScreenshotBrowser(concurrency);
 
       // wait for chrome in container to start
       await sleep(2000);
 
       onStartScreenshot();
 
-      await this.connectToBrowser(parallel, container, browsers);
+      await this.connectToBrowser(concurrency, container, browsers);
       const storyScreenshotMetadataList = await this.screenshot(
         storybookUrl,
         browsers,
