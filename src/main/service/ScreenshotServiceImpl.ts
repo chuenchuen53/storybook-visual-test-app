@@ -50,7 +50,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
     return ips[0];
   }
 
-  @CatchErrorInformRenderer("Fail to take screenshot")
+  @CatchErrorInformRenderer("Fail to take screenshot", false)
   @Log()
   public async newScreenshotSet(storybookUrl: string, viewport: Viewport, concurrency: number): Promise<void> {
     await this.checkDockerAvailability();
@@ -173,11 +173,11 @@ function sendFailStatusAndErrMsg(errorMsg: string): void {
   ScreenshotChannel.updateStatus(ScreenshotState.FAILED);
 }
 
-function CatchErrorInformRenderer(errMsg?: string) {
+function CatchErrorInformRenderer(errMsg?: string, rethrow: boolean | "handled" = "handled") {
   return CatchError(e => {
     if (!(e instanceof HandledError)) {
       const msg = errMsg ?? (e instanceof Error ? e.message : "Non-Error type");
       sendFailStatusAndErrMsg(msg);
     }
-  }, "handled");
+  }, rethrow);
 }

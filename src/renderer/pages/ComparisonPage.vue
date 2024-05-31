@@ -2,30 +2,44 @@
   <main class="size-full">
     <LeftRightSplitContainer :init-left-width="325">
       <template #left>
-        <ComparisonResultExplorer />
+        <ComparisonResultExplorer
+          v-model:expanded-keys="expandedKeys"
+          v-model:highlight-key="highlightKey"
+          v-model:selected-type="selectedType"
+          v-model:search-text="searchText"
+          :tree-data="treeData"
+          :open-in-explorer="openInExplorer"
+          :show-save="!isNullResult"
+          :expand-all="expandAll"
+          :collapse-all="collapseAll"
+          :type-options="typeOptions"
+          :handle-select-story="handleNodeSelect"
+          :open-save-dialog="() => (saveDialogOpen = true)"
+        />
       </template>
       <template #right>
-        <div class="size-full">
-          <ProjectTabs
-            :all-projects="availableProjects"
-            :all-projects-in-tab="projectsInTab"
-            :selected="project"
-            @click-project="updateProject"
-            @click-add="displayTabsSetting = true"
-          />
-          <div v-if="displayTabsSetting">
-            <ProjectPickerList
-              :all-projects="availableProjects"
-              :all-projects-in-tab="projectsInTab"
-              @confirm="handlePickerConfirm"
-              @cancel="displayTabsSetting = false"
-            />
-          </div>
-          <div v-else class="h-full overflow-y-auto">
-            <div class="w-full p-6">
-              <CompareSetting />
+        <div class="relative size-full">
+          <ComparisonSetting v-if="isNullResult" class="basis-full" />
+          <div v-else class="mt-6">
+            <div class="mx-6 mb-6 flex justify-between">
+              <ComparisonResultHeader v-if="comparisonSetSummary" :data="comparisonSetSummary" />
+              <IconButton
+                v-tooltip.left="'Start new comparison'"
+                icon="pi pi-trash"
+                :wrapper-size="40"
+                :icon-size="16"
+                @click="removeCurrentResult"
+              />
             </div>
-            <ComparisonImages />
+            <ComparisonResultSummaryTable
+              v-if="comparisonSetSummary && comparisonImageState.type === null"
+              class="mx-6 my-6"
+              :data="comparisonSetSummary"
+            />
+            <ScrollPanel class="scroll-panel-height w-full overflow-hidden">
+              <ComparisonImages class="mx-6" />
+              <div class="h-6"></div>
+            </ScrollPanel>
           </div>
         </div>
       </template>
@@ -36,24 +50,40 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
-import ProjectTabs from "../components/shared/ProjectTabs.vue";
-import ProjectPickerList from "../components/shared/ProjectPickerList.vue";
+import { onMounted } from "vue";
+import ScrollPanel from "primevue/scrollpanel";
+import IconButton from "../components/general/IconButton.vue";
 import ComparisonResultExplorer from "../components/comparison/comparison-result-explorer/ComparisonResultExplorer.vue";
-import CompareSetting from "../components/comparison/CompareSetting.vue";
+import ComparisonResultSummaryTable from "../components/comparison/ComparisonResultSummaryTable.vue";
+import ComparisonSetting from "../components/comparison/ComparisonSetting.vue";
+import ComparisonResultHeader from "../components/comparison/ComparisonResultHeader.vue";
 import { useComparisonStore } from "../stores/ComparisonStore";
 import SaveCompareResultDialog from "../components/comparison/SaveCompareResultDialog.vue";
 import LeftRightSplitContainer from "../components/LeftRightSplitContainer.vue";
 import ComparisonImages from "../components/comparison/ComparisonImages.vue";
 
 const store = useComparisonStore();
-const { project, availableProjects, projectsInTab } = storeToRefs(store);
-const { updateProject, updateProjectsInTab } = store;
+const {
+  treeData,
+  highlightKey,
+  expandedKeys,
+  saveDialogOpen,
+  searchText,
+  typeOptions,
+  selectedType,
+  isNullResult,
+  comparisonImageState,
+  comparisonSetSummary,
+} = storeToRefs(store);
+const { refreshData, openInExplorer, expandAll, collapseAll, handleNodeSelect, removeCurrentResult } = store;
 
-const displayTabsSetting = ref(false);
-
-const handlePickerConfirm = (projects: string[]) => {
-  updateProjectsInTab(projects);
-  displayTabsSetting.value = false;
-};
+onMounted(() => {
+  refreshData();
+});
 </script>
+
+<style scoped>
+.scroll-panel-height {
+  height: calc(100vh - 138px);
+}
+</style>

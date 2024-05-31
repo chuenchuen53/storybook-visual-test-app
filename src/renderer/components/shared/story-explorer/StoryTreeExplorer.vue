@@ -3,7 +3,7 @@
     <div class="flex justify-between gap-2 px-2 py-1">
       <div class="flex gap-[2px]">
         <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
-        <IconButton v-if="allowSave" v-tooltip.bottom="'Save'" icon="pi pi-save" @click="saveDialogOpen = true" />
+        <IconButton v-if="showSave" v-tooltip.bottom="'Save'" icon="pi pi-save" @click="openSaveDialog" />
       </div>
       <div class="flex gap-[2px]">
         <div>
@@ -74,7 +74,6 @@ import type { StoryMetadataInExplorer } from "./helper";
 import type { NodeData } from "../../general/tree/type";
 import type { StoryTypeFilter } from "../../../composables/useStoryExplorer";
 
-const saveDialogOpen = defineModel<boolean>("saveDialogOpen", { required: true });
 const expandedKeys = defineModel<Set<string>>("expandedKeys", { required: true });
 const highlightKey = defineModel<string | null>("highlightKey", { required: true });
 const storyTypeFilter = defineModel<StoryTypeFilter>("storyTypeFilter", { required: true });
@@ -82,11 +81,12 @@ const searchText = defineModel<string>("searchText", { required: true });
 
 const props = defineProps<{
   treeData: NodeData[];
-  allowSave: boolean;
+  showSave: boolean;
   openInExplorer: () => void;
   expandAll: () => void;
   collapseAll: () => void;
   handleSelectStory: (id: string) => Promise<void>;
+  openSaveDialog?: () => void;
 }>();
 
 const search = ref("");
@@ -135,14 +135,14 @@ function iconCls(state: StoryState): string {
     case StoryState.WAITING:
       return "pi pi-hourglass opacity-50";
     case StoryState.CAPTURING:
-      return "pi pi-camera text-green-400 animate-pulse";
+      return "pi pi-camera text-primary animate-pulse";
     case StoryState.FINISHED:
-      return "pi pi-check-circle text-green-400";
+      return "pi pi-check-circle text-primary";
   }
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .active-menu-item {
   color: var(--p-primary-color) !important;
 }

@@ -3,17 +3,17 @@
     <LeftRightSplitContainer :init-left-width="325">
       <template #left>
         <StoryTreeExplorer
-          v-model:save-dialog-open="saveDialogOpen"
           v-model:expanded-keys="expandedKeys"
           v-model:highlight-key="highlightKey"
           v-model:story-type-filter="storyTypeFilter"
           v-model:search-text="searchText"
           :tree-data="treeData"
-          :allow-save="state === ScreenshotState.FINISHED"
+          :show-save="state === ScreenshotState.FINISHED"
           :open-in-explorer="openInExplorer"
           :expand-all="expandAll"
           :collapse-all="collapseAll"
           :handle-select-story="handleSelectStory"
+          :open-save-dialog="() => (saveDialogOpen = true)"
         />
       </template>
       <template #right>

@@ -3,7 +3,7 @@
     <div class="flex justify-between gap-2 px-2 py-1">
       <div class="flex gap-[2px]">
         <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
-        <IconButton v-if="treeData" v-tooltip.bottom="'Save'" icon="pi pi-save" @click="saveDialogOpen = true" />
+        <IconButton v-if="showSave" v-tooltip.bottom="'Save'" icon="pi pi-save" @click="openSaveDialog" />
       </div>
       <div class="flex gap-[2px]">
         <IconButton icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" @click="expandAll" />
@@ -28,8 +28,8 @@
           <span>
             {{ slotProps.option.name }}
           </span>
-          <span v-if="typeOptions[slotProps.option.value] !== null" class="text-[10px] text-gray-400">
-            ({{ typeOptions[slotProps.option.value] }})
+          <span v-if="shouldShowNumber(slotProps.option.value)" class="text-[10px] text-gray-400">
+            ({{ getNumber(slotProps.option.value) }})
           </span>
         </div>
       </template>
@@ -42,30 +42,53 @@
         class="px-3 pb-8 pt-2 text-sm"
         @node-click="onNodeSelect"
       >
+        <template #node-content="{ node }">
+          <div v-if="isLeaf(node)">
+            <div class="flex gap-2">
+              <i class="pi pi-bookmark text-primary !text-sm"></i>
+              <div>
+                {{ node.label }}
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            {{ node.label }}
+          </div>
+        </template>
       </StyledTree>
     </ScrollPanel>
   </div>
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
 import InputText from "primevue/inputtext";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import ScrollPanel from "primevue/scrollpanel";
 import SelectButton from "primevue/selectbutton";
 import StyledTree from "../../general/tree/StyledTree.vue";
-import { useComparisonStore } from "../../../stores/ComparisonStore";
 import IconButton from "../../general/IconButton.vue";
+import { isLeaf } from "../../general/tree/tree-helper";
+import type { TypeOptions } from "../../../composables/useComparisonResultExplorer";
 import type { ComparisonResultTreeLeaf } from "./helper";
 import type { StoriesDiffResult } from "../../../../shared/type";
 import type { NodeData } from "../../general/tree/type";
 
-const store = useComparisonStore();
+const expandedKeys = defineModel<Set<string>>("expandedKeys", { required: true });
+const highlightKey = defineModel<string | null>("highlightKey", { required: true });
+const selectedType = defineModel<keyof StoriesDiffResult>("selectedType", { required: true });
+const searchText = defineModel<string>("searchText", { required: true });
 
-const { treeData, highlightKey, expandedKeys, saveDialogOpen, searchText, typeOptions, selectedType } =
-  storeToRefs(store);
-const { openInExplorer, expandAll, collapseAll, handleNodeSelect } = store;
+const props = defineProps<{
+  treeData: NodeData[] | null;
+  openInExplorer: () => void;
+  showSave: boolean;
+  expandAll: () => void;
+  collapseAll: () => void;
+  typeOptions: TypeOptions;
+  handleSelectStory: (data: ComparisonResultTreeLeaf) => Promise<void>;
+  openSaveDialog?: () => void;
+}>();
 
 const selectOptions: { name: string; value: keyof StoriesDiffResult }[] = [
   { name: "Diff", value: "diff" },
@@ -77,13 +100,21 @@ const selectOptions: { name: string; value: keyof StoriesDiffResult }[] = [
 const onNodeSelect = (node: NodeData) => {
   if (node.data) {
     const data: ComparisonResultTreeLeaf = node.data;
-    handleNodeSelect(data);
+    props.handleSelectStory(data);
   }
+};
+
+const shouldShowNumber = (key: keyof StoriesDiffResult) => {
+  return props.typeOptions[key] !== null;
+};
+
+const getNumber = (key: keyof StoriesDiffResult) => {
+  return props.typeOptions[key];
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .scroll-panel-height {
-  height: calc(100vh - 140px);
+  height: calc(100vh - 175px);
 }
 </style>

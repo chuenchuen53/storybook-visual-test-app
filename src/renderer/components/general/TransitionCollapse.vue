@@ -60,6 +60,6 @@ function afterLeave(element: HTMLElement) {
 .collapse-enter-active,
 .collapse-leave-active {
   overflow: hidden;
-  transition: height 0.15s linear;
+  transition: height 0.2s ease-out;
 }
 </style>

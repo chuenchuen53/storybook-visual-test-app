@@ -13,7 +13,7 @@
         <slot name="right" />
       </SplitterPanel>
     </Splitter>
-    <div v-if="!showLeft" class="absolute left-6 top-4 z-10">
+    <div v-if="!showLeft" class="absolute left-6 top-11 z-10">
       <IconButton :wrapper-size="40" :icon-size="16" icon="pi pi-list" @click="showLeftPanel" />
     </div>
   </div>

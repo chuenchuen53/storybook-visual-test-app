@@ -1,15 +1,15 @@
 <template>
   <div v-if="comparisonImageState.type">
     <div v-if="comparisonImageState.type === 'added'">
-      <div class="text-lg">Added</div>
-      <StyledImg :img="comparisonImageState.testImg" alt="screenshot" />
+      <div class="mb-2 text-lg">Added</div>
+      <StyledImg :img="comparisonImageState.testImg" alt="screenshot" class="flex justify-center" />
     </div>
     <div v-if="comparisonImageState.type === 'removed'">
-      <div class="text-lg">Removed</div>
-      <StyledImg :img="comparisonImageState.refImg" alt="screenshot" />
+      <div class="mb-2 text-lg">Removed</div>
+      <StyledImg :img="comparisonImageState.refImg" alt="screenshot" class="flex justify-center" />
     </div>
     <div v-if="comparisonImageState.type === 'same'">
-      <div class="text-lg">Same</div>
+      <div class="mb-2 text-lg">Same</div>
       <div class="mb-4 flex justify-end gap-[2px]">
         <Button
           class="!size-8 !p-0"
@@ -28,13 +28,20 @@
           <SplitIcon :size="24" />
         </Button>
       </div>
-      <div class="grid gap-2" :class="diffViewInVertical ? 'grid-cols-1 grid-rows-2' : 'grid-cols-2 grid-rows-1'">
-        <StyledImg :img="comparisonImageState.refImg" alt="screenshot" />
+      <div
+        class="grid gap-4"
+        :class="diffViewInVertical ? 'grid-cols-1 grid-rows-2 justify-items-center' : 'grid-cols-2 grid-rows-1'"
+      >
+        <StyledImg
+          :img="comparisonImageState.refImg"
+          alt="screenshot"
+          :class="!diffViewInVertical && 'justify-self-end'"
+        />
         <StyledImg :img="comparisonImageState.testImg" alt="screenshot" />
       </div>
     </div>
     <div v-if="comparisonImageState.type === 'diff'">
-      <div class="text-lg">Diff</div>
+      <div class="mb-2 text-lg">Different</div>
       <div class="mb-4 flex justify-end gap-[2px]">
         <Button text class="!h-8 !py-0" :severity="!showDiffImg ? undefined : 'secondary'" @click="showDiffImg = false"
           >Original
@@ -59,8 +66,15 @@
           <SplitIcon :size="24" />
         </Button>
       </div>
-      <div class="grid gap-2" :class="diffViewInVertical ? 'grid-cols-1 grid-rows-2' : 'grid-cols-2 grid-rows-1'">
-        <StyledImg :img="comparisonImageState.refImg" alt="screenshot" />
+      <div
+        class="grid gap-4"
+        :class="diffViewInVertical ? 'grid-cols-1 grid-rows-2 justify-items-center' : 'grid-cols-2 grid-rows-1'"
+      >
+        <StyledImg
+          :img="comparisonImageState.refImg"
+          alt="screenshot"
+          :class="!diffViewInVertical && 'justify-self-end'"
+        />
         <StyledImg v-if="showDiffImg" :img="comparisonImageState.diffImg" alt="screenshot" />
         <StyledImg v-else :img="comparisonImageState.testImg" alt="screenshot" />
       </div>

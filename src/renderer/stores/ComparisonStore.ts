@@ -19,16 +19,22 @@ export const useComparisonStore = defineStore("comparison", () => {
   const _toast = useToast();
 
   const project = ref<string | null>(null);
-
   const availableProjects = ref<string[]>([]);
   const projectsInTab = ref<string[]>([]);
   const availableSets = ref<GetAvailableSetResponse>({
     ref: [],
     test: [],
   });
+  const refSet = ref<CompareSet>({
+    branch: null,
+    setId: null,
+  });
+  const testSet = ref<CompareSet>({
+    branch: null,
+    setId: null,
+  });
 
   const isComparing = ref(false);
-  const selectedKey = ref<null | string>(null);
   const diffViewInVertical = ref(false);
   const showDiffImg = ref(false);
 
@@ -39,8 +45,10 @@ export const useComparisonStore = defineStore("comparison", () => {
     selectedType,
     highlightKey,
     expandedKeys,
+    isNullResult,
+    comparisonSetSummary,
+    reset: resetExplorerData,
     replaceBackingData,
-    getSetMetadata,
     expandAll,
     collapseAll,
   } = useComparisonResultExplorer();
@@ -50,7 +58,7 @@ export const useComparisonStore = defineStore("comparison", () => {
   const saveDialogOpen = ref(false);
   const isSaving = ref(false);
   const saveInfo = ref<SaveInfo>({
-    name: "feature abc",
+    name: "feature 123",
   });
 
   const compare = async () => {
@@ -109,8 +117,13 @@ export const useComparisonStore = defineStore("comparison", () => {
       window.userSettingApi.invoke.getProjectsInTab(),
     ]);
 
+    const filteredProjects = _projectsInTab.filter(x => _availableProjects.includes(x));
+    if (filteredProjects.length !== _projectsInTab.length) {
+      void updateProjectsInTab(filteredProjects);
+    }
+
     availableProjects.value = _availableProjects;
-    projectsInTab.value = _projectsInTab;
+    projectsInTab.value = filteredProjects;
 
     if (projectsInTab.value.length === 0) {
       project.value = null;
@@ -136,7 +149,10 @@ export const useComparisonStore = defineStore("comparison", () => {
       if (availableProjects.value.includes(firstProject)) {
         await updateProject(firstProject);
       }
-    } else if (
+      return;
+    }
+
+    if (
       project.value &&
       projectsInTab.value.includes(project.value) &&
       availableProjects.value.includes(project.value)
@@ -169,17 +185,13 @@ export const useComparisonStore = defineStore("comparison", () => {
   const updateProjectsInTab = async (projects: string[]) => {
     await window.userSettingApi.invoke.updateProjectsInTab(projects);
     projectsInTab.value = projects;
+    if (project.value && projects.includes(project.value)) return;
+    if (projects.length > 0) {
+      await updateProject(projects[0]);
+    } else {
+      project.value = null;
+    }
   };
-
-  const refSet = ref<CompareSet>({
-    branch: null,
-    setId: null,
-  });
-
-  const testSet = ref<CompareSet>({
-    branch: null,
-    setId: null,
-  });
 
   const updateRefSetBranch = (x: string) => {
     if (x === refSet.value.branch) return;
@@ -193,22 +205,13 @@ export const useComparisonStore = defineStore("comparison", () => {
     testSet.value.setId = null;
   };
 
-  const updateRefSetId = (x: string) => {
-    refSet.value.setId = x;
-  };
-
-  const updateTestSetId = (x: string) => {
-    testSet.value.setId = x;
-  };
-
   const openInExplorer = () => {
     window.comparisonApi.send.openInExplorer();
   };
 
   const handleNodeSelect = async (data: ComparisonResultTreeLeaf) => {
-    const setMetadata = getSetMetadata();
-    if (!setMetadata) return;
-    const { project, refBranch, testBranch, refSetId, testSetId } = setMetadata;
+    if (!comparisonSetSummary.value) return;
+    const { project, refBranch, testBranch, refSetId, testSetId } = comparisonSetSummary.value;
     const getRefImgFn = () =>
       window.imgApi.invoke.getSavedImg({
         type: "reference",
@@ -247,6 +250,11 @@ export const useComparisonStore = defineStore("comparison", () => {
     }
   };
 
+  const removeCurrentResult = () => {
+    resetExplorerData();
+    resetImgs();
+  };
+
   const saveScreenshot = async () => {
     try {
       isSaving.value = true;
@@ -283,7 +291,6 @@ export const useComparisonStore = defineStore("comparison", () => {
     treeData,
     highlightKey,
     expandedKeys,
-    selectedKey,
     isSaving,
     saveDialogOpen,
     searchText,
@@ -294,18 +301,19 @@ export const useComparisonStore = defineStore("comparison", () => {
     diffViewInVertical,
     comparisonImageState,
     showDiffImg,
+    isNullResult,
+    comparisonSetSummary,
     updateProject,
     compare,
     refreshData,
     updateRefSetBranch,
     updateTestSetBranch,
-    updateRefSetId,
-    updateTestSetId,
     openInExplorer,
     handleNodeSelect,
     saveScreenshot,
     expandAll,
     collapseAll,
     updateProjectsInTab,
+    removeCurrentResult,
   };
 });

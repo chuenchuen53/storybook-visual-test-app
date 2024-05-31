@@ -1,16 +1,12 @@
 <template>
   <div>
-    <div v-if="delayedLoading">
-      <ProgressSpinner />
-    </div>
-    <div v-else>
-      <div v-if="img.src">
-        <LightboxImage :src="img.src" :alt="alt" />
-      </div>
+    <ProgressSpinner v-if="delayedLoading" />
+    <template v-else>
+      <LightboxImage v-if="img.src" :src="img.src" :alt="alt" />
       <div v-else-if="img.isExist !== null && img.isExist === false" class="text-center text-gray-400">
         Image not exist
       </div>
-    </div>
+    </template>
   </div>
 </template>
 

@@ -9,12 +9,15 @@ import type { ComparisonResponse$Data, StoriesDiffResult, StoryScreenshotMetadat
 import type { ComputedRef, Ref } from "vue";
 import type { NodeData } from "../components/general/tree/type";
 
-interface ComparisonSetMetadata {
+export interface ComparisonSetSummary {
   project: string;
   refBranch: string;
   refSetId: string;
+  refSetName: string;
   testBranch: string;
   testSetId: string;
+  testSetName: string;
+  resultSummary: Record<keyof StoriesDiffResult, number>;
 }
 
 export type TypeOptions = Record<keyof StoriesDiffResult, number | null>;
@@ -25,10 +28,11 @@ export interface UseComparisonResultExplorerReturn {
   typeOptions: ComputedRef<TypeOptions>;
   selectedType: Ref<keyof StoriesDiffResult>;
   highlightKey: Ref<string | null>;
-  isNullResult: () => boolean;
+  isNullResult: ComputedRef<boolean>;
   expandedKeys: Ref<Set<string>>;
+  comparisonSetSummary: ComputedRef<ComparisonSetSummary | null>;
+  reset: () => void;
   replaceBackingData: (data: ComparisonResponse$Data, storyMetadataList: StoryScreenshotMetadata[]) => void;
-  getSetMetadata: () => null | ComparisonSetMetadata;
   expandAll: () => void;
   collapseAll: () => void;
 }
@@ -46,8 +50,6 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     if (!_backingData.value) return null;
 
     const localResult = _backingData.value.result;
-    if (!localResult) return null;
-
     const lowerCaseSearchText = searchText.value.toLowerCase();
     const dataOfType = localResult[selectedType.value].map(id => {
       const data = _storyMetadataMap.get(id);
@@ -91,7 +93,27 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     expandedKeys.value.clear();
   };
 
-  const isNullResult = () => _backingData.value === null;
+  const isNullResult = computed(() => _backingData.value === null);
+
+  const comparisonSetSummary = computed<ComparisonSetSummary | null>(() => {
+    return _backingData.value === null
+      ? null
+      : {
+          project: _backingData.value.project,
+          refBranch: _backingData.value.refBranch,
+          refSetId: _backingData.value.refSetId,
+          refSetName: _backingData.value.refSetName,
+          testBranch: _backingData.value.testBranch,
+          testSetId: _backingData.value.testSetId,
+          testSetName: _backingData.value.testSetName,
+          resultSummary: {
+            diff: _backingData.value.result.diff.length,
+            added: _backingData.value.result.added.length,
+            removed: _backingData.value.result.removed.length,
+            same: _backingData.value.result.same.length,
+          },
+        };
+  });
 
   const replaceBackingData = (data: ComparisonResponse$Data, storyMetadataList: StoryScreenshotMetadata[]) => {
     _storyMetadataMap.clear();
@@ -103,16 +125,11 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     _backingData.value = data;
   };
 
-  const getSetMetadata = (): null | ComparisonSetMetadata => {
-    return _backingData.value === null
-      ? null
-      : {
-          project: _backingData.value.project,
-          refBranch: _backingData.value.refBranch,
-          refSetId: _backingData.value.refSetId,
-          testBranch: _backingData.value.testBranch,
-          testSetId: _backingData.value.testSetId,
-        };
+  const reset = () => {
+    _storyMetadataMap.clear();
+    highlightKey.value = null;
+    expandedKeys.value.clear();
+    _backingData.value = null;
   };
 
   return {
@@ -123,8 +140,9 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     highlightKey,
     expandedKeys,
     isNullResult,
+    comparisonSetSummary,
     replaceBackingData,
-    getSetMetadata,
+    reset,
     expandAll,
     collapseAll,
   };

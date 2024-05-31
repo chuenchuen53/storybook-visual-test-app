@@ -50,7 +50,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     highlightKey: comparisonHighlightKey,
     expandedKeys: comparisonExpandedKeys,
     replaceBackingData: comparisonReplaceBackingData,
-    getSetMetadata: comparisonGetSetMetadata,
+    comparisonSetSummary: comparisonGetSetMetadata,
     expandAll: comparisonExpandAll,
     collapseAll: comparisonCollapseAll,
   } = useComparisonResultExplorer();
