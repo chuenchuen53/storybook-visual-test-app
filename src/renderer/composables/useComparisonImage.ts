@@ -6,7 +6,7 @@ import type { StoriesDiffResult } from "../../shared/type";
 
 type UpdateFn = UpdateImgFunction | UpdateImgFromBase64Function;
 
-interface State {
+export interface ComparisonImageState {
   type: Ref<UnwrapRef<keyof StoriesDiffResult | null>>;
   diffImg: Ref<ImageState>;
   refImg: Ref<ImageState>;
@@ -14,7 +14,7 @@ interface State {
 }
 
 interface UseComparisonImageReturn {
-  comparisonImageState: Ref<UnwrapRef<State>>;
+  comparisonImageState: Ref<UnwrapRef<ComparisonImageState>>;
   resetImgs: () => void;
   setSameImg: (refUpdateFn: UpdateFn, testUpdateFn: UpdateFn) => Promise<void>;
   setAddedImg: (fn: UpdateFn) => Promise<void>;
@@ -28,7 +28,7 @@ export function useComparisonImage(): UseComparisonImageReturn {
   const testImg = useImage();
   const diffImg = useImage();
 
-  const comparisonImageState = ref<State>({
+  const comparisonImageState = ref<ComparisonImageState>({
     type: displayingType,
     refImg: refImg.imgState,
     testImg: testImg.imgState,

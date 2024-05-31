@@ -5,6 +5,7 @@ import { createPinia } from "pinia";
 import Tooltip from "primevue/tooltip";
 import ToastService from "primevue/toastservice";
 import Ripple from "primevue/ripple";
+import ConfirmationService from "primevue/confirmationservice";
 // @ts-ignore
 import App from "./renderer/App.vue";
 import { router } from "./renderer/routes";
@@ -32,6 +33,7 @@ app.use(PrimeVue, {
 app.directive("ripple", Ripple);
 app.directive("tooltip", Tooltip);
 app.use(ToastService);
+app.use(ConfirmationService);
 
 app.use(pinia);
 

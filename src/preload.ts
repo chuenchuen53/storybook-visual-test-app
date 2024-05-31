@@ -80,7 +80,10 @@ const comparisonApi: IpcRendererHandler<ComparisonApi> = {
 
 const savedSetApi: IpcRendererHandler<SavedSetApi> = {
   listen: {},
-  send: {},
+  send: {
+    openTestRefSetInExplorer: req => ipcRenderer.send(SavedSetChannelKey.send.openTestRefSetInExplorer, req),
+    openComparisonSetInExplorer: req => ipcRenderer.send(SavedSetChannelKey.send.openComparisonSetInExplorer, req),
+  },
   invoke: {
     getAllSavedProjects: () => ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedProjects),
     getAllSavedSets: project => ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedSets, project),
@@ -88,6 +91,10 @@ const savedSetApi: IpcRendererHandler<SavedSetApi> = {
       ipcRenderer.invoke(SavedSetChannelKey.invoke.getRefOrTestSavedSetMetadata, req),
     getComparisonSavedSetMetadata: req =>
       ipcRenderer.invoke(SavedSetChannelKey.invoke.getComparisonSavedSetMetadata, req),
+    deleteRefTestSet: req => ipcRenderer.invoke(SavedSetChannelKey.invoke.deleteRefTestSet, req),
+    deleteComparisonSet: req => ipcRenderer.invoke(SavedSetChannelKey.invoke.deleteComparisonSet, req),
+    deleteRefTestBranch: req => ipcRenderer.invoke(SavedSetChannelKey.invoke.deleteRefTestBranch, req),
+    deleteProject: project => ipcRenderer.invoke(SavedSetChannelKey.invoke.deleteProject, project),
   },
 };
 

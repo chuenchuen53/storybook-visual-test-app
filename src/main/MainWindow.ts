@@ -1,4 +1,4 @@
-import { logger } from "./main/logger";
+import { logger } from "./logger";
 import type { BrowserWindow } from "electron";
 
 export class MainWindow {

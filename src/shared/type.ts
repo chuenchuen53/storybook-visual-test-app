@@ -159,8 +159,8 @@ export interface ComparisonSavedInfo {
 }
 
 export interface SavedSets {
-  ref: RefTestSavedInfo[];
-  test: RefTestSavedInfo[];
+  ref: Record<string, Record<string, RefTestSavedInfo>>;
+  test: Record<string, Record<string, RefTestSavedInfo>>;
   comparison: ComparisonSavedInfo[];
 }
 
@@ -206,4 +206,38 @@ export interface StartScreenshotRequest {
   storybookUrl: string;
   viewport: Viewport;
   concurrency: number;
+}
+
+export interface OpenTestRefSetInExplorerRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  setId: string;
+}
+
+export interface OpenComparisonSetInExplorerRequest {
+  project: string;
+  setId: string;
+}
+
+export interface DeleteRefTestSetRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  setId: string;
+}
+
+export interface DeleteComparisonSetRequest {
+  project: string;
+  setId: string;
+}
+
+export interface DeleteRefTestBranchRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+}
+
+export interface DeleteProjectRequest {
+  project: string;
 }

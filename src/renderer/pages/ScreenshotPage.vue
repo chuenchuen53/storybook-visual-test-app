@@ -14,7 +14,11 @@
           :collapse-all="collapseAll"
           :handle-select-story="handleSelectStory"
           :open-save-dialog="() => (saveDialogOpen = true)"
-        />
+        >
+          <template #story-display="{ label, data }">
+            <StoryDisplayInExplorer :label="label" :data="data" />
+          </template>
+        </StoryTreeExplorer>
       </template>
       <template #right>
         <ScrollPanel class="app-content-height w-full overflow-hidden">
@@ -55,6 +59,7 @@ import { useScreenshotStore } from "../stores/ScreenshotStore";
 import StoryTreeExplorer from "../components/shared/story-explorer/StoryTreeExplorer.vue";
 import SaveDialog from "../components/screenshot/SaveDialog.vue";
 import ScreenshotImg from "../components/screenshot/ScreenshotImg.vue";
+import StoryDisplayInExplorer from "../components/screenshot/StoryDisplayInExplorer.vue";
 import { ScreenshotState } from "../../shared/type";
 
 const store = useScreenshotStore();

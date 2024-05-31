@@ -15,4 +15,8 @@ export interface SavedSetService {
     setId: string,
   ): Promise<StoryScreenshotMetadata[]>;
   getComparisonSavedSetMetadata(project: string, setId: string): Promise<GetComparisonSavedSetMetadataResponse>;
+  deleteRefTestSet(type: SaveScreenshotType, project: string, branch: string, setId: string): Promise<SavedSets | null>;
+  deleteComparisonSet(project: string, setId: string): Promise<SavedSets | null>;
+  deleteRefTestBranch(type: SaveScreenshotType, project: string, branch: string): Promise<SavedSets | null>;
+  deleteProject(project: string): Promise<boolean>;
 }

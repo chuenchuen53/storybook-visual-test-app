@@ -7,7 +7,7 @@
       @click="$emit('nodeClick', node)"
     >
       <div class="flex flex-shrink-0 flex-grow-0 basis-4 items-center justify-center">
-        <i v-if="!isLeaf(node)" :class="expandedKeys.has(node.key) ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
+        <i v-if="!isLeaf(node)" :class="expandedKeys?.has(node.key) ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
       </div>
       <div class="flex-shrink flex-grow basis-full select-none">
         <slot name="node-content" :node="node">

@@ -35,18 +35,9 @@
       >
         <template #node-content="{ node }">
           <div v-if="isLeaf(node)">
-            <div class="flex items-baseline justify-between gap-2">
-              <div class="flex gap-2">
-                <i class="!text-sm" :class="iconCls(node.data.state)"></i>
-                <div>
-                  {{ node.label }}
-                </div>
-                <i v-if="node.data.storyErr" class="pi pi-exclamation-triangle !text-s text-red-400"></i>
-              </div>
-              <div v-if="node.data.startTime && node.data.endTime" class="text-xs text-gray-500">
-                {{ timeSpent(node.data.startTime, node.data.endTime) }}ms
-              </div>
-            </div>
+            <slot name="story-display" :label="node.label" :data="node.data">
+              {{ node.label }}
+            </slot>
           </div>
           <div v-else>
             {{ node.label }}
@@ -66,10 +57,8 @@ import InputText from "primevue/inputtext";
 import { watchDebounced } from "@vueuse/core";
 import ScrollPanel from "primevue/scrollpanel";
 import IconButton from "../../general/IconButton.vue";
-import { StoryState } from "../../../../shared/type";
 import StyledTree from "../../general/tree/StyledTree.vue";
 import { isLeaf } from "../../general/tree/tree-helper";
-import { timeSpent } from "../../../utils/time-utils";
 import type { StoryMetadataInExplorer } from "./helper";
 import type { NodeData } from "../../general/tree/type";
 import type { StoryTypeFilter } from "../../../composables/useStoryExplorer";
@@ -87,6 +76,11 @@ const props = defineProps<{
   collapseAll: () => void;
   handleSelectStory: (id: string) => Promise<void>;
   openSaveDialog?: () => void;
+}>();
+
+defineSlots<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  "story-display"(props: { label: string; data: any }): unknown;
 }>();
 
 const search = ref("");
@@ -129,17 +123,6 @@ const onNodeSelect = (node: NodeData) => {
     props.handleSelectStory(data.id);
   }
 };
-
-function iconCls(state: StoryState): string {
-  switch (state) {
-    case StoryState.WAITING:
-      return "pi pi-hourglass opacity-50";
-    case StoryState.CAPTURING:
-      return "pi pi-camera text-primary animate-pulse";
-    case StoryState.FINISHED:
-      return "pi pi-check-circle text-primary";
-  }
-}
 </script>
 
 <style lang="scss" scoped>

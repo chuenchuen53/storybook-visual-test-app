@@ -20,7 +20,7 @@
       <template #right>
         <div class="relative size-full">
           <ComparisonSetting v-if="isNullResult" class="basis-full" />
-          <div v-else class="mt-6">
+          <div v-else class="mt-4">
             <div class="mx-6 mb-6 flex justify-between">
               <ComparisonResultHeader v-if="comparisonSetSummary" :data="comparisonSetSummary" />
               <IconButton
@@ -37,7 +37,14 @@
               :data="comparisonSetSummary"
             />
             <ScrollPanel class="scroll-panel-height w-full overflow-hidden">
-              <ComparisonImages class="mx-6" />
+              <ComparisonImages
+                class="mx-6"
+                :comparison-image-state="comparisonImageState"
+                :diff-view-in-vertical="diffViewInVertical"
+                :show-diff-img="showDiffImg"
+                @change-show-diff-img="showDiffImg = $event"
+                @change-diff-view-in-vertical="diffViewInVertical = $event"
+              />
               <div class="h-6"></div>
             </ScrollPanel>
           </div>
@@ -72,8 +79,10 @@ const {
   typeOptions,
   selectedType,
   isNullResult,
-  comparisonImageState,
   comparisonSetSummary,
+  comparisonImageState,
+  showDiffImg,
+  diffViewInVertical,
 } = storeToRefs(store);
 const { refreshData, openInExplorer, expandAll, collapseAll, handleNodeSelect, removeCurrentResult } = store;
 
@@ -84,6 +93,6 @@ onMounted(() => {
 
 <style scoped>
 .scroll-panel-height {
-  height: calc(100vh - 138px);
+  height: calc(100vh - 130px);
 }
 </style>

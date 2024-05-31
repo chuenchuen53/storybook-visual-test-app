@@ -15,7 +15,7 @@
           class="!size-8 !p-0"
           text
           :severity="diffViewInVertical ? undefined : 'secondary'"
-          @click="diffViewInVertical = true"
+          @click="$emit('changeDiffViewInVertical', true)"
         >
           <SplitIcon :size="24" />
         </Button>
@@ -23,7 +23,7 @@
           text
           class="!size-8 rotate-90 !p-0"
           :severity="!diffViewInVertical ? undefined : 'secondary'"
-          @click="diffViewInVertical = false"
+          @click="$emit('changeDiffViewInVertical', false)"
         >
           <SplitIcon :size="24" />
         </Button>
@@ -43,17 +43,25 @@
     <div v-if="comparisonImageState.type === 'diff'">
       <div class="mb-2 text-lg">Different</div>
       <div class="mb-4 flex justify-end gap-[2px]">
-        <Button text class="!h-8 !py-0" :severity="!showDiffImg ? undefined : 'secondary'" @click="showDiffImg = false"
+        <Button
+          text
+          class="!h-8 !py-0"
+          :severity="!showDiffImg ? undefined : 'secondary'"
+          @click="$emit('changeShowDiffImg', false)"
           >Original
         </Button>
-        <Button text class="!h-8 !py-0" :severity="showDiffImg ? undefined : 'secondary'" @click="showDiffImg = true"
+        <Button
+          text
+          class="!h-8 !py-0"
+          :severity="showDiffImg ? undefined : 'secondary'"
+          @click="$emit('changeShowDiffImg', true)"
           >Diff
         </Button>
         <Button
           class="!size-8 !p-0"
           text
           :severity="diffViewInVertical ? undefined : 'secondary'"
-          @click="diffViewInVertical = true"
+          @click="$emit('changeDiffViewInVertical', true)"
         >
           <SplitIcon :size="24" />
         </Button>
@@ -61,7 +69,7 @@
           text
           class="!size-8 rotate-90 !p-0"
           :severity="!diffViewInVertical ? undefined : 'secondary'"
-          @click="diffViewInVertical = false"
+          @click="$emit('changeDiffViewInVertical', false)"
         >
           <SplitIcon :size="24" />
         </Button>
@@ -83,12 +91,19 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
 import Button from "primevue/button";
 import SplitIcon from "../shared/SplitIcon.vue";
-import { useComparisonStore } from "../../stores/ComparisonStore";
 import StyledImg from "../general/image/StyledImg.vue";
+import type { ComparisonImageState } from "../../composables/useComparisonImage";
 
-const store = useComparisonStore();
-const { showDiffImg, diffViewInVertical, comparisonImageState } = storeToRefs(store);
+defineProps<{
+  showDiffImg: boolean;
+  diffViewInVertical: boolean;
+  comparisonImageState: ComparisonImageState;
+}>();
+
+defineEmits<{
+  changeShowDiffImg: [value: boolean];
+  changeDiffViewInVertical: [value: boolean];
+}>();
 </script>

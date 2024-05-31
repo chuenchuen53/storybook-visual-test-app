@@ -5,6 +5,7 @@ import { savedComparisonDir, savedReferenceDir, savedTestDir } from "../Filepath
 import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
 import { LogError } from "../decorator/LogError";
+import { CatchError } from "../decorator/CatchError";
 import type {
   ComparisonSavedInfo,
   GetComparisonSavedSetMetadataResponse,
@@ -33,20 +34,22 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   @LogError()
   public async getAllSavedSets(project: string): Promise<SavedSets> {
-    const [refSets, testSets] = await Promise.all([
+    const [refBranches, testBranches] = await Promise.all([
       this.getAllRefOrTestBranches("reference", project),
       this.getAllRefOrTestBranches("test", project),
     ]);
 
     const [refSetsInfo, testSetsInfo, comparisonSets] = await Promise.all([
-      (await Promise.all(refSets.map(branch => this.getAllRefOrTestSavedSets("reference", project, branch)))).flat(),
-      (await Promise.all(testSets.map(branch => this.getAllRefOrTestSavedSets("test", project, branch)))).flat(),
+      (
+        await Promise.all(refBranches.map(branch => this.getAllRefOrTestSavedSets("reference", project, branch)))
+      ).flat(),
+      (await Promise.all(testBranches.map(branch => this.getAllRefOrTestSavedSets("test", project, branch)))).flat(),
       this.getSaveComparisonSets(project),
     ]);
 
     return {
-      ref: this.sortSavedRefTestSets(refSetsInfo),
-      test: this.sortSavedRefTestSets(testSetsInfo),
+      ref: this.groupByBranch(this.sortSavedRefTestSets(refSetsInfo)),
+      test: this.groupByBranch(this.sortSavedRefTestSets(testSetsInfo)),
       comparison: this.sortCompareSets(comparisonSets),
     };
   }
@@ -84,7 +87,7 @@ export class SavedSetServiceImpl implements SavedSetService {
       metadata.testSetId,
     );
 
-    if (metadata === null || refSetMetadata === null || testSetMetadata === null) return { data: null };
+    if (refSetMetadata === null || testSetMetadata === null) return { data: null };
 
     const map = new Map<string, StoryScreenshotMetadata>();
     for (const x of refSetMetadata.storyMetadataList) {
@@ -102,6 +105,52 @@ export class SavedSetServiceImpl implements SavedSetService {
         storyMetadataList,
       },
     };
+  }
+
+  @CatchError<null>(null)
+  @LogError()
+  public async deleteRefTestSet(
+    type: SaveScreenshotType,
+    project: string,
+    branch: string,
+    setId: string,
+  ): Promise<SavedSets | null> {
+    const dir = path.join(type === "reference" ? savedReferenceDir : savedTestDir, project, branch, setId);
+    if (!(await fs.pathExists(dir))) return null;
+    await fs.remove(dir);
+    return await this.getAllSavedSets(project);
+  }
+
+  @CatchError<null>(null)
+  @LogError()
+  public async deleteComparisonSet(project: string, setId: string): Promise<SavedSets | null> {
+    const dir = path.join(savedComparisonDir, project, setId);
+    if (!(await fs.pathExists(dir))) return null;
+    await fs.remove(dir);
+    return await this.getAllSavedSets(project);
+  }
+
+  @CatchError<null>(null)
+  @LogError()
+  public async deleteRefTestBranch(
+    type: SaveScreenshotType,
+    project: string,
+    branch: string,
+  ): Promise<SavedSets | null> {
+    const dir = path.join(type === "reference" ? savedReferenceDir : savedTestDir, project, branch);
+    if (!(await fs.pathExists(dir))) return null;
+    await fs.remove(dir);
+    return await this.getAllSavedSets(project);
+  }
+
+  @CatchError<boolean>(false)
+  @LogError()
+  public async deleteProject(project: string): Promise<boolean> {
+    const refDir = path.join(savedReferenceDir, project);
+    const testDir = path.join(savedTestDir, project);
+    const comparisonDir = path.join(savedComparisonDir, project);
+    await Promise.all([fs.remove(refDir), fs.remove(testDir), fs.remove(comparisonDir)]);
+    return true;
   }
 
   private async getAllRefOrTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
@@ -176,30 +225,30 @@ export class SavedSetServiceImpl implements SavedSetService {
     return (await Promise.all(allSets.map(getSavedInfo))).filter((info): info is ComparisonSavedInfo => info !== null);
   }
 
+  private groupByBranch(savedSets: RefTestSavedInfo[]): Record<string, Record<string, RefTestSavedInfo>> {
+    const map = new Map<string, Record<string, RefTestSavedInfo>>();
+    for (const set of savedSets) {
+      let branchMap = map.get(set.branch);
+      if (!branchMap) {
+        branchMap = {};
+        map.set(set.branch, branchMap);
+      }
+      branchMap[set.id] = set;
+    }
+    return Object.fromEntries(map);
+  }
+
   private sortSavedRefTestSets(savedSets: RefTestSavedInfo[]): RefTestSavedInfo[] {
     return savedSets.sort((a, b) => {
       if (a.branch !== b.branch) {
         return a.branch.localeCompare(b.branch);
       }
-      if (a.viewport.width !== b.viewport.width) {
-        return a.viewport.width - b.viewport.width;
-      }
-
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // desc
     });
   }
 
   private sortCompareSets(savedSets: ComparisonSavedInfo[]): ComparisonSavedInfo[] {
     return savedSets.sort((a, b) => {
-      if (a.testBranch !== b.testBranch) {
-        return a.testBranch.localeCompare(b.testBranch);
-      }
-      if (a.viewport.width !== b.viewport.width) {
-        return a.viewport.width - b.viewport.width;
-      }
-      if (a.refBranch !== b.refBranch) {
-        return a.refBranch.localeCompare(b.refBranch);
-      }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // desc
     });
   }

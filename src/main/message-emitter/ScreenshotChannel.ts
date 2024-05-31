@@ -1,4 +1,4 @@
-import { MainWindow } from "../../MainWindow";
+import { MainWindow } from "../MainWindow";
 import { ScreenshotChannelKey } from "../../shared/ScreenshotApi";
 import type { FirstParamTypeForListener } from "../../shared/ipc-type-helper";
 import type { ScreenshotApi } from "../../shared/ScreenshotApi";

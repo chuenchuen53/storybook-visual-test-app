@@ -2,7 +2,7 @@ import path from "path";
 import { app, BrowserWindow } from "electron";
 import { registerUserSettingHandlers } from "./main/ipc-handlers/user-setting-handlers";
 import { UserSettingServiceImpl } from "./main/service/UserSettingServiceImpl";
-import { MainWindow } from "./MainWindow";
+import { MainWindow } from "./main/MainWindow";
 import { ScreenshotServiceImpl } from "./main/service/ScreenshotServiceImpl";
 import { ComparisonServiceImpl } from "./main/service/ComparisonServiceImpl";
 import { logger } from "./main/logger";
