@@ -229,7 +229,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
         id: data.id,
       });
     const getDiffImgFn = () =>
-      window.imgApi.invoke.getSavedComparisonImg({
+      window.imgApi.invoke.getSavedComparisonDiffImg({
         project,
         setId: id,
         id: data.id,

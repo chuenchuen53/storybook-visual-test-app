@@ -1,8 +1,8 @@
 import { ipcMain } from "electron";
-import type { SavedSetApi } from "../../shared/SavedSetApi";
 import { SavedSetChannelKey } from "../../shared/SavedSetApi";
 import { FilepathHelper } from "../Filepath";
 import { openInExplorer } from "../utils";
+import type { SavedSetApi } from "../../shared/SavedSetApi";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 import type { SavedSetService } from "../service/SavedSetService";
 

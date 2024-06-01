@@ -20,7 +20,7 @@
           >
             <template #story-display="slotProps">
               <div class="flex gap-2">
-                <i class="pi pi-bookmark text-primary !text-sm"></i>
+                <i class="pi pi-bookmark !text-sm text-primary"></i>
                 <div>
                   {{ slotProps.label }}
                 </div>

@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
-import type { UserSettingApi } from "../../shared/UserSettingApi";
 import { UserSettingChannelKey } from "../../shared/UserSettingApi";
+import type { UserSettingApi } from "../../shared/UserSettingApi";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 import type { UserSettingService } from "../service/UserSettingService";
 

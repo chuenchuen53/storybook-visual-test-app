@@ -4,11 +4,11 @@ import { v4 as uuidv4 } from "uuid";
 import { StoriesDifferImpl } from "../differ/stories-differ/StoriesDifferImpl";
 import { FilepathHelper } from "../Filepath";
 import { getAllFolders } from "../utils";
-import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
+import { SavedScreenshotMetadataHelper } from "../persistence/SavedScreenshotMetadataHelper";
 import { Log } from "../decorator/Log";
 import { CatchError } from "../decorator/CatchError";
-import { TempComparisonMetadataHelper } from "../data-files/TempComparisonMetadataHelper";
-import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
+import { TempComparisonMetadataHelper } from "../persistence/TempComparisonMetadataHelper";
+import { SavedComparisonMetadataHelper } from "../persistence/SavedComparisonMetadataHelper";
 import { LogError } from "../decorator/LogError";
 import type {
   BranchScreenshotSet,

@@ -1,4 +1,3 @@
-import type { ComputedRef, Ref } from "vue";
 import { computed, ref } from "vue";
 import {
   generateTreeFromRespData,
@@ -6,6 +5,7 @@ import {
 } from "../components/comparison/comparison-result-explorer/helper";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import { filterNonNull } from "../utils/utils";
+import type { ComputedRef, Ref } from "vue";
 import type { ComparisonResponse$Data, StoriesDiffResult, StoryScreenshotMetadata } from "../../shared/type";
 import type { NodeData } from "../components/general/tree/type";
 

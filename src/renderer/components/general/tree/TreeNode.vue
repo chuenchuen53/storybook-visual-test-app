@@ -32,9 +32,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Ref } from "vue";
 import { inject } from "vue";
 import { isLeaf } from "./tree-helper";
+import type { Ref } from "vue";
 import type { EmitEvent, NodeData, NodeSlots } from "./type";
 
 defineProps<{

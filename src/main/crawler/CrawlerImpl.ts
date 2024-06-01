@@ -1,12 +1,12 @@
-import type { Browser, Page } from "puppeteer-core";
 import puppeteer from "puppeteer-core";
 import { DockerContainer } from "../docker-helper/DockerContainer";
 import { sleep } from "../utils";
 import { logger } from "../logger";
 import { Log } from "../decorator/Log";
-import type { NamedBrowser } from "./ScreenshotManager";
 import { ScreenshotManager } from "./ScreenshotManager";
 import { getStorybookMetadata } from "./client-code";
+import type { NamedBrowser } from "./ScreenshotManager";
+import type { Browser, Page } from "puppeteer-core";
 import type { StoryMetadata, StoryState, Viewport } from "../../shared/type";
 import type { Crawler } from "./Crawler";
 import type { GetStoriesMetadataResult, ScreenshotStoriesResult } from "./type";
@@ -26,7 +26,7 @@ export class CrawlerImpl implements Crawler {
   @Log("CrawlerImpl.getStoriesMetadata")
   public async getStoriesMetadata(
     storybookUrl: string,
-    onComputingMetadata: () => void,
+    onStartComputeMetadata: () => void,
   ): Promise<GetStoriesMetadataResult> {
     let container: DockerContainer | undefined = undefined;
     let browser: Browser | undefined = undefined;
@@ -42,7 +42,7 @@ export class CrawlerImpl implements Crawler {
       browser = storybookConnection.browser;
       const page = storybookConnection.page;
 
-      onComputingMetadata();
+      onStartComputeMetadata();
 
       const storyMetadataList = await this.computeMetadata(page);
 

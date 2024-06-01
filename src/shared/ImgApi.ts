@@ -1,4 +1,4 @@
-import type { IpcApi } from "./ipc-type-helper";
+import type { IpcApi, IpcChannel } from "./ipc-type-helper";
 import type { GetImgResponse, GetSavedComparisonImgRequest, GetSavedRefTestImgRequest } from "./type";
 
 export interface ImgApi extends IpcApi {
@@ -10,11 +10,11 @@ export interface ImgApi extends IpcApi {
     getCompareRemovedImg: (id: string) => Promise<GetImgResponse>;
     getCompareDiffImg: (id: string) => Promise<GetImgResponse>;
     getSavedRefTestImg: (req: GetSavedRefTestImgRequest) => Promise<GetImgResponse>;
-    getSavedComparisonImg: (req: GetSavedComparisonImgRequest) => Promise<GetImgResponse>;
+    getSavedComparisonDiffImg: (req: GetSavedComparisonImgRequest) => Promise<GetImgResponse>;
   };
 }
 
-export const ImgChannelKey = {
+export const ImgChannelKey: IpcChannel<ImgApi> = {
   listen: {},
   send: {},
   invoke: {
@@ -23,6 +23,6 @@ export const ImgChannelKey = {
     getCompareRemovedImg: "img:getCompareRemovedImg",
     getCompareDiffImg: "img:getCompareDiffImg",
     getSavedRefTestImg: "img:getSavedRefTestImg",
-    getSavedComparisonImg: "img:getSavedComparisonImg",
+    getSavedComparisonDiffImg: "img:getSavedComparisonDiffImg",
   },
 };

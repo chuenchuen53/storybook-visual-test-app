@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import { PixelmatchDiffer } from "../img-differ/PixelmatchDiffer";
 import { computeArrDiff } from "../../utils";
 import { FilepathHelper } from "../../Filepath";
-import { SavedScreenshotMetadataHelper } from "../../data-files/SavedScreenshotMetadataHelper";
+import { SavedScreenshotMetadataHelper } from "../../persistence/SavedScreenshotMetadataHelper";
 import type { StoriesDiffResult } from "../../../shared/type";
 import type { StoriesDiffer } from "./StoriesDiffer";
 import type { ImgDiffer } from "../img-differ/ImgDiffer";

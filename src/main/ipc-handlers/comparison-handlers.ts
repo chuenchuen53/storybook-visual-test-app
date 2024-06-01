@@ -1,8 +1,8 @@
 import { ipcMain } from "electron";
 import { openInExplorer } from "../utils";
 import { FilepathHelper } from "../Filepath";
-import type { ComparisonApi } from "../../shared/ComparisonApi";
 import { ComparisonChannelKey } from "../../shared/ComparisonApi";
+import type { ComparisonApi } from "../../shared/ComparisonApi";
 import type { ComparisonService } from "../service/ComparisonService";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 

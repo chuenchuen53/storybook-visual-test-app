@@ -50,8 +50,8 @@ export class ImgServiceImpl implements ImgService {
   }
 
   @LogError()
-  public async getSavedComparisonImg(project: string, setId: string, id: string): Promise<GetImgResponse> {
-    const filepath = FilepathHelper.savedComparisonImgPath(project, setId, id + ".png");
+  public async getSavedComparisonDiffImg(project: string, setId: string, id: string): Promise<GetImgResponse> {
+    const filepath = FilepathHelper.savedComparisonDiffImgPath(project, setId, id + ".png");
     return await this.getImg(filepath);
   }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { StoryTree } from "../../../../renderer/components/shared/story-explorer/helper";
 import { getScreenshotPageTreeData } from "../../../../renderer/components/shared/story-explorer/helper";
+import type { StoryTree } from "../../../../renderer/components/shared/story-explorer/helper";
 
 describe("getScreenshotPageTreeData", () => {
   it("should return an empty array when given an empty object", () => {

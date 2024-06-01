@@ -45,7 +45,7 @@
         <template #node-content="{ node }">
           <div v-if="isLeaf(node)">
             <div class="flex gap-2">
-              <i class="pi pi-bookmark text-primary !text-sm"></i>
+              <i class="pi pi-bookmark !text-sm text-primary"></i>
               <div>
                 {{ node.label }}
               </div>

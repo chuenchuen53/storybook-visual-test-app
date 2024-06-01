@@ -1,11 +1,11 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import type { SaveScreenshotType, StartScreenshotRequest, Viewport } from "../../shared/type";
 import { ScreenshotState, StoryState } from "../../shared/type";
 import { type StoryMetadataInExplorer } from "../components/shared/story-explorer/helper";
 import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
+import type { SaveScreenshotType, StartScreenshotRequest, Viewport } from "../../shared/type";
 
 export interface SaveInfo {
   type: SaveScreenshotType;

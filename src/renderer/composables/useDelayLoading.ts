@@ -1,5 +1,5 @@
-import type { Ref } from "vue";
 import { ref, watch } from "vue";
+import type { Ref } from "vue";
 
 export function useDelayLoading(sourceRef: Ref<boolean>, delay = 500): Ref<boolean> {
   let timeId: number | null = null;

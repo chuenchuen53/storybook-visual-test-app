@@ -1,8 +1,8 @@
 import { ipcMain } from "electron";
 import { openInExplorer } from "../utils";
 import { FilepathHelper } from "../Filepath";
-import type { ScreenshotApi } from "../../shared/ScreenshotApi";
 import { ScreenshotChannelKey } from "../../shared/ScreenshotApi";
+import type { ScreenshotApi } from "../../shared/ScreenshotApi";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 import type { ScreenshotService } from "../service/ScreenshotService";
 

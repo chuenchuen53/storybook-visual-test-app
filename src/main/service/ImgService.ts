@@ -12,5 +12,5 @@ export interface ImgService {
     setId: string,
     id: string,
   ): Promise<GetImgResponse>;
-  getSavedComparisonImg(project: string, setId: string, id: string): Promise<GetImgResponse>;
+  getSavedComparisonDiffImg(project: string, setId: string, id: string): Promise<GetImgResponse>;
 }

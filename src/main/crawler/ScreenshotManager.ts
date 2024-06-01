@@ -1,9 +1,9 @@
 import { sleep } from "../utils";
 import { FilepathHelper } from "../Filepath";
-import type { StoryMetadata, StoryScreenshotMetadata, Viewport } from "../../shared/type";
 import { StoryState } from "../../shared/type";
 import { logger } from "../logger";
 import { GlobalChannel } from "../message-emitter/GlobalChannel";
+import type { StoryMetadata, StoryScreenshotMetadata, Viewport } from "../../shared/type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
 export interface NamedBrowser {

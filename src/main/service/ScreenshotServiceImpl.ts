@@ -5,6 +5,15 @@ import { CrawlerImpl } from "../crawler/CrawlerImpl";
 import { isDockerAvailable } from "../docker-helper/is-docker-available";
 import { checkDockerImage, pullDockerImage } from "../docker-helper/docker-image";
 import { FilepathHelper } from "../Filepath";
+import { ScreenshotState } from "../../shared/type";
+import { GlobalChannel } from "../message-emitter/GlobalChannel";
+import { ScreenshotChannel } from "../message-emitter/ScreenshotChannel";
+import { Log } from "../decorator/Log";
+import { CatchError, HandledError } from "../decorator/CatchError";
+import { TempScreenshotMetadataHelper } from "../persistence/TempScreenshotMetadataHelper";
+import { SavedScreenshotMetadataHelper } from "../persistence/SavedScreenshotMetadataHelper";
+import { sumPngFileSize } from "../utils";
+import { LogError } from "../decorator/LogError";
 import type {
   SavedScreenshotMetadata,
   SavedScreenshotResponse,
@@ -14,15 +23,6 @@ import type {
   TempScreenshotMetadata,
   Viewport,
 } from "../../shared/type";
-import { ScreenshotState } from "../../shared/type";
-import { GlobalChannel } from "../message-emitter/GlobalChannel";
-import { ScreenshotChannel } from "../message-emitter/ScreenshotChannel";
-import { Log } from "../decorator/Log";
-import { CatchError, HandledError } from "../decorator/CatchError";
-import { TempScreenshotMetadataHelper } from "../data-files/TempScreenshotMetadataHelper";
-import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
-import { sumPngFileSize } from "../utils";
-import { LogError } from "../decorator/LogError";
 import type { ScreenshotService } from "./ScreenshotService";
 import type { Crawler } from "../crawler/Crawler";
 

@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  plugins: ["@typescript-eslint", "import"],
+  plugins: ["@typescript-eslint", "import", "eslint-plugin-local-rules"],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -101,6 +101,15 @@ module.exports = {
     {
       files: ["*.ts"],
       parser: "@typescript-eslint/parser",
+    },
+    {
+      files: ["./src/main/**/*.ts"],
+      parserOptions: {
+        project: "./tsconfig.json",
+      },
+      rules: {
+        "local-rules/catch-error-decorator": "warn",
+      },
     },
   ],
 };

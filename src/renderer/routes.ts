@@ -1,7 +1,7 @@
 // @ts-nocheck
 
-import type { RouteRecordRaw } from "vue-router";
 import { createMemoryHistory, createRouter } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 
 const SavedSetPage = () => import("./pages/SavedSetPage.vue");
 const ScreenshotPage = () => import("./pages/ScreenshotPage.vue");

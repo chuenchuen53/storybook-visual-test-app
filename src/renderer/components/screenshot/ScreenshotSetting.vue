@@ -42,12 +42,12 @@
 <script setup lang="ts">
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/InputNumber";
-import type { AutoCompleteCompleteEvent } from "primevue/autocomplete";
 import AutoComplete from "primevue/autocomplete";
 import Button from "primevue/button";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watchEffect } from "vue";
 import { useScreenshotStore } from "../../stores/ScreenshotStore";
+import type { AutoCompleteCompleteEvent } from "primevue/autocomplete";
 
 const store = useScreenshotStore();
 const { storybookUrl, isProcessing, viewport, concurrency } = storeToRefs(store);

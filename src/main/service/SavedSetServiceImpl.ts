@@ -1,8 +1,8 @@
 import fs from "fs-extra";
 import { getAllFolders } from "../utils";
 import { FilepathHelper } from "../Filepath";
-import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
-import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
+import { SavedScreenshotMetadataHelper } from "../persistence/SavedScreenshotMetadataHelper";
+import { SavedComparisonMetadataHelper } from "../persistence/SavedComparisonMetadataHelper";
 import { LogError } from "../decorator/LogError";
 import { CatchError } from "../decorator/CatchError";
 import type {

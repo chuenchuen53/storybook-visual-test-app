@@ -10,7 +10,7 @@
     <template #option="{ option }">
       <div class="w-full space-y-1">
         <div>{{ labelDisplay(option) }}</div>
-        <div class="text-muted flex w-full justify-between text-xs">
+        <div class="flex w-full justify-between text-xs text-muted">
           <div>{{ viewportDisplay(option) }}</div>
           <div>{{ createdAtDisplay(option) }}</div>
         </div>
