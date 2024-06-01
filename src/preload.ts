@@ -41,7 +41,8 @@ const imgApi: IpcRendererHandler<ImgApi> = {
     getCompareAddedImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareAddedImg, id),
     getCompareRemovedImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareRemovedImg, id),
     getCompareDiffImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareDiffImg, id),
-    getSavedImg: req => ipcRenderer.invoke(ImgChannelKey.invoke.getSavedImg, req),
+    getSavedRefTestImg: req => ipcRenderer.invoke(ImgChannelKey.invoke.getSavedRefTestImg, req),
+    getSavedComparisonImg: req => ipcRenderer.invoke(ImgChannelKey.invoke.getSavedComparisonImg, req),
   },
 };
 

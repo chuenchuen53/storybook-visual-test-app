@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, provide, readonly } from "vue";
+import { provide, readonly, ref } from "vue";
 import TreeNode from "./TreeNode.vue";
 import { isLeaf } from "./tree-helper";
 import type { EmitEvent, NodeData, NodeSlots } from "./type";

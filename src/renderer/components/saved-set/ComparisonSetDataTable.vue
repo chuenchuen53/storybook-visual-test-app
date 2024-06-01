@@ -71,12 +71,10 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import dayjs from "dayjs";
 import { useConfirm } from "primevue/useconfirm";
-import { node } from "execa";
-import { useToast } from "primevue/usetoast";
 import Tooltip from "../general/Tooltip.vue";
 import { useSavedSetStore } from "../../stores/SavedSetStore";
 import IconButton from "../general/IconButton.vue";
-import type { ComparisonSavedInfo, RefTestSavedInfo } from "../../../shared/type";
+import type { ComparisonSavedInfo } from "../../../shared/type";
 
 defineProps<{
   rows: ComparisonSavedInfo[];

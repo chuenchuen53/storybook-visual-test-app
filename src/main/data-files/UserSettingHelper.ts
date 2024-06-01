@@ -1,21 +1,29 @@
 import fs from "fs-extra";
-import { userSettingFilepath } from "../Filepath";
+import { FilepathHelper } from "../Filepath";
 import { logger } from "../logger";
 import type { UserSetting } from "../../shared/type";
 
 export class UserSettingHelper {
-  private static readonly filepath = userSettingFilepath;
-
   public static async read(): Promise<UserSetting | null> {
-    const isExist = await fs.pathExists(UserSettingHelper.filepath);
+    const filepath = FilepathHelper.userSettingPath();
+    const isExist = await fs.pathExists(filepath);
     if (!isExist) return null;
     try {
-      return await fs.readJSON(UserSettingHelper.filepath);
+      return await fs.readJSON(filepath);
     } catch (error) {
       logger.error("Error reading user setting:", error);
       return null;
     }
   }
 
-  public static save() {}
+  public static async save(setting: UserSetting) {
+    const filepath = FilepathHelper.userSettingPath();
+    try {
+      await fs.writeJSON(filepath, setting);
+      return true;
+    } catch (error) {
+      logger.error("Error saving user setting:", error);
+      return false;
+    }
+  }
 }

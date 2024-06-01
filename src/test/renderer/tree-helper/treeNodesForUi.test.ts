@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { treeNodesForUi } from "@renderer/components/general/tree/tree-helper";
+import { describe, expect, it } from "vitest";
 import type { LeafNodePredicate } from "@renderer/components/general/tree/tree-helper";
+import { treeNodesForUi } from "@renderer/components/general/tree/tree-helper";
 
 interface TreeData {
   id: string;

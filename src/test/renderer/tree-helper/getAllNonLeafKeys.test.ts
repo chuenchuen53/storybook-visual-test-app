@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { getAllNonLeafKeys } from "@renderer/components/general/tree/tree-helper";
 import type { NodeData } from "@renderer/components/general/tree/type";
 

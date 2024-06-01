@@ -1,16 +1,16 @@
 import { ipcMain } from "electron";
 import { openInExplorer } from "../utils";
-import { screenshotDir } from "../Filepath";
+import { FilepathHelper } from "../Filepath";
+import type { ScreenshotApi } from "../../shared/ScreenshotApi";
 import { ScreenshotChannelKey } from "../../shared/ScreenshotApi";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
-import type { ScreenshotApi } from "../../shared/ScreenshotApi";
 import type { ScreenshotService } from "../service/ScreenshotService";
 
 export function registerScreenshotHandlers(service: ScreenshotService) {
   const handler: IpcMainHandler<ScreenshotApi> = {
     send: {
       openInExplorer: () => {
-        openInExplorer(screenshotDir);
+        openInExplorer(FilepathHelper.tempScreenshotDir());
       },
       startScreenshot: (_, req) => {
         void service.newScreenshotSet(req.storybookUrl, req.viewport, req.concurrency);

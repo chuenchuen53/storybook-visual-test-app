@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { generateTreeFromFlatData } from "@renderer/utils/story-tree-utils";
 import type { TreeObj } from "@renderer/utils/story-tree-utils";
+import { generateTreeFromFlatData } from "@renderer/utils/story-tree-utils";
 import type { StoryTree } from "../../../../renderer/components/shared/story-explorer/helper";
 import type { StoryMetadata } from "@shared/type";
 

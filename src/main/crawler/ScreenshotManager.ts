@@ -1,10 +1,9 @@
-import path from "path";
 import { sleep } from "../utils";
-import { screenshotDir } from "../Filepath";
+import { FilepathHelper } from "../Filepath";
+import type { StoryMetadata, StoryScreenshotMetadata, Viewport } from "../../shared/type";
 import { StoryState } from "../../shared/type";
 import { logger } from "../logger";
 import { GlobalChannel } from "../message-emitter/GlobalChannel";
-import type { Viewport, StoryMetadata, StoryScreenshotMetadata } from "../../shared/type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
 export interface NamedBrowser {
@@ -78,7 +77,7 @@ export class ScreenshotManager {
       return Boolean(errorStack?.textContent && errorStack.textContent.trim().length > 0);
     });
 
-    const filepath = path.join(screenshotDir, `${story.id}.png`);
+    const filepath = FilepathHelper.tempScreenshotImgPath(story.id + ".png");
 
     const rootElementSelector = "#storybook-root";
     // Wait for the root element to be available

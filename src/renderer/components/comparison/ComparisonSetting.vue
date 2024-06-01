@@ -40,12 +40,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Button from "primevue/button";
+import type { SelectChangeEvent } from "primevue/select";
 import Select from "primevue/select";
 import { storeToRefs } from "pinia";
 import { useComparisonStore } from "../../stores/ComparisonStore";
 import ProjectTabs from "../shared/ProjectTabs.vue";
 import StyledSetListbox from "./StyledSetListbox.vue";
-import type { SelectChangeEvent } from "primevue/select";
 
 const store = useComparisonStore();
 const { isComparing, project, availableSets, refSet, testSet, availableProjects, projectsInTab } = storeToRefs(store);

@@ -1,12 +1,12 @@
+import type { Browser, Page } from "puppeteer-core";
 import puppeteer from "puppeteer-core";
 import { DockerContainer } from "../docker-helper/DockerContainer";
 import { sleep } from "../utils";
 import { logger } from "../logger";
 import { Log } from "../decorator/Log";
+import type { NamedBrowser } from "./ScreenshotManager";
 import { ScreenshotManager } from "./ScreenshotManager";
 import { getStorybookMetadata } from "./client-code";
-import type { NamedBrowser } from "./ScreenshotManager";
-import type { Browser, Page } from "puppeteer-core";
 import type { StoryMetadata, StoryState, Viewport } from "../../shared/type";
 import type { Crawler } from "./Crawler";
 import type { GetStoriesMetadataResult, ScreenshotStoriesResult } from "./type";

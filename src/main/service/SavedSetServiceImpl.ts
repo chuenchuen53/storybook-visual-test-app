@@ -1,7 +1,6 @@
-import path from "path";
 import fs from "fs-extra";
 import { getAllFolders } from "../utils";
-import { savedComparisonDir, savedReferenceDir, savedTestDir } from "../Filepath";
+import { FilepathHelper } from "../Filepath";
 import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../data-files/SavedComparisonMetadataHelper";
 import { LogError } from "../decorator/LogError";
@@ -27,7 +26,10 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   @LogError()
   public async getAllSavedProjects(): Promise<string[]> {
-    const [refs, tests] = await Promise.all([getAllFolders(savedReferenceDir), getAllFolders(savedTestDir)]);
+    const [refs, tests] = await Promise.all([
+      getAllFolders(FilepathHelper.savedRefDir()),
+      getAllFolders(FilepathHelper.savedTestDir()),
+    ]);
     const set = new Set([...refs, ...tests]);
     return Array.from(set);
   }
@@ -44,7 +46,7 @@ export class SavedSetServiceImpl implements SavedSetService {
         await Promise.all(refBranches.map(branch => this.getAllRefOrTestSavedSets("reference", project, branch)))
       ).flat(),
       (await Promise.all(testBranches.map(branch => this.getAllRefOrTestSavedSets("test", project, branch)))).flat(),
-      this.getSaveComparisonSets(project),
+      this.getSavedComparisonSets(project),
     ]);
 
     return {
@@ -115,7 +117,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     branch: string,
     setId: string,
   ): Promise<SavedSets | null> {
-    const dir = path.join(type === "reference" ? savedReferenceDir : savedTestDir, project, branch, setId);
+    const dir = FilepathHelper.savedRefTestSetDir(type, project, branch, setId);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
     return await this.getAllSavedSets(project);
@@ -124,7 +126,7 @@ export class SavedSetServiceImpl implements SavedSetService {
   @CatchError<null>(null)
   @LogError()
   public async deleteComparisonSet(project: string, setId: string): Promise<SavedSets | null> {
-    const dir = path.join(savedComparisonDir, project, setId);
+    const dir = FilepathHelper.savedComparisonSetDir(project, setId);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
     return await this.getAllSavedSets(project);
@@ -137,7 +139,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     project: string,
     branch: string,
   ): Promise<SavedSets | null> {
-    const dir = path.join(type === "reference" ? savedReferenceDir : savedTestDir, project, branch);
+    const dir = FilepathHelper.savedRefTestBranchDir(type, project, branch);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
     return await this.getAllSavedSets(project);
@@ -146,16 +148,15 @@ export class SavedSetServiceImpl implements SavedSetService {
   @CatchError<boolean>(false)
   @LogError()
   public async deleteProject(project: string): Promise<boolean> {
-    const refDir = path.join(savedReferenceDir, project);
-    const testDir = path.join(savedTestDir, project);
-    const comparisonDir = path.join(savedComparisonDir, project);
+    const refDir = FilepathHelper.savedRefTestProjectDir("reference", project);
+    const testDir = FilepathHelper.savedRefTestProjectDir("test", project);
+    const comparisonDir = FilepathHelper.savedComparisonProjectDir(project);
     await Promise.all([fs.remove(refDir), fs.remove(testDir), fs.remove(comparisonDir)]);
     return true;
   }
 
   private async getAllRefOrTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
-    let dir = type === "reference" ? savedReferenceDir : savedTestDir;
-    dir = path.join(dir, project);
+    const dir = FilepathHelper.savedRefTestProjectDir(type, project);
     if (!(await fs.pathExists(dir))) return [];
     return await getAllFolders(dir);
   }
@@ -165,8 +166,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     project: string,
     branch: string,
   ): Promise<RefTestSavedInfo[]> {
-    let dir = type === "reference" ? savedReferenceDir : savedTestDir;
-    dir = path.join(dir, project, branch);
+    const dir = FilepathHelper.savedRefTestBranchDir(type, project, branch);
     const allSets = await getAllFolders(dir);
 
     const getSavedInfo = async (setId: string): Promise<RefTestSavedInfo | null> => {
@@ -191,8 +191,8 @@ export class SavedSetServiceImpl implements SavedSetService {
     return results.filter((info): info is RefTestSavedInfo => info !== null);
   }
 
-  private async getSaveComparisonSets(project: string): Promise<ComparisonSavedInfo[]> {
-    const dir = path.join(savedComparisonDir, project);
+  private async getSavedComparisonSets(project: string): Promise<ComparisonSavedInfo[]> {
+    const dir = FilepathHelper.savedComparisonProjectDir(project);
     if (!(await fs.pathExists(dir))) return [];
     const allSets = await getAllFolders(dir);
 

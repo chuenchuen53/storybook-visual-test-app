@@ -2,15 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
 import { StoriesDifferImpl } from "../differ/stories-differ/StoriesDifferImpl";
-import {
-  comparisonAddedDir,
-  comparisonDiffDir,
-  comparisonDir,
-  comparisonRemovedDir,
-  savedComparisonDir,
-  savedReferenceDir,
-  savedTestDir,
-} from "../Filepath";
+import { FilepathHelper } from "../Filepath";
 import { getAllFolders } from "../utils";
 import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
 import { Log } from "../decorator/Log";
@@ -49,11 +41,11 @@ export class ComparisonServiceImpl implements ComparisonService {
       test: [],
     };
 
-    const refDir = path.join(savedReferenceDir, project);
-    const testDir = path.join(savedTestDir, project);
+    const refProjectDir = FilepathHelper.savedRefTestProjectDir("reference", project);
+    const testProjectDir = FilepathHelper.savedRefTestProjectDir("test", project);
 
-    const refExists = await fs.pathExists(refDir);
-    const testExists = await fs.pathExists(testDir);
+    const refExists = await fs.pathExists(refProjectDir);
+    const testExists = await fs.pathExists(testProjectDir);
 
     if (refExists) result.ref = await this.getSetsFromDir("reference", project);
     if (testExists) result.test = await this.getSetsFromDir("test", project);
@@ -84,13 +76,13 @@ export class ComparisonServiceImpl implements ComparisonService {
 
     const project = testSetMetadata.project;
 
-    await fs.emptydir(comparisonDir);
-    await fs.ensureDir(comparisonDiffDir);
-    await fs.ensureDir(comparisonRemovedDir);
-    await fs.ensureDir(comparisonAddedDir);
+    await fs.emptydir(FilepathHelper.tempComparisonDir());
+    await fs.ensureDir(FilepathHelper.tempComparisonDiffDir());
+    await fs.ensureDir(FilepathHelper.tempComparisonRemovedDir());
+    await fs.ensureDir(FilepathHelper.tempComparisonAddedDir());
 
-    const refDir = path.join(savedReferenceDir, refProject, refBranch, refSetId);
-    const testDir = path.join(savedTestDir, testProject, testBranch, testSetId);
+    const refDir = FilepathHelper.savedRefTestSetDir("reference", refProject, refBranch, refSetId);
+    const testDir = FilepathHelper.savedRefTestSetDir("test", testProject, testBranch, testSetId);
 
     const differ: StoriesDiffer = new StoriesDifferImpl();
     const tolerance = 5;
@@ -133,8 +125,9 @@ export class ComparisonServiceImpl implements ComparisonService {
     if (!metadata) throw new Error("No comparison metadata found");
 
     const { id, project } = metadata;
-    const destDir = path.join(savedComparisonDir, project, id);
-    await fs.copy(comparisonDir, destDir, { overwrite: true });
+    const srcDir = FilepathHelper.tempComparisonDir();
+    const destDir = FilepathHelper.savedComparisonSetDir(project, id);
+    await fs.copy(srcDir, destDir, { overwrite: true });
     const savedMetadata: SavedComparisonMetadata = {
       id: metadata.id,
       createdAt: metadata.createdAt,
@@ -154,8 +147,7 @@ export class ComparisonServiceImpl implements ComparisonService {
   }
 
   private async getSetsFromDir(type: SaveScreenshotType, project: string): Promise<BranchScreenshotSet[]> {
-    const dir = type === "reference" ? savedReferenceDir : savedTestDir;
-    const projectDir = path.join(dir, project);
+    const projectDir = FilepathHelper.savedRefTestProjectDir(type, project);
     const branches = await getAllFolders(projectDir);
 
     return await Promise.all(

@@ -140,9 +140,6 @@ import StyledImg from "../components/general/image/StyledImg.vue";
 import ComparisonResultExplorer from "../components/comparison/comparison-result-explorer/ComparisonResultExplorer.vue";
 import IconButton from "../components/general/IconButton.vue";
 import ComparisonImages from "../components/comparison/ComparisonImages.vue";
-import type { ComparisonSavedInfo, StoriesDiffResult } from "../../shared/type";
-import type { NodeData } from "../components/general/tree/type";
-import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
 
 const store = useSavedSetStore();
 const {

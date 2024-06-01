@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import { value } from "happy-dom/lib/PropertySymbol";
 import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
 import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
@@ -194,7 +193,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type === "comparison") return;
     const { project, branch, type, id: setId } = currentSelectedSet.value.data;
     await refTestUpdateImg(() =>
-      window.imgApi.invoke.getSavedImg({
+      window.imgApi.invoke.getSavedRefTestImg({
         type,
         project,
         branch,
@@ -212,9 +211,9 @@ export const useSavedSetStore = defineStore("savedSet", () => {
 
   const updateComparisonDisplayImg = async (data: ComparisonResultTreeLeaf) => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type !== "comparison") return;
-    const { project, refBranch, testBranch, refSetId, testSetId } = currentSelectedSet.value.data;
+    const { project, id, refBranch, testBranch, refSetId, testSetId } = currentSelectedSet.value.data;
     const getRefImgFn = () =>
-      window.imgApi.invoke.getSavedImg({
+      window.imgApi.invoke.getSavedRefTestImg({
         type: "reference",
         project,
         branch: refBranch,
@@ -222,14 +221,19 @@ export const useSavedSetStore = defineStore("savedSet", () => {
         id: data.id,
       });
     const getTestImgFn = () =>
-      window.imgApi.invoke.getSavedImg({
+      window.imgApi.invoke.getSavedRefTestImg({
         type: "test",
         project,
         branch: testBranch,
         setId: testSetId,
         id: data.id,
       });
-    const getDiffImgFn = () => window.imgApi.invoke.getCompareDiffImg(data.id);
+    const getDiffImgFn = () =>
+      window.imgApi.invoke.getSavedComparisonImg({
+        project,
+        setId: id,
+        id: data.id,
+      });
 
     switch (data.type) {
       case "same": {

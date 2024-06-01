@@ -1,7 +1,7 @@
 import { MainWindow } from "../MainWindow";
+import type { ScreenshotApi } from "../../shared/ScreenshotApi";
 import { ScreenshotChannelKey } from "../../shared/ScreenshotApi";
 import type { FirstParamTypeForListener } from "../../shared/ipc-type-helper";
-import type { ScreenshotApi } from "../../shared/ScreenshotApi";
 
 export class ScreenshotChannel {
   public static updateStatus(status: FirstParamTypeForListener<ScreenshotApi, "onUpdateStatus">) {

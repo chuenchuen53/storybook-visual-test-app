@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import { PixelmatchDiffer } from "../img-differ/PixelmatchDiffer";
 import { computeArrDiff } from "../../utils";
-import { comparisonAddedDir, comparisonDiffDir, comparisonRemovedDir } from "../../Filepath";
+import { FilepathHelper } from "../../Filepath";
 import { SavedScreenshotMetadataHelper } from "../../data-files/SavedScreenshotMetadataHelper";
 import type { StoriesDiffResult } from "../../../shared/type";
 import type { StoriesDiffer } from "./StoriesDiffer";
@@ -39,13 +39,13 @@ export class StoriesDifferImpl implements StoriesDiffer {
 
     const copyAddedPromises = addedIds.map(id => {
       const oriImg = path.join(testDir, id + ".png");
-      const destImg = path.join(comparisonAddedDir, id + ".png");
+      const destImg = FilepathHelper.tempComparisonAddedImgPath(id + ".png");
       return fs.copy(oriImg, destImg);
     });
 
     const copyRemovedPromises = removedIds.map(id => {
       const oriImg = path.join(refDir, id + ".png");
-      const destImg = path.join(comparisonRemovedDir, id + ".png");
+      const destImg = FilepathHelper.tempComparisonRemovedImgPath(id + ".png");
       return fs.copy(oriImg, destImg);
     });
 
@@ -56,7 +56,7 @@ export class StoriesDifferImpl implements StoriesDiffer {
     for (const id of sameIds) {
       const refPath = path.join(refDir, id + ".png");
       const testPath = path.join(testDir, id + ".png");
-      const diffPath = path.join(comparisonDiffDir, id + ".png");
+      const diffPath = FilepathHelper.tempComparisonDiffImgPath(id + ".png");
 
       const isSame = await imgDiffer.isSame(refPath, testPath, diffPath, tolerance);
       if (isSame) {

@@ -213,7 +213,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     if (!comparisonSetSummary.value) return;
     const { project, refBranch, testBranch, refSetId, testSetId } = comparisonSetSummary.value;
     const getRefImgFn = () =>
-      window.imgApi.invoke.getSavedImg({
+      window.imgApi.invoke.getSavedRefTestImg({
         type: "reference",
         project,
         branch: refBranch,
@@ -221,7 +221,7 @@ export const useComparisonStore = defineStore("comparison", () => {
         id: data.id,
       });
     const getTestImgFn = () =>
-      window.imgApi.invoke.getSavedImg({
+      window.imgApi.invoke.getSavedRefTestImg({
         type: "test",
         project,
         branch: testBranch,

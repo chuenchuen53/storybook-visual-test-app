@@ -1,5 +1,5 @@
 import type { IpcApi } from "./ipc-type-helper";
-import type { GetImgResponse, GetSavedImgRequest } from "./type";
+import type { GetImgResponse, GetSavedComparisonImgRequest, GetSavedRefTestImgRequest } from "./type";
 
 export interface ImgApi extends IpcApi {
   listen: Record<string, never>;
@@ -9,7 +9,8 @@ export interface ImgApi extends IpcApi {
     getCompareAddedImg: (id: string) => Promise<GetImgResponse>;
     getCompareRemovedImg: (id: string) => Promise<GetImgResponse>;
     getCompareDiffImg: (id: string) => Promise<GetImgResponse>;
-    getSavedImg: (req: GetSavedImgRequest) => Promise<GetImgResponse>;
+    getSavedRefTestImg: (req: GetSavedRefTestImgRequest) => Promise<GetImgResponse>;
+    getSavedComparisonImg: (req: GetSavedComparisonImgRequest) => Promise<GetImgResponse>;
   };
 }
 
@@ -21,6 +22,7 @@ export const ImgChannelKey = {
     getCompareAddedImg: "img:getCompareAddImg",
     getCompareRemovedImg: "img:getCompareRemovedImg",
     getCompareDiffImg: "img:getCompareDiffImg",
-    getSavedImg: "img:getSavedImg",
+    getSavedRefTestImg: "img:getSavedRefTestImg",
+    getSavedComparisonImg: "img:getSavedComparisonImg",
   },
 };

@@ -1,6 +1,6 @@
 import { MainWindow } from "../MainWindow";
-import { GlobalChannelKey } from "../../shared/GlobalApi";
 import type { GlobalApi } from "../../shared/GlobalApi";
+import { GlobalChannelKey } from "../../shared/GlobalApi";
 import type { FirstParamTypeForListener } from "../../shared/ipc-type-helper";
 
 export class GlobalChannel {

@@ -1,7 +1,7 @@
-import { ref } from "vue";
-import { useImage } from "./useImage";
 import type { Ref, UnwrapRef } from "vue";
-import type { UpdateImgFunction, UpdateImgFromBase64Function, ImageState } from "./useImage";
+import { ref } from "vue";
+import type { ImageState, UpdateImgFromBase64Function, UpdateImgFunction } from "./useImage";
+import { useImage } from "./useImage";
 import type { StoriesDiffResult } from "../../shared/type";
 
 type UpdateFn = UpdateImgFunction | UpdateImgFromBase64Function;

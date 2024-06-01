@@ -1,8 +1,8 @@
 import type {
-  StartScreenshotRequest,
   SavedScreenshotResponse,
   SaveScreenshotType,
   ScreenshotState,
+  StartScreenshotRequest,
   StoryMetadata,
   StoryState,
 } from "./type";

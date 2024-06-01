@@ -1,19 +1,16 @@
-import path from "path";
 import fs from "fs-extra";
-import { screenshotDir, screenshotMetadataFilename } from "../Filepath";
+import { FilepathHelper } from "../Filepath";
 import { logger } from "../logger";
 import type { TempScreenshotMetadata } from "../../shared/type";
 
 export class TempScreenshotMetadataHelper {
-  private static readonly metadataFilePath = path.join(screenshotDir, screenshotMetadataFilename);
-
   public static async save(saveMetaData: TempScreenshotMetadata): Promise<void> {
-    await fs.writeJSON(TempScreenshotMetadataHelper.metadataFilePath, saveMetaData);
+    await fs.writeJSON(FilepathHelper.tempScreenshotMetadataPath(), saveMetaData);
   }
 
   public static async read(): Promise<TempScreenshotMetadata | null> {
     try {
-      return await fs.readJSON(TempScreenshotMetadataHelper.metadataFilePath);
+      return await fs.readJSON(FilepathHelper.tempScreenshotMetadataPath());
     } catch (error) {
       logger.error(error, "Error reading metadata:");
       return null;

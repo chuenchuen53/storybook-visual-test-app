@@ -5,11 +5,12 @@ export interface ImgService {
   getCompareAddedImg(id: string): Promise<GetImgResponse>;
   getCompareRemovedImg(id: string): Promise<GetImgResponse>;
   getCompareDiffImg(id: string): Promise<GetImgResponse>;
-  getSavedImg(
+  getSavedRefTestImg(
     type: SaveScreenshotType,
     project: string,
     branch: string,
-    uuid: string,
+    setId: string,
     id: string,
   ): Promise<GetImgResponse>;
+  getSavedComparisonImg(project: string, setId: string, id: string): Promise<GetImgResponse>;
 }

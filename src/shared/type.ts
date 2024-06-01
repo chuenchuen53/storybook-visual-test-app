@@ -194,7 +194,7 @@ export interface RetRefOrTestSavedSetMetadataRequest {
   setId: string;
 }
 
-export interface GetSavedImgRequest {
+export interface GetSavedRefTestImgRequest {
   type: SaveScreenshotType;
   project: string;
   branch: string;
@@ -240,4 +240,10 @@ export interface DeleteRefTestBranchRequest {
 
 export interface DeleteProjectRequest {
   project: string;
+}
+
+export interface GetSavedComparisonImgRequest {
+  project: string;
+  setId: string;
+  id: string;
 }

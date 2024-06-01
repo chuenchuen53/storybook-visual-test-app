@@ -1,9 +1,8 @@
-import path from "path";
 import { ipcMain } from "electron";
-import { SavedSetChannelKey } from "../../shared/SavedSetApi";
-import { savedComparisonDir, savedReferenceDir, savedTestDir } from "../Filepath";
-import { openInExplorer } from "../utils";
 import type { SavedSetApi } from "../../shared/SavedSetApi";
+import { SavedSetChannelKey } from "../../shared/SavedSetApi";
+import { FilepathHelper } from "../Filepath";
+import { openInExplorer } from "../utils";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 import type { SavedSetService } from "../service/SavedSetService";
 
@@ -12,12 +11,12 @@ export function registerSavedSetHandlers(service: SavedSetService) {
     send: {
       openTestRefSetInExplorer: (_, req) => {
         const { type, project, branch, setId } = req;
-        const dir = path.join(type === "reference" ? savedReferenceDir : savedTestDir, project, branch, setId);
+        const dir = FilepathHelper.savedRefTestSetDir(type, project, branch, setId);
         openInExplorer(dir);
       },
       openComparisonSetInExplorer: (_, req) => {
         const { project, setId } = req;
-        const dir = path.join(savedComparisonDir, project, setId);
+        const dir = FilepathHelper.savedComparisonSetDir(project, setId);
         openInExplorer(dir);
       },
     },

@@ -1,11 +1,19 @@
 import os from "os";
-import path from "path";
 import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
 import { CrawlerImpl } from "../crawler/CrawlerImpl";
 import { isDockerAvailable } from "../docker-helper/is-docker-available";
 import { checkDockerImage, pullDockerImage } from "../docker-helper/docker-image";
-import { savedReferenceDir, savedTestDir, screenshotDir } from "../Filepath";
+import { FilepathHelper } from "../Filepath";
+import type {
+  SavedScreenshotMetadata,
+  SavedScreenshotResponse,
+  SaveScreenshotType,
+  StoryMetadata,
+  StoryScreenshotMetadata,
+  TempScreenshotMetadata,
+  Viewport,
+} from "../../shared/type";
 import { ScreenshotState } from "../../shared/type";
 import { GlobalChannel } from "../message-emitter/GlobalChannel";
 import { ScreenshotChannel } from "../message-emitter/ScreenshotChannel";
@@ -15,15 +23,6 @@ import { TempScreenshotMetadataHelper } from "../data-files/TempScreenshotMetada
 import { SavedScreenshotMetadataHelper } from "../data-files/SavedScreenshotMetadataHelper";
 import { sumPngFileSize } from "../utils";
 import { LogError } from "../decorator/LogError";
-import type {
-  SavedScreenshotResponse,
-  SaveScreenshotType,
-  StoryMetadata,
-  StoryScreenshotMetadata,
-  TempScreenshotMetadata,
-  Viewport,
-  SavedScreenshotMetadata,
-} from "../../shared/type";
 import type { ScreenshotService } from "./ScreenshotService";
 import type { Crawler } from "../crawler/Crawler";
 
@@ -56,7 +55,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
     await this.checkDockerAvailability();
     await this.ensureDockerImage();
 
-    await fs.emptydir(screenshotDir);
+    await fs.emptydir(FilepathHelper.tempScreenshotDir());
 
     ScreenshotChannel.updateStatus(ScreenshotState.PREPARING_METADATA_BROWSER);
     const storyMetadataList = await this.getStoryMetadataList(storybookUrl);
@@ -96,10 +95,10 @@ export class ScreenshotServiceImpl implements ScreenshotService {
 
     const { id, createdAt, viewport, storyMetadataList } = metadata;
 
-    const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
-    const destDir = path.join(typeDir, project, branch, id);
+    const srcDir = FilepathHelper.tempScreenshotDir();
+    const destDir = FilepathHelper.savedRefTestSetDir(type, project, branch, id);
     await fs.ensureDir(destDir);
-    await fs.copy(screenshotDir, destDir, { overwrite: true });
+    await fs.copy(srcDir, destDir, { overwrite: true });
 
     const size = await sumPngFileSize(destDir);
 

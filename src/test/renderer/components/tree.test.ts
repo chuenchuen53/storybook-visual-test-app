@@ -1,10 +1,10 @@
+import type { DOMWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import { ref } from "vue";
 import TreeNode from "@renderer/components/general/tree/TreeNode.vue";
 import Tree from "@renderer/components/general/tree/Tree.vue";
 import { getAllNonLeafKeys } from "@renderer/components/general/tree/tree-helper";
-import type { DOMWrapper } from "@vue/test-utils";
 
 const tree1 = [
   { key: "1", label: "Node 1", data: { id: "1" } },

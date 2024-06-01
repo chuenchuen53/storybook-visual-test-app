@@ -1,13 +1,5 @@
-import path from "path";
 import fs from "fs-extra";
-import {
-  comparisonAddedDir,
-  comparisonDiffDir,
-  comparisonRemovedDir,
-  savedReferenceDir,
-  savedTestDir,
-  screenshotDir,
-} from "../Filepath";
+import { FilepathHelper } from "../Filepath";
 import { LogError } from "../decorator/LogError";
 import type { GetImgResponse, SaveScreenshotType } from "../../shared/type";
 import type { ImgService } from "./ImgService";
@@ -23,38 +15,43 @@ export class ImgServiceImpl implements ImgService {
 
   @LogError()
   public async getScreenshotImg(id: string): Promise<GetImgResponse> {
-    const filepath = path.join(screenshotDir, id + ".png");
+    const filepath = FilepathHelper.tempScreenshotImgPath(id + ".png");
     return await this.getImg(filepath);
   }
 
   @LogError()
   public async getCompareAddedImg(id: string): Promise<GetImgResponse> {
-    const filepath = path.join(comparisonAddedDir, id + ".png");
+    const filepath = FilepathHelper.tempComparisonAddedImgPath(id + ".png");
     return await this.getImg(filepath);
   }
 
   @LogError()
   public async getCompareRemovedImg(id: string): Promise<GetImgResponse> {
-    const filepath = path.join(comparisonRemovedDir, id + ".png");
+    const filepath = FilepathHelper.tempComparisonRemovedImgPath(id + ".png");
     return await this.getImg(filepath);
   }
 
   @LogError()
   public async getCompareDiffImg(id: string): Promise<GetImgResponse> {
-    const filepath = path.join(comparisonDiffDir, id + ".png");
+    const filepath = FilepathHelper.tempComparisonDiffImgPath(id + ".png");
     return await this.getImg(filepath);
   }
 
   @LogError()
-  public async getSavedImg(
+  public async getSavedRefTestImg(
     type: SaveScreenshotType,
     project: string,
     branch: string,
-    uuid: string,
+    setId: string,
     id: string,
   ): Promise<GetImgResponse> {
-    const typeDir = type === "reference" ? savedReferenceDir : savedTestDir;
-    const filepath = path.join(typeDir, project, branch, uuid, id + ".png");
+    const filepath = FilepathHelper.savedRefTestImgPath(type, project, branch, setId, id + ".png");
+    return await this.getImg(filepath);
+  }
+
+  @LogError()
+  public async getSavedComparisonImg(project: string, setId: string, id: string): Promise<GetImgResponse> {
+    const filepath = FilepathHelper.savedComparisonImgPath(project, setId, id + ".png");
     return await this.getImg(filepath);
   }
 

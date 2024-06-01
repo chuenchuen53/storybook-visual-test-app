@@ -1,9 +1,10 @@
 import pino from "pino";
 import fs from "fs-extra";
-import { appLogFilepath } from "./Filepath";
+import { FilepathHelper } from "./Filepath";
 
-if (fs.existsSync(appLogFilepath)) {
-  fs.truncateSync(appLogFilepath);
+const logPath = FilepathHelper.appLogPath();
+if (fs.existsSync(logPath)) {
+  fs.truncateSync(logPath);
 }
 
 export const logger = pino(
@@ -14,7 +15,7 @@ export const logger = pino(
     targets: [
       {
         target: "pino/file",
-        options: { destination: appLogFilepath },
+        options: { destination: logPath },
       },
       {
         target: "pino-pretty",
