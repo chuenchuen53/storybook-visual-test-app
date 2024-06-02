@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { generateTreeFromFlatData } from "@renderer/utils/story-tree-utils";
-import type { TreeObj } from "@renderer/utils/story-tree-utils";
-import type { StoryTree } from "../../../../renderer/components/shared/story-explorer/helper";
+import { generateTreeFromList } from "../../../../renderer/components/shared/story-explorer/helper";
+import type { ScreenshotPageStoryTree, TreeObj } from "../../../../renderer/components/shared/story-explorer/helper";
 import type { StoryMetadata } from "@shared/type";
 
 interface TreeData {
@@ -13,8 +12,8 @@ interface TreeData {
 describe("generateTreeFromFlatData", () => {
   it("should return an empty object when given an empty array", () => {
     const metadataArr: StoryMetadata[] = [];
-    const expectedResult: StoryTree = {};
-    expect(generateTreeFromFlatData(metadataArr)).toEqual(expectedResult);
+    const expectedResult: ScreenshotPageStoryTree = {};
+    expect(generateTreeFromList(metadataArr)).toEqual(expectedResult);
   });
 
   // Should correctly create a StoryTree object from an array of StoryMetadata
@@ -47,7 +46,7 @@ describe("generateTreeFromFlatData", () => {
         },
       },
     };
-    expect(generateTreeFromFlatData(flatDataArr)).toEqual(expectedResult);
+    expect(generateTreeFromList(flatDataArr)).toEqual(expectedResult);
   });
 
   it("test mock data", () => {
@@ -212,6 +211,6 @@ describe("generateTreeFromFlatData", () => {
         },
       },
     };
-    expect(generateTreeFromFlatData(mockData)).toEqual(expectedResult);
+    expect(generateTreeFromList(mockData)).toEqual(expectedResult);
   });
 });

@@ -1,4 +1,4 @@
-import type { TreeObj } from "../../../utils/story-tree-utils";
+import type { TreeObj } from "../../shared/story-explorer/helper";
 import type { NodeData } from "./type";
 
 export type CheckSingleBranchAndGetLeafResult =

@@ -1,8 +1,7 @@
 import { computed, ref } from "vue";
-import { getScreenshotPageTreeData } from "../components/shared/story-explorer/helper";
-import { generateTreeFromFlatData } from "../utils/story-tree-utils";
+import { generateTreeFromList, getScreenshotPageTreeData } from "../components/shared/story-explorer/helper";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
-import type { StoryMetadataInExplorer } from "../components/shared/story-explorer/helper";
+import type { StoryMetadataInScreenshotPageExplorer } from "../components/shared/story-explorer/helper";
 import type { ComputedRef, Ref } from "vue";
 import type { StoryMetadata } from "../../shared/type";
 import type { NodeData } from "../components/general/tree/type";
@@ -47,7 +46,7 @@ export function useStoryExplorer<T extends BaseStoryMetadata>(): UseStoryExplore
         (item.title.toLowerCase().includes(lowerCaseSearchText) ||
           item.name.toLowerCase().includes(lowerCaseSearchText)),
     );
-    return getScreenshotPageTreeData(generateTreeFromFlatData(filteredData));
+    return getScreenshotPageTreeData(generateTreeFromList(filteredData));
   });
 
   const reset = () => {
@@ -75,7 +74,7 @@ export function useStoryExplorer<T extends BaseStoryMetadata>(): UseStoryExplore
     return index === undefined ? null : _backingData.value[index] ?? null;
   };
 
-  const updateItem = (id: string, updateItem: Partial<StoryMetadataInExplorer>) => {
+  const updateItem = (id: string, updateItem: Partial<StoryMetadataInScreenshotPageExplorer>) => {
     const data = getDataById(id);
     if (!data) return;
     Object.assign(data, updateItem);

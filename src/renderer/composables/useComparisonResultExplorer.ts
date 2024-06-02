@@ -4,7 +4,7 @@ import {
   getCompareResultTreeData,
 } from "../components/comparison/comparison-result-explorer/helper";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
-import { filterNonNull } from "../utils/utils";
+import { filterNonNull } from "../utils";
 import type { ComputedRef, Ref } from "vue";
 import type { TempComparisonMetadata, StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../shared/type";
 import type { NodeData } from "../components/general/tree/type";

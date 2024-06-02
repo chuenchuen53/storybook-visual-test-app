@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { ScreenshotState, StoryState } from "../../shared/type";
-import { type StoryMetadataInExplorer } from "../components/shared/story-explorer/helper";
+import { type StoryMetadataInScreenshotPageExplorer } from "../components/shared/story-explorer/helper";
 import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
 import type { CreateNewScreenshotSetRequest, Viewport } from "../../shared/type";
@@ -59,17 +59,19 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const startScreenshot = async () => {
     if (isProcessing.value) return;
     state.value = ScreenshotState.CHECKING_SERVICE;
-    let req: CreateNewScreenshotSetRequest = {
+    const req: CreateNewScreenshotSetRequest = {
       storybookUrl: storybookUrl.value,
-      viewport: viewport.value,
+      viewport: {
+        // drop reactive to allow object clone
+        width: viewport.value.width,
+        height: viewport.value.height,
+      },
       concurrency: concurrency.value,
     };
-    // drop reactive to allow object clone
-    req = JSON.parse(JSON.stringify(req));
     void window.screenshotApi.send.createNewSet(req);
   };
 
-  const selectedStory = ref<StoryMetadataInExplorer | null>(null);
+  const selectedStory = ref<StoryMetadataInScreenshotPageExplorer | null>(null);
   const {
     searchText,
     storyTypeFilter,
@@ -81,7 +83,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     updateItem,
     expandAll,
     collapseAll,
-  } = useStoryExplorer<StoryMetadataInExplorer>();
+  } = useStoryExplorer<StoryMetadataInScreenshotPageExplorer>();
 
   const { imgState, removeImg, updateImg } = useImage();
 
@@ -101,9 +103,9 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const isSaving = ref(false);
   const saveDialogOpen = ref(false);
   const saveInfo = ref<SaveInfo>({
-    project: "my-project",
-    branch: "main",
-    name: "feature 123",
+    project: "",
+    branch: "",
+    name: "",
   });
 
   const saveScreenshot = async () => {

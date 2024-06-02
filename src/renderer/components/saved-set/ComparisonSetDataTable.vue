@@ -108,9 +108,6 @@ const confirmDel = (event: Event, data: SavedComparisonInfo) => {
   });
 };
 
-const store = useSavedSetStore();
-const { openComparisonSet } = store;
-
 function viewportDisplay(x?: SavedComparisonInfo) {
   return x ? `${x.viewport.width}x${x.viewport.height}` : "";
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getScreenshotPageTreeData } from "../../../../renderer/components/shared/story-explorer/helper";
-import type { StoryTree } from "../../../../renderer/components/shared/story-explorer/helper";
+import type { ScreenshotPageStoryTree } from "../../../../renderer/components/shared/story-explorer/helper";
 
 describe("getScreenshotPageTreeData", () => {
   it("should return an empty array when given an empty object", () => {
@@ -24,7 +24,7 @@ describe("getScreenshotPageTreeData", () => {
         name: "Name 2",
       },
     };
-    const result = getScreenshotPageTreeData(storyTree as unknown as StoryTree);
+    const result = getScreenshotPageTreeData(storyTree as unknown as ScreenshotPageStoryTree);
     const expectedNodes = [
       {
         key: "node1",
@@ -53,7 +53,7 @@ describe("getScreenshotPageTreeData", () => {
         },
       },
     };
-    const result = getScreenshotPageTreeData(storyTree as unknown as StoryTree);
+    const result = getScreenshotPageTreeData(storyTree as unknown as ScreenshotPageStoryTree);
     expect(result).toEqual([
       {
         key: "level1",
@@ -139,7 +139,7 @@ describe("getScreenshotPageTreeData", () => {
       },
     ];
 
-    const result = getScreenshotPageTreeData(storyTree as unknown as StoryTree);
+    const result = getScreenshotPageTreeData(storyTree as unknown as ScreenshotPageStoryTree);
     expect(result).toEqual(expectedNodes);
   });
 });

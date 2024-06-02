@@ -59,7 +59,7 @@ import ScrollPanel from "primevue/scrollpanel";
 import IconButton from "../../general/IconButton.vue";
 import StyledTree from "../../general/tree/StyledTree.vue";
 import { isLeaf } from "../../general/tree/tree-helper";
-import type { StoryMetadataInExplorer } from "./helper";
+import type { StoryMetadataInScreenshotPageExplorer } from "./helper";
 import type { NodeData } from "../../general/tree/type";
 import type { StoryTypeFilter } from "../../../composables/useStoryExplorer";
 
@@ -118,7 +118,7 @@ const items = ref([
 ]);
 
 const onNodeSelect = (node: NodeData) => {
-  const data: StoryMetadataInExplorer | undefined = node.data;
+  const data: StoryMetadataInScreenshotPageExplorer | undefined = node.data;
   if (data) {
     props.handleSelectStory(data.id);
   }

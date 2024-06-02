@@ -14,13 +14,13 @@
 </template>
 
 <script setup lang="ts">
-import { timeSpent } from "../../utils/time-utils";
 import { StoryState } from "../../../shared/type";
-import type { StoryMetadataInExplorer } from "../shared/story-explorer/helper";
+import { timeSpent } from "../../utils";
+import type { StoryMetadataInScreenshotPageExplorer } from "../shared/story-explorer/helper";
 
 defineProps<{
   label: string;
-  data: StoryMetadataInExplorer;
+  data: StoryMetadataInScreenshotPageExplorer;
 }>();
 
 function iconCls(state: StoryState): string {

@@ -1,6 +1,7 @@
 <template>
   <div class="ref-test-data-table-container">
     <TreeTable
+      v-if="localData"
       v-model:expandedKeys="expandedKeys"
       :value="localData"
       size="small"
@@ -83,6 +84,7 @@ import dayjs from "dayjs";
 import { ref, watch } from "vue";
 import { useConfirm } from "primevue/useconfirm";
 import IconButton from "../general/IconButton.vue";
+import type { TreeTableExpandedKeys } from "primevue/treetable";
 import type { TreeNode } from "primevue/treenode";
 import type { SavedScreenshotSetInfo } from "../../../shared/type";
 
@@ -98,11 +100,11 @@ const emit = defineEmits<{
   delBranch: [branch: string];
 }>();
 
-const localData = ref<any>(null);
+const localData = ref<TreeNode[] | null>(null);
 
 const filters = ref({});
 
-const expandedKeys = ref<any>({});
+const expandedKeys = ref<TreeTableExpandedKeys>({});
 
 const expandNode = (node: TreeNode) => {
   if (node.children && node.children.length) {

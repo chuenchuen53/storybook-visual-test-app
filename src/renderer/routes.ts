@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { createMemoryHistory, createRouter } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 

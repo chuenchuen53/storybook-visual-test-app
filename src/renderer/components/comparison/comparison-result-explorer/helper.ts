@@ -1,5 +1,6 @@
 import { treeNodesForUi } from "../../general/tree/tree-helper";
-import { generateTreeFromFlatData, type TreeObj } from "../../../utils/story-tree-utils";
+import { generateTreeFromList } from "../../shared/story-explorer/helper";
+import type { TreeObj } from "../../shared/story-explorer/helper";
 import type { StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../../../shared/type";
 
 export interface ComparisonResultTreeLeaf extends StoryMetadataWithRenderStatus {
@@ -9,7 +10,7 @@ export interface ComparisonResultTreeLeaf extends StoryMetadataWithRenderStatus 
 export type CompareResultTree = TreeObj<ComparisonResultTreeLeaf>;
 
 export function generateTreeFromRespData(data: ComparisonResultTreeLeaf[]): CompareResultTree {
-  return generateTreeFromFlatData(data);
+  return generateTreeFromList(data);
 }
 
 function isCompareResultLeaf(node: CompareResultTree | ComparisonResultTreeLeaf): node is ComparisonResultTreeLeaf {

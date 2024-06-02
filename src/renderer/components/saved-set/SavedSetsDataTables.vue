@@ -31,6 +31,8 @@ import { useSavedSetStore } from "../../stores/SavedSetStore";
 import { treeNodesForUi } from "../general/tree/tree-helper";
 import RefTestSetTable from "./ScreenshotSetTable.vue";
 import ComparisonSavedSet from "./ComparisonSetDataTable.vue";
+import type { TreeObj } from "../shared/story-explorer/helper";
+import type { LeafNodePredicate } from "../general/tree/tree-helper";
 import type { SavedComparisonInfo, SavedScreenshotSetInfo } from "../../../shared/type";
 
 const store = useSavedSetStore();
@@ -42,12 +44,19 @@ const {
   deleteScreenshotSet,
   deleteComparisonSet,
   deleteScreenshotBranch,
-  deleteProject,
 } = store;
+
+const isLeaf: LeafNodePredicate<SavedScreenshotSetInfo> = (
+  x: SavedScreenshotSetInfo | TreeObj<SavedScreenshotSetInfo>,
+): x is SavedScreenshotSetInfo => {
+  const keys = Object.keys(x);
+  const requiredKeys: (keyof SavedScreenshotSetInfo)[] = ["id", "createdAt", "project", "branch"];
+  return requiredKeys.every(key => keys.includes(key));
+};
 
 const screenshotSetsData = computed(() => {
   const raw = filteredSavedSets.value?.screenshot;
-  return raw ? treeNodesForUi(raw, x => "id" in x) : [];
+  return raw ? treeNodesForUi(raw, isLeaf) : [];
 });
 
 function handleScreenshotViewClick(data: SavedScreenshotSetInfo) {

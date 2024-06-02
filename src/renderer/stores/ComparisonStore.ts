@@ -24,11 +24,11 @@ export const useComparisonStore = defineStore("comparison", () => {
   const availableSets = ref<GetAllSavedScreenshotSetsResponse>({
     screenshot: {},
   });
-  const refSet = ref<CompareSet>({
+  const selectedRefSet = ref<CompareSet>({
     branch: null,
     setId: null,
   });
-  const testSet = ref<CompareSet>({
+  const selectedTestSet = ref<CompareSet>({
     branch: null,
     setId: null,
   });
@@ -57,19 +57,25 @@ export const useComparisonStore = defineStore("comparison", () => {
   const saveDialogOpen = ref(false);
   const isSaving = ref(false);
   const saveInfo = ref<SaveInfo>({
-    name: "feature 123",
+    name: "",
   });
 
   const compare = async () => {
     if (isComparing.value) return;
-    if (!project.value || !refSet.value.branch || !refSet.value.setId || !testSet.value.branch || !testSet.value.setId)
+    if (
+      !project.value ||
+      !selectedRefSet.value.branch ||
+      !selectedRefSet.value.setId ||
+      !selectedTestSet.value.branch ||
+      !selectedTestSet.value.setId
+    )
       return;
 
     try {
       isComparing.value = true;
       const req: CreateNewComparisonSetRequest = {
-        ref: { project: project.value, branch: refSet.value.branch, setId: refSet.value.setId },
-        test: { project: project.value, branch: testSet.value.branch, setId: testSet.value.setId },
+        ref: { project: project.value, branch: selectedRefSet.value.branch, setId: selectedRefSet.value.setId },
+        test: { project: project.value, branch: selectedTestSet.value.branch, setId: selectedTestSet.value.setId },
       };
       const { success, data, storyMetadataList } = await window.comparisonApi.invoke.compare(req);
 
@@ -100,11 +106,11 @@ export const useComparisonStore = defineStore("comparison", () => {
 
     project.value = projectName;
     availableSets.value = await window.savedSetApi.invoke.getAllSavedScreenshotSets(projectName);
-    refSet.value = {
+    selectedRefSet.value = {
       branch: null,
       setId: null,
     };
-    testSet.value = {
+    selectedTestSet.value = {
       branch: null,
       setId: null,
     };
@@ -129,11 +135,11 @@ export const useComparisonStore = defineStore("comparison", () => {
       availableSets.value = {
         screenshot: {},
       };
-      refSet.value = {
+      selectedRefSet.value = {
         branch: null,
         setId: null,
       };
-      testSet.value = {
+      selectedTestSet.value = {
         branch: null,
         setId: null,
       };
@@ -155,26 +161,26 @@ export const useComparisonStore = defineStore("comparison", () => {
       projectsInTab.value.includes(project.value) &&
       availableProjects.value.includes(project.value)
     ) {
-      const oldRefBranch = refSet.value.branch;
-      const oldTestBranch = testSet.value.branch;
-      const oldRefSetId = refSet.value.setId;
-      const oldTestSetId = testSet.value.setId;
+      const oldRefBranch = selectedRefSet.value.branch;
+      const oldTestBranch = selectedTestSet.value.branch;
+      const oldRefSetId = selectedRefSet.value.setId;
+      const oldTestSetId = selectedTestSet.value.setId;
 
       await updateProject(project.value, false);
 
       const oldRefBranchData = oldRefBranch ? availableSets.value.screenshot[oldRefBranch] : null;
       if (oldRefBranchData) {
-        refSet.value.branch = oldRefBranch;
+        selectedRefSet.value.branch = oldRefBranch;
         if (oldRefSetId && oldRefBranchData[oldRefSetId]) {
-          refSet.value.setId = oldRefSetId;
+          selectedRefSet.value.setId = oldRefSetId;
         }
       }
 
       const oldTestBranchData = oldTestBranch ? availableSets.value.screenshot[oldTestBranch] : null;
       if (oldTestBranchData) {
-        testSet.value.branch = oldTestBranch;
+        selectedTestSet.value.branch = oldTestBranch;
         if (oldTestSetId && oldTestBranchData[oldTestSetId]) {
-          testSet.value.setId = oldTestSetId;
+          selectedTestSet.value.setId = oldTestSetId;
         }
       }
     }
@@ -192,15 +198,15 @@ export const useComparisonStore = defineStore("comparison", () => {
   };
 
   const updateRefSetBranch = (x: string) => {
-    if (x === refSet.value.branch) return;
-    refSet.value.branch = x;
-    refSet.value.setId = null;
+    if (x === selectedRefSet.value.branch) return;
+    selectedRefSet.value.branch = x;
+    selectedRefSet.value.setId = null;
   };
 
   const updateTestSetBranch = (x: string) => {
-    if (x === testSet.value.branch) return;
-    testSet.value.branch = x;
-    testSet.value.setId = null;
+    if (x === selectedTestSet.value.branch) return;
+    selectedTestSet.value.branch = x;
+    selectedTestSet.value.setId = null;
   };
 
   const openInExplorer = () => {
@@ -282,8 +288,8 @@ export const useComparisonStore = defineStore("comparison", () => {
     project,
     availableProjects,
     availableSets,
-    refSet,
-    testSet,
+    selectedRefSet,
+    selectedTestSet,
     treeData,
     highlightKey,
     expandedKeys,

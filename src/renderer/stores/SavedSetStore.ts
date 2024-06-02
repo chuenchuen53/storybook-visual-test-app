@@ -104,7 +104,6 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     expandedKeys: comparisonExpandedKeys,
     reset: comparisonReset,
     replaceBackingData: comparisonReplaceBackingData,
-    comparisonSetSummary: comparisonGetSetMetadata,
     expandAll: comparisonExpandAll,
     collapseAll: comparisonCollapseAll,
   } = useComparisonResultExplorer();
@@ -207,6 +206,8 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     currentSelectedSet.value = null;
     screenshotReset();
     screenshotRemoveImg();
+    comparisonReset();
+    resetComparisonImgs();
   };
 
   const updateComparisonDisplayImg = async (data: ComparisonResultTreeLeaf) => {
