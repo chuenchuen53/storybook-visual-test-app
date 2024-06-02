@@ -17,6 +17,7 @@ export function LogError(methodName?: string) {
         } else {
           logger.error(`${logMethodName} failed with non-Error type. Error: ${e}`);
         }
+        // rethrow the error after logging
         throw e;
       }
     };

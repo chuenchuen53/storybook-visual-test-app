@@ -11,7 +11,7 @@ import type {
   RefTestSavedInfo,
   SavedSets,
   SaveScreenshotType,
-  StoryScreenshotMetadata,
+  StoryMetadataWithRenderStatus,
 } from "../../shared/type";
 import type { SavedSetService } from "./SavedSetService";
 
@@ -62,7 +62,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     project: string,
     branch: string,
     setId: string,
-  ): Promise<StoryScreenshotMetadata[]> {
+  ): Promise<StoryMetadataWithRenderStatus[]> {
     const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, setId);
     return metadata === null ? [] : metadata.storyMetadataList;
   }
@@ -91,7 +91,7 @@ export class SavedSetServiceImpl implements SavedSetService {
 
     if (refSetMetadata === null || testSetMetadata === null) return { data: null };
 
-    const map = new Map<string, StoryScreenshotMetadata>();
+    const map = new Map<string, StoryMetadataWithRenderStatus>();
     for (const x of refSetMetadata.storyMetadataList) {
       map.set(x.id, x);
     }

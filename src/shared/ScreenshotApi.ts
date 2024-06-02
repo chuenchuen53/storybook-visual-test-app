@@ -1,26 +1,12 @@
 import type {
-  SavedScreenshotResponse,
-  SaveScreenshotType,
+  SaveScreenshotRequest,
+  SaveScreenshotResponse,
   ScreenshotState,
   StartScreenshotRequest,
   StoryMetadata,
-  StoryState,
+  StoryUpdateEventData,
 } from "./type";
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
-
-export interface SaveScreenshotRequest {
-  type: SaveScreenshotType;
-  project: string;
-  branch: string;
-  name: string;
-}
-
-export interface StoryUpdateEventData {
-  storyId: string;
-  state: StoryState;
-  browserName: string;
-  storyErr: boolean | null;
-}
 
 export interface ScreenshotApi extends IpcApi {
   listen: {
@@ -30,26 +16,26 @@ export interface ScreenshotApi extends IpcApi {
   };
   send: {
     openInExplorer: () => void;
-    startScreenshot: (req: StartScreenshotRequest) => void;
+    createNewSet: (req: StartScreenshotRequest) => void;
   };
   invoke: {
     getLocalIPAddress: () => Promise<string | undefined>;
-    saveScreenshot: (params: SaveScreenshotRequest) => Promise<SavedScreenshotResponse>;
+    save: (params: SaveScreenshotRequest) => Promise<SaveScreenshotResponse>;
   };
 }
 
 export const ScreenshotChannelKey: IpcChannel<ScreenshotApi> = {
   listen: {
-    onUpdateStatus: "screenshot:updateStatus",
-    onNewMetadata: "screenshot:newMetadata",
-    onUpdateStoryState: "screenshot:updateStoryState",
+    onUpdateStatus: "screenshot:onUpdateStatus",
+    onNewMetadata: "screenshot:onNewMetadata",
+    onUpdateStoryState: "screenshot:onUpdateStoryState",
   },
   send: {
     openInExplorer: "screenshot:openInExplorer",
-    startScreenshot: "screenshot:startScreenshot",
+    createNewSet: "screenshot:createNewSet",
   },
   invoke: {
     getLocalIPAddress: "screenshot:getLocalIPAddress",
-    saveScreenshot: "screenshot:save",
+    save: "screenshot:save",
   },
 };

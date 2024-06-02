@@ -16,10 +16,10 @@ import { sumPngFileSize } from "../utils";
 import { LogError } from "../decorator/LogError";
 import type {
   SavedScreenshotMetadata,
-  SavedScreenshotResponse,
+  SaveScreenshotResponse,
   SaveScreenshotType,
   StoryMetadata,
-  StoryScreenshotMetadata,
+  StoryMetadataWithRenderStatus,
   TempScreenshotMetadata,
   Viewport,
 } from "../../shared/type";
@@ -51,7 +51,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
 
   @CatchErrorInformRenderer("Fail to take screenshot", false)
   @Log()
-  public async newScreenshotSet(storybookUrl: string, viewport: Viewport, concurrency: number): Promise<void> {
+  public async createNewSet(storybookUrl: string, viewport: Viewport, concurrency: number): Promise<void> {
     await this.checkDockerAvailability();
     await this.ensureDockerImage();
 
@@ -82,14 +82,14 @@ export class ScreenshotServiceImpl implements ScreenshotService {
     ScreenshotChannel.updateStatus(ScreenshotState.FINISHED);
   }
 
-  @CatchError<SavedScreenshotResponse>({ success: false, errMsg: "Fail to save screenshot" })
+  @CatchError<SaveScreenshotResponse>({ success: false, errMsg: "Fail to save screenshot" })
   @Log()
-  public async saveScreenshot(
+  public async save(
     type: SaveScreenshotType,
     project: string,
     branch: string,
     name: string,
-  ): Promise<SavedScreenshotResponse> {
+  ): Promise<SaveScreenshotResponse> {
     const metadata = await TempScreenshotMetadataHelper.read();
     if (metadata === null) return { success: false, errMsg: "Fail to read metadata" };
 
@@ -124,7 +124,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
     if (!isDockerAvailable()) throw new Error("Docker is not available");
   }
 
-  @CatchErrorInformRenderer("Fail to pull docker image")
+  @CatchErrorInformRenderer()
   @Log()
   private async ensureDockerImage(): Promise<void> {
     const isDockerImageAvailable = await checkDockerImage();
@@ -148,13 +148,13 @@ export class ScreenshotServiceImpl implements ScreenshotService {
   @Log()
   private async screenshotStories(
     storyMetadataList: StoryMetadata[],
-    url: string,
+    storybookUrl: string,
     viewport: Viewport,
     concurrency: number,
-  ): Promise<StoryScreenshotMetadata[]> {
+  ): Promise<StoryMetadataWithRenderStatus[]> {
     const crawler: Crawler = CrawlerImpl.getInstance();
     const result = await crawler.screenshotStories(
-      url,
+      storybookUrl,
       storyMetadataList,
       viewport,
       concurrency,
@@ -167,16 +167,12 @@ export class ScreenshotServiceImpl implements ScreenshotService {
   }
 }
 
-function sendFailStatusAndErrMsg(errorMsg: string): void {
-  GlobalChannel.sendGlobalMessage({ type: "error", message: errorMsg });
-  ScreenshotChannel.updateStatus(ScreenshotState.FAILED);
-}
-
 function CatchErrorInformRenderer(errMsg?: string, rethrow: boolean | "handled" = "handled") {
   return CatchError(e => {
     if (!(e instanceof HandledError)) {
-      const msg = errMsg ?? (e instanceof Error ? e.message : "Non-Error type");
-      sendFailStatusAndErrMsg(msg);
+      const message = errMsg ?? (e instanceof Error ? e.message : "Non-Error type");
+      GlobalChannel.sendGlobalMessage({ type: "error", message });
+      ScreenshotChannel.updateStatus(ScreenshotState.FAILED);
     }
   }, rethrow);
 }

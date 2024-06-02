@@ -1,8 +1,8 @@
 import { treeNodesForUi } from "../../general/tree/tree-helper";
 import { generateTreeFromFlatData, type TreeObj } from "../../../utils/story-tree-utils";
-import type { StoriesDiffResult, StoryScreenshotMetadata } from "../../../../shared/type";
+import type { StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../../../shared/type";
 
-export interface ComparisonResultTreeLeaf extends StoryScreenshotMetadata {
+export interface ComparisonResultTreeLeaf extends StoryMetadataWithRenderStatus {
   type: keyof StoriesDiffResult;
 }
 

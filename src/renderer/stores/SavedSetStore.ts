@@ -17,7 +17,7 @@ import type {
   RefTestSavedInfo,
   SavedSets,
   SaveScreenshotType,
-  StoryScreenshotMetadata,
+  StoryMetadataWithRenderStatus,
 } from "../../shared/type";
 
 type CurrentSelectedSet =
@@ -94,7 +94,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     replaceBackingData: refTestReplaceBackingData,
     expandAll: refTestExpandAll,
     collapseAll: refTestCollapseAll,
-  } = useStoryExplorer<StoryScreenshotMetadata>();
+  } = useStoryExplorer<StoryMetadataWithRenderStatus>();
   const { imgState: refTestImgState, removeImg: refTestRemoveImg, updateImg: refTestUpdateImg } = useImage();
 
   const {

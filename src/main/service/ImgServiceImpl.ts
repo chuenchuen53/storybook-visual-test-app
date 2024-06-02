@@ -14,25 +14,13 @@ export class ImgServiceImpl implements ImgService {
   private constructor() {}
 
   @LogError()
-  public async getScreenshotImg(id: string): Promise<GetImgResponse> {
+  public async getTempScreenshotImg(id: string): Promise<GetImgResponse> {
     const filepath = FilepathHelper.tempScreenshotImgPath(id + ".png");
     return await this.getImg(filepath);
   }
 
   @LogError()
-  public async getCompareAddedImg(id: string): Promise<GetImgResponse> {
-    const filepath = FilepathHelper.tempComparisonAddedImgPath(id + ".png");
-    return await this.getImg(filepath);
-  }
-
-  @LogError()
-  public async getCompareRemovedImg(id: string): Promise<GetImgResponse> {
-    const filepath = FilepathHelper.tempComparisonRemovedImgPath(id + ".png");
-    return await this.getImg(filepath);
-  }
-
-  @LogError()
-  public async getCompareDiffImg(id: string): Promise<GetImgResponse> {
+  public async getTempComparisonDiffImg(id: string): Promise<GetImgResponse> {
     const filepath = FilepathHelper.tempComparisonDiffImgPath(id + ".png");
     return await this.getImg(filepath);
   }
@@ -57,7 +45,7 @@ export class ImgServiceImpl implements ImgService {
 
   private async getImg(filepath: string): Promise<GetImgResponse> {
     const isExist = await fs.pathExists(filepath);
-    const base64 = isExist ? fs.readFileSync(filepath).toString("base64") : null;
+    const base64 = isExist ? (await fs.readFile(filepath)).toString("base64") : null;
     return { base64, isExist };
   }
 }

@@ -1,5 +1,5 @@
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
-import type { ComparisonRequest, ComparisonResponse, GetAvailableSetResponse, SavedScreenshotResponse } from "./type";
+import type { ComparisonRequest, ComparisonResponse, GetAvailableSetResponse, SaveScreenshotResponse } from "./type";
 
 export interface ComparisonApi extends IpcApi {
   listen: Record<string, never>;
@@ -9,18 +9,18 @@ export interface ComparisonApi extends IpcApi {
   invoke: {
     getAvailableSets: (project: string) => Promise<GetAvailableSetResponse>;
     compare: (req: ComparisonRequest) => Promise<ComparisonResponse>;
-    saveComparisonResult: (name: string) => Promise<SavedScreenshotResponse>;
+    save: (name: string) => Promise<SaveScreenshotResponse>;
   };
 }
 
 export const ComparisonChannelKey: IpcChannel<ComparisonApi> = {
   listen: {},
   send: {
-    openInExplorer: "compare:openInExplorer",
+    openInExplorer: "comparison:openInExplorer",
   },
   invoke: {
-    getAvailableSets: "compare:getAvailableSets",
-    compare: "compare:compare",
-    saveComparisonResult: "compare:saveComparison",
+    getAvailableSets: "comparison:getAvailableSets",
+    compare: "comparison:compare",
+    save: "comparison:save",
   },
 };

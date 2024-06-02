@@ -1,5 +1,4 @@
 import path from "path";
-import fs from "fs-extra";
 import { PixelmatchDiffer } from "../img-differ/PixelmatchDiffer";
 import { computeArrDiff } from "../../utils";
 import { FilepathHelper } from "../../Filepath";
@@ -36,20 +35,6 @@ export class StoriesDifferImpl implements StoriesDiffer {
 
     result.added = [...addedIds];
     result.removed = [...removedIds];
-
-    const copyAddedPromises = addedIds.map(id => {
-      const oriImg = path.join(testDir, id + ".png");
-      const destImg = FilepathHelper.tempComparisonAddedImgPath(id + ".png");
-      return fs.copy(oriImg, destImg);
-    });
-
-    const copyRemovedPromises = removedIds.map(id => {
-      const oriImg = path.join(refDir, id + ".png");
-      const destImg = FilepathHelper.tempComparisonRemovedImgPath(id + ".png");
-      return fs.copy(oriImg, destImg);
-    });
-
-    await Promise.all([...copyAddedPromises, ...copyRemovedPromises]);
 
     const imgDiffer: ImgDiffer = new PixelmatchDiffer();
 

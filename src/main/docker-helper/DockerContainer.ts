@@ -87,4 +87,3 @@ export class DockerContainer {
     return stdout;
   }
 }
-DockerContainer.ensureAllStopped();

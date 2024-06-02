@@ -95,6 +95,7 @@ module.exports = {
       },
     ],
     "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/explicit-member-accessibility": "error",
     "vue/multi-word-component-names": "off",
   },
   overrides: [

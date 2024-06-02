@@ -60,8 +60,8 @@ export async function getAllFolders(dir: string): Promise<string[]> {
   const entries = await fs.readdir(dir);
   const folders: string[] = [];
   for (const entry of entries) {
+    // Ignore hidden folders
     if (!entry.startsWith(".")) {
-      // Ignore hidden folders
       const entryPath = path.join(dir, entry);
       const stat = await fs.stat(entryPath);
       if (stat.isDirectory()) {
@@ -73,7 +73,7 @@ export async function getAllFolders(dir: string): Promise<string[]> {
 }
 
 /**
- * @returns A promise that resolves to the total size of all PNG files in megabytes.
+ * @returns A promise that resolves to the total size of all PNG files.
  */
 export async function sumPngFileSize(dirPath: string): Promise<number> {
   try {

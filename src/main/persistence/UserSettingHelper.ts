@@ -17,8 +17,8 @@ export class UserSettingHelper {
   }
 
   public static async save(setting: UserSetting) {
-    const filepath = FilepathHelper.userSettingPath();
     try {
+      const filepath = FilepathHelper.userSettingPath();
       await fs.writeJSON(filepath, setting);
       return true;
     } catch (error) {

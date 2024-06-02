@@ -3,7 +3,7 @@ import { FilepathHelper } from "../Filepath";
 import { StoryState } from "../../shared/type";
 import { logger } from "../logger";
 import { GlobalChannel } from "../message-emitter/GlobalChannel";
-import type { StoryMetadata, StoryScreenshotMetadata, Viewport } from "../../shared/type";
+import type { StoryMetadata, StoryMetadataWithRenderStatus, Viewport } from "../../shared/type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
 export interface NamedBrowser {
@@ -19,9 +19,9 @@ export type OnStoryStateChange = (
 ) => void;
 
 export class ScreenshotManager {
-  private readonly result: StoryScreenshotMetadata[] = [];
+  private readonly result: StoryMetadataWithRenderStatus[] = [];
 
-  constructor(
+  public constructor(
     private readonly storybookUrl: string,
     private readonly browsers: NamedBrowser[],
     private readonly storyMetadataList: StoryMetadata[],
@@ -29,7 +29,7 @@ export class ScreenshotManager {
     private readonly onStoryStateChange: OnStoryStateChange,
   ) {}
 
-  async startScreenshot(): Promise<StoryScreenshotMetadata[]> {
+  public async startScreenshot(): Promise<StoryMetadataWithRenderStatus[]> {
     let nextJobIndex = this.browsers.length;
 
     await Promise.all(
@@ -56,8 +56,8 @@ export class ScreenshotManager {
     return this.result;
   }
 
-  private storyUrl(url: string, storyId: string) {
-    return `${url}/iframe.html?args=&id=${storyId}`;
+  private storyUrl(storybookUrl: string, storyId: string) {
+    return `${storybookUrl}/iframe.html?args=&id=${storyId}`;
   }
 
   private async screenshot(browser: NamedBrowser, jobIndex: number) {

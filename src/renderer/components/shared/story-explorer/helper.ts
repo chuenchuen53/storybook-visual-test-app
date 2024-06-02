@@ -1,7 +1,7 @@
 import { treeNodesForUi } from "../../general/tree/tree-helper";
 import type { BaseStoryMetadata } from "../../../composables/useStoryExplorer";
 import type { NodeData } from "../../general/tree/type";
-import type { StoryMetadata, StoryScreenshotMetadata, StoryState } from "../../../../shared/type";
+import type { StoryMetadata, StoryMetadataWithRenderStatus, StoryState } from "../../../../shared/type";
 import type { TreeObj } from "../../../utils/story-tree-utils";
 
 export interface StoryMetadataInExplorer extends StoryMetadata {
@@ -14,7 +14,7 @@ export interface StoryMetadataInExplorer extends StoryMetadata {
 
 export type StoryTree = TreeObj<StoryMetadataInExplorer>;
 
-export type SavedStoryTree = TreeObj<StoryScreenshotMetadata>;
+export type SavedStoryTree = TreeObj<StoryMetadataWithRenderStatus>;
 
 function isLeafNode<T extends BaseStoryMetadata>(node: T | TreeObj<T>): node is T {
   const keys = Object.keys(node);

@@ -1,10 +1,8 @@
 import type { GetImgResponse, SaveScreenshotType } from "../../shared/type";
 
 export interface ImgService {
-  getScreenshotImg(id: string): Promise<GetImgResponse>;
-  getCompareAddedImg(id: string): Promise<GetImgResponse>;
-  getCompareRemovedImg(id: string): Promise<GetImgResponse>;
-  getCompareDiffImg(id: string): Promise<GetImgResponse>;
+  getTempScreenshotImg(id: string): Promise<GetImgResponse>;
+  getTempComparisonDiffImg(id: string): Promise<GetImgResponse>;
   getSavedRefTestImg(
     type: SaveScreenshotType,
     project: string,

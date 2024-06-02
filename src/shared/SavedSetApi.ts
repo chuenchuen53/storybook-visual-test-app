@@ -9,7 +9,7 @@ import type {
   OpenTestRefSetInExplorerRequest,
   RetRefOrTestSavedSetMetadataRequest,
   SavedSets,
-  StoryScreenshotMetadata,
+  StoryMetadataWithRenderStatus,
 } from "./type";
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
 
@@ -22,7 +22,9 @@ export interface SavedSetApi extends IpcApi {
   invoke: {
     getAllSavedProjects: () => Promise<string[]>;
     getAllSavedSets: (project: string) => Promise<SavedSets>;
-    getRefOrTestSavedSetMetadata: (req: RetRefOrTestSavedSetMetadataRequest) => Promise<StoryScreenshotMetadata[]>;
+    getRefOrTestSavedSetMetadata: (
+      req: RetRefOrTestSavedSetMetadataRequest,
+    ) => Promise<StoryMetadataWithRenderStatus[]>;
     getComparisonSavedSetMetadata: (
       req: GetComparisonSavedSetMetadataRequest,
     ) => Promise<GetComparisonSavedSetMetadataResponse>;

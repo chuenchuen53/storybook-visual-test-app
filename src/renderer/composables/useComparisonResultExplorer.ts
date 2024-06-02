@@ -6,7 +6,7 @@ import {
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import { filterNonNull } from "../utils/utils";
 import type { ComputedRef, Ref } from "vue";
-import type { ComparisonResponse$Data, StoriesDiffResult, StoryScreenshotMetadata } from "../../shared/type";
+import type { TempComparisonMetadata, StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../shared/type";
 import type { NodeData } from "../components/general/tree/type";
 
 export interface ComparisonSetSummary {
@@ -32,14 +32,14 @@ export interface UseComparisonResultExplorerReturn {
   expandedKeys: Ref<Set<string>>;
   comparisonSetSummary: ComputedRef<ComparisonSetSummary | null>;
   reset: () => void;
-  replaceBackingData: (data: ComparisonResponse$Data, storyMetadataList: StoryScreenshotMetadata[]) => void;
+  replaceBackingData: (data: TempComparisonMetadata, storyMetadataList: StoryMetadataWithRenderStatus[]) => void;
   expandAll: () => void;
   collapseAll: () => void;
 }
 
 export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn {
-  const _backingData = ref<null | ComparisonResponse$Data>(null);
-  const _storyMetadataMap = new Map<string, StoryScreenshotMetadata>();
+  const _backingData = ref<null | TempComparisonMetadata>(null);
+  const _storyMetadataMap = new Map<string, StoryMetadataWithRenderStatus>();
 
   const searchText = ref("");
   const expandedKeys = ref(new Set<string>());
@@ -115,7 +115,7 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
         };
   });
 
-  const replaceBackingData = (data: ComparisonResponse$Data, storyMetadataList: StoryScreenshotMetadata[]) => {
+  const replaceBackingData = (data: TempComparisonMetadata, storyMetadataList: StoryMetadataWithRenderStatus[]) => {
     _storyMetadataMap.clear();
     storyMetadataList.forEach(x => {
       _storyMetadataMap.set(x.id, x);

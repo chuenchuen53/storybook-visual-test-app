@@ -8,10 +8,8 @@ export function registerImgHandlers(imgService: ImgService) {
   const handler: IpcMainHandler<ImgApi> = {
     send: {},
     invoke: {
-      getScreenshotImg: async (_, id) => await imgService.getScreenshotImg(id),
-      getCompareAddedImg: async (_, id) => await imgService.getCompareAddedImg(id),
-      getCompareRemovedImg: async (_, id) => await imgService.getCompareRemovedImg(id),
-      getCompareDiffImg: async (_, id) => await imgService.getCompareDiffImg(id),
+      getTempScreenshotImg: async (_, id) => await imgService.getTempScreenshotImg(id),
+      getTempComparisonDiffImg: async (_, id) => await imgService.getTempComparisonDiffImg(id),
       getSavedRefTestImg: async (_, req) =>
         await imgService.getSavedRefTestImg(req.type, req.project, req.branch, req.setId, req.id),
       getSavedComparisonDiffImg: async (_, req) =>
@@ -19,10 +17,8 @@ export function registerImgHandlers(imgService: ImgService) {
     },
   };
 
-  ipcMain.handle(ImgChannelKey.invoke.getScreenshotImg, handler.invoke.getScreenshotImg);
-  ipcMain.handle(ImgChannelKey.invoke.getCompareAddedImg, handler.invoke.getCompareAddedImg);
-  ipcMain.handle(ImgChannelKey.invoke.getCompareRemovedImg, handler.invoke.getCompareRemovedImg);
-  ipcMain.handle(ImgChannelKey.invoke.getCompareDiffImg, handler.invoke.getCompareDiffImg);
+  ipcMain.handle(ImgChannelKey.invoke.getTempScreenshotImg, handler.invoke.getTempScreenshotImg);
+  ipcMain.handle(ImgChannelKey.invoke.getTempComparisonDiffImg, handler.invoke.getTempComparisonDiffImg);
   ipcMain.handle(ImgChannelKey.invoke.getSavedRefTestImg, handler.invoke.getSavedRefTestImg);
   ipcMain.handle(ImgChannelKey.invoke.getSavedComparisonDiffImg, handler.invoke.getSavedComparisonDiffImg);
 }

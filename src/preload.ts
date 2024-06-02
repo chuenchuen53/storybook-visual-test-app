@@ -37,10 +37,8 @@ const imgApi: IpcRendererHandler<ImgApi> = {
   listen: {},
   send: {},
   invoke: {
-    getScreenshotImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getScreenshotImg, id),
-    getCompareAddedImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareAddedImg, id),
-    getCompareRemovedImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareRemovedImg, id),
-    getCompareDiffImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getCompareDiffImg, id),
+    getTempScreenshotImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getTempScreenshotImg, id),
+    getTempComparisonDiffImg: id => ipcRenderer.invoke(ImgChannelKey.invoke.getTempComparisonDiffImg, id),
     getSavedRefTestImg: req => ipcRenderer.invoke(ImgChannelKey.invoke.getSavedRefTestImg, req),
     getSavedComparisonDiffImg: req => ipcRenderer.invoke(ImgChannelKey.invoke.getSavedComparisonDiffImg, req),
   },
@@ -59,11 +57,11 @@ const screenshotApi: IpcRendererHandler<ScreenshotApi> = {
   },
   send: {
     openInExplorer: () => ipcRenderer.send(ScreenshotChannelKey.send.openInExplorer),
-    startScreenshot: req => ipcRenderer.send(ScreenshotChannelKey.send.startScreenshot, req),
+    createNewSet: req => ipcRenderer.send(ScreenshotChannelKey.send.createNewSet, req),
   },
   invoke: {
     getLocalIPAddress: () => ipcRenderer.invoke(ScreenshotChannelKey.invoke.getLocalIPAddress),
-    saveScreenshot: req => ipcRenderer.invoke(ScreenshotChannelKey.invoke.saveScreenshot, req),
+    save: req => ipcRenderer.invoke(ScreenshotChannelKey.invoke.save, req),
   },
 };
 
@@ -75,7 +73,7 @@ const comparisonApi: IpcRendererHandler<ComparisonApi> = {
   invoke: {
     getAvailableSets: project => ipcRenderer.invoke(ComparisonChannelKey.invoke.getAvailableSets, project),
     compare: req => ipcRenderer.invoke(ComparisonChannelKey.invoke.compare, req),
-    saveComparisonResult: name => ipcRenderer.invoke(ComparisonChannelKey.invoke.saveComparisonResult, name),
+    save: name => ipcRenderer.invoke(ComparisonChannelKey.invoke.save, name),
   },
 };
 
@@ -100,13 +98,8 @@ const savedSetApi: IpcRendererHandler<SavedSetApi> = {
 };
 
 contextBridge.exposeInMainWorld("globalApi", globalApi);
-
 contextBridge.exposeInMainWorld("userSettingApi", userSettingApi);
-
 contextBridge.exposeInMainWorld("imgApi", imgApi);
-
 contextBridge.exposeInMainWorld("screenshotApi", screenshotApi);
-
 contextBridge.exposeInMainWorld("comparisonApi", comparisonApi);
-
 contextBridge.exposeInMainWorld("savedSetApi", savedSetApi);

@@ -1,6 +1,46 @@
+export interface GlobalMessage {
+  type: "success" | "info" | "warn" | "error";
+  message: string;
+  title?: string;
+}
+
+export interface GetSavedRefTestImgRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  setId: string;
+  id: string;
+}
+
+export interface GetSavedComparisonImgRequest {
+  project: string;
+  setId: string;
+  id: string;
+}
+
+export interface GetImgResponse {
+  isExist: boolean;
+  base64: string | null;
+}
+
+export interface UserSetting {
+  projectsInTab?: string[];
+}
+
 export interface Viewport {
   width: number;
   height: number;
+}
+
+export enum ScreenshotState {
+  IDLE = "IDLE",
+  CHECKING_SERVICE = "CHECKING_SERVICE",
+  PREPARING_METADATA_BROWSER = "PREPARING_METADATA_BROWSER",
+  COMPUTING_METADATA = "COMPUTING_METADATA",
+  PREPARING_SCREENSHOT_BROWSER = "PREPARING_SCREENSHOT_BROWSER",
+  CAPTURING_SCREENSHOT = "CAPTURING_SCREENSHOT",
+  FINISHED = "FINISHED",
+  FAILED = "FAILED",
 }
 
 export enum StoryState {
@@ -16,29 +56,49 @@ export interface StoryMetadata {
   tags: string[];
 }
 
-export enum ScreenshotState {
-  IDLE = "IDLE",
-  CHECKING_SERVICE = "CHECKING_SERVICE",
-  PREPARING_METADATA_BROWSER = "PREPARING_METADATA_BROWSER",
-  COMPUTING_METADATA = "COMPUTING_METADATA",
-  PREPARING_SCREENSHOT_BROWSER = "PREPARING_SCREENSHOT_BROWSER",
-  CAPTURING_SCREENSHOT = "CAPTURING_SCREENSHOT",
-  FINISHED = "FINISHED",
-  FAILED = "FAILED",
+export interface StoryMetadataWithRenderStatus extends StoryMetadata {
+  storyErr: boolean;
 }
 
-export interface GlobalMessage {
-  type: "success" | "info" | "warn" | "error";
-  message: string;
-  title?: string;
+export interface TempScreenshotMetadata {
+  id: string;
+  createdAt: string;
+  viewport: Viewport;
+  storyMetadataList: StoryMetadataWithRenderStatus[];
 }
 
-export interface SavedScreenshotResponse {
-  success: boolean;
-  errMsg?: string;
+export interface StoryUpdateEventData {
+  storyId: string;
+  state: StoryState;
+  browserName: string;
+  storyErr: boolean | null;
 }
 
 export type SaveScreenshotType = "reference" | "test";
+
+export interface SaveScreenshotRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  name: string;
+}
+
+export interface SavedScreenshotMetadata {
+  id: string;
+  createdAt: string;
+  viewport: Viewport;
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  name: string;
+  size: number;
+  storyMetadataList: StoryMetadataWithRenderStatus[];
+}
+
+export interface SaveScreenshotResponse {
+  success: boolean;
+  errMsg?: string;
+}
 
 export interface StoriesDiffResult {
   same: string[];
@@ -47,7 +107,7 @@ export interface StoriesDiffResult {
   diff: string[];
 }
 
-export interface ComparisonResponse$Data {
+export interface TempComparisonMetadata {
   id: string;
   createdAt: string;
   project: string;
@@ -61,7 +121,24 @@ export interface ComparisonResponse$Data {
   result: StoriesDiffResult;
 }
 
-export interface SavedComparisonMetadata extends ComparisonResponse$Data {
+export interface RefTestSetLocationIdentifier {
+  project: string;
+  branch: string;
+  setId: string;
+}
+
+export interface ComparisonRequest {
+  ref: RefTestSetLocationIdentifier;
+  test: RefTestSetLocationIdentifier;
+}
+
+export interface ComparisonResponse {
+  success: boolean;
+  data: TempComparisonMetadata | null;
+  storyMetadataList: StoryMetadataWithRenderStatus[] | null;
+}
+
+export interface SavedComparisonMetadata extends TempComparisonMetadata {
   name: string;
 }
 
@@ -73,25 +150,8 @@ export interface GetComparisonSavedSetMetadataRequest {
 export interface GetComparisonSavedSetMetadataResponse {
   data: {
     metadata: SavedComparisonMetadata;
-    storyMetadataList: StoryScreenshotMetadata[];
+    storyMetadataList: StoryMetadataWithRenderStatus[];
   } | null;
-}
-
-export interface SetData {
-  project: string;
-  branch: string;
-  setId: string;
-}
-
-export interface ComparisonRequest {
-  ref: SetData;
-  test: SetData;
-}
-
-export interface ComparisonResponse {
-  success: boolean;
-  data: ComparisonResponse$Data | null;
-  storyMetadataList: StoryScreenshotMetadata[] | null;
 }
 
 export interface SetItem {
@@ -112,15 +172,6 @@ export interface BranchScreenshotSet {
 export interface GetAvailableSetResponse {
   ref: BranchScreenshotSet[];
   test: BranchScreenshotSet[];
-}
-
-export interface GetImgResponse {
-  isExist: boolean;
-  base64: string | null;
-}
-
-export interface UserSetting {
-  projectsInTab?: string[];
 }
 
 export interface RefTestSavedInfo {
@@ -164,42 +215,11 @@ export interface SavedSets {
   comparison: ComparisonSavedInfo[];
 }
 
-export interface StoryScreenshotMetadata extends StoryMetadata {
-  storyErr: boolean;
-}
-
-export interface TempScreenshotMetadata {
-  id: string;
-  createdAt: string;
-  viewport: Viewport;
-  storyMetadataList: StoryScreenshotMetadata[];
-}
-
-export interface SavedScreenshotMetadata {
-  id: string;
-  createdAt: string;
-  viewport: Viewport;
-  type: SaveScreenshotType;
-  project: string;
-  branch: string;
-  name: string;
-  size: number;
-  storyMetadataList: StoryScreenshotMetadata[];
-}
-
 export interface RetRefOrTestSavedSetMetadataRequest {
   type: SaveScreenshotType;
   project: string;
   branch: string;
   setId: string;
-}
-
-export interface GetSavedRefTestImgRequest {
-  type: SaveScreenshotType;
-  project: string;
-  branch: string;
-  setId: string;
-  id: string;
 }
 
 export interface StartScreenshotRequest {
@@ -240,10 +260,4 @@ export interface DeleteRefTestBranchRequest {
 
 export interface DeleteProjectRequest {
   project: string;
-}
-
-export interface GetSavedComparisonImgRequest {
-  project: string;
-  setId: string;
-  id: string;
 }

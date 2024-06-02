@@ -13,14 +13,14 @@ import { LogError } from "../decorator/LogError";
 import type {
   BranchScreenshotSet,
   ComparisonResponse,
-  ComparisonResponse$Data,
+  TempComparisonMetadata,
   GetAvailableSetResponse,
   SavedComparisonMetadata,
-  SavedScreenshotResponse,
+  SaveScreenshotResponse,
   SaveScreenshotType,
-  SetData,
+  RefTestSetLocationIdentifier,
   SetItem,
-  StoryScreenshotMetadata,
+  StoryMetadataWithRenderStatus,
 } from "../../shared/type";
 import type { ComparisonService } from "./ComparisonService";
 import type { StoriesDiffer } from "../differ/stories-differ/StoriesDiffer";
@@ -55,7 +55,10 @@ export class ComparisonServiceImpl implements ComparisonService {
 
   @CatchError<ComparisonResponse>({ success: false, data: null, storyMetadataList: null })
   @Log()
-  public async compare(refSet: SetData, testSet: SetData): Promise<ComparisonResponse> {
+  public async compare(
+    refSet: RefTestSetLocationIdentifier,
+    testSet: RefTestSetLocationIdentifier,
+  ): Promise<ComparisonResponse> {
     const id = uuidv4();
     const now = new Date();
 
@@ -78,8 +81,6 @@ export class ComparisonServiceImpl implements ComparisonService {
 
     await fs.emptydir(FilepathHelper.tempComparisonDir());
     await fs.ensureDir(FilepathHelper.tempComparisonDiffDir());
-    await fs.ensureDir(FilepathHelper.tempComparisonRemovedDir());
-    await fs.ensureDir(FilepathHelper.tempComparisonAddedDir());
 
     const refDir = FilepathHelper.savedRefTestSetDir("reference", refProject, refBranch, refSetId);
     const testDir = FilepathHelper.savedRefTestSetDir("test", testProject, testBranch, testSetId);
@@ -88,7 +89,7 @@ export class ComparisonServiceImpl implements ComparisonService {
     const tolerance = 5;
     const result = await differ.computeDiff(refDir, testDir, tolerance);
 
-    const map = new Map<string, StoryScreenshotMetadata>();
+    const map = new Map<string, StoryMetadataWithRenderStatus>();
     for (const x of refSetMetadata.storyMetadataList) {
       map.set(x.id, x);
     }
@@ -97,7 +98,7 @@ export class ComparisonServiceImpl implements ComparisonService {
     }
     const storyMetadataList = Array.from(map.values());
 
-    const metadata: ComparisonResponse$Data = {
+    const metadata: TempComparisonMetadata = {
       id,
       createdAt: now.toISOString(),
       project,
@@ -115,12 +116,12 @@ export class ComparisonServiceImpl implements ComparisonService {
     return { success: true, data: metadata, storyMetadataList };
   }
 
-  @CatchError<SavedScreenshotResponse>(e => ({
+  @CatchError<SaveScreenshotResponse>(e => ({
     success: false,
     errMsg: e instanceof Error ? e.message : "Unknown error",
   }))
   @Log()
-  public async saveComparison(name: string): Promise<SavedScreenshotResponse> {
+  public async save(name: string): Promise<SaveScreenshotResponse> {
     const metadata = await TempComparisonMetadataHelper.read();
     if (!metadata) throw new Error("No comparison metadata found");
 

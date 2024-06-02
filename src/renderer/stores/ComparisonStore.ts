@@ -228,7 +228,7 @@ export const useComparisonStore = defineStore("comparison", () => {
         setId: testSetId,
         id: data.id,
       });
-    const getDiffImgFn = () => window.imgApi.invoke.getCompareDiffImg(data.id);
+    const getDiffImgFn = () => window.imgApi.invoke.getTempComparisonDiffImg(data.id);
 
     switch (data.type) {
       case "same": {
@@ -258,7 +258,7 @@ export const useComparisonStore = defineStore("comparison", () => {
   const saveScreenshot = async () => {
     try {
       isSaving.value = true;
-      const result = await window.comparisonApi.invoke.saveComparisonResult(saveInfo.value.name);
+      const result = await window.comparisonApi.invoke.save(saveInfo.value.name);
       if (result.success) {
         _toast.add({
           severity: "success",

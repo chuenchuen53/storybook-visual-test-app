@@ -16,8 +16,6 @@ const screenshotMetadataFilename = "metadata.json";
 const comparisonDir = path.join(tempDir, "comparison");
 const comparisonDiffDirName = "diff";
 const comparisonDiffDir = path.join(comparisonDir, comparisonDiffDirName);
-const comparisonRemovedDir = path.join(comparisonDir, "removed");
-const comparisonAddedDir = path.join(comparisonDir, "added");
 const comparisonMetadataFilename = "metadata.json";
 
 const savedReferenceDir = path.join(savedDir, "reference");
@@ -51,24 +49,8 @@ export class FilepathHelper {
     return comparisonDiffDir;
   }
 
-  public static tempComparisonRemovedDir(): string {
-    return comparisonRemovedDir;
-  }
-
-  public static tempComparisonAddedDir(): string {
-    return comparisonAddedDir;
-  }
-
   public static tempComparisonDiffImgPath(imgFilename: string): string {
     return path.join(comparisonDiffDir, imgFilename);
-  }
-
-  public static tempComparisonRemovedImgPath(imgFilename: string): string {
-    return path.join(comparisonRemovedDir, imgFilename);
-  }
-
-  public static tempComparisonAddedImgPath(imgFilename: string): string {
-    return path.join(comparisonAddedDir, imgFilename);
   }
 
   public static tempComparisonMetadataPath(): string {

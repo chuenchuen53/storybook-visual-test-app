@@ -1,7 +1,12 @@
-import type { ComparisonResponse, GetAvailableSetResponse, SavedScreenshotResponse, SetData } from "../../shared/type";
+import type {
+  ComparisonResponse,
+  GetAvailableSetResponse,
+  SaveScreenshotResponse,
+  RefTestSetLocationIdentifier,
+} from "../../shared/type";
 
 export interface ComparisonService {
   getAvailableSets(project: string): Promise<GetAvailableSetResponse>;
-  compare(refSet: SetData, testSet: SetData): Promise<ComparisonResponse>;
-  saveComparison(name: string): Promise<SavedScreenshotResponse>;
+  compare(refSet: RefTestSetLocationIdentifier, testSet: RefTestSetLocationIdentifier): Promise<ComparisonResponse>;
+  save(name: string): Promise<SaveScreenshotResponse>;
 }

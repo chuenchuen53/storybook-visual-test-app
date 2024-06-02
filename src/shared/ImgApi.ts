@@ -5,10 +5,8 @@ export interface ImgApi extends IpcApi {
   listen: Record<string, never>;
   send: Record<string, never>;
   invoke: {
-    getScreenshotImg: (id: string) => Promise<GetImgResponse>;
-    getCompareAddedImg: (id: string) => Promise<GetImgResponse>;
-    getCompareRemovedImg: (id: string) => Promise<GetImgResponse>;
-    getCompareDiffImg: (id: string) => Promise<GetImgResponse>;
+    getTempScreenshotImg: (id: string) => Promise<GetImgResponse>;
+    getTempComparisonDiffImg: (id: string) => Promise<GetImgResponse>;
     getSavedRefTestImg: (req: GetSavedRefTestImgRequest) => Promise<GetImgResponse>;
     getSavedComparisonDiffImg: (req: GetSavedComparisonImgRequest) => Promise<GetImgResponse>;
   };
@@ -18,10 +16,8 @@ export const ImgChannelKey: IpcChannel<ImgApi> = {
   listen: {},
   send: {},
   invoke: {
-    getScreenshotImg: "img:getScreenshotImg",
-    getCompareAddedImg: "img:getCompareAddImg",
-    getCompareRemovedImg: "img:getCompareRemovedImg",
-    getCompareDiffImg: "img:getCompareDiffImg",
+    getTempScreenshotImg: "img:getTempScreenshotImg",
+    getTempComparisonDiffImg: "img:getTempComparisonDiffImg",
     getSavedRefTestImg: "img:getSavedRefTestImg",
     getSavedComparisonDiffImg: "img:getSavedComparisonDiffImg",
   },

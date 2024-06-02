@@ -2,7 +2,7 @@ import type {
   GetComparisonSavedSetMetadataResponse,
   SavedSets,
   SaveScreenshotType,
-  StoryScreenshotMetadata,
+  StoryMetadataWithRenderStatus,
 } from "../../shared/type";
 
 export interface SavedSetService {
@@ -13,7 +13,7 @@ export interface SavedSetService {
     project: string,
     branch: string,
     setId: string,
-  ): Promise<StoryScreenshotMetadata[]>;
+  ): Promise<StoryMetadataWithRenderStatus[]>;
   getComparisonSavedSetMetadata(project: string, setId: string): Promise<GetComparisonSavedSetMetadataResponse>;
   deleteRefTestSet(type: SaveScreenshotType, project: string, branch: string, setId: string): Promise<SavedSets | null>;
   deleteComparisonSet(project: string, setId: string): Promise<SavedSets | null>;

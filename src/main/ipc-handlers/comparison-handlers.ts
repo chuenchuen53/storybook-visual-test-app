@@ -20,8 +20,8 @@ export function registerComparisonHandlers(service: ComparisonService) {
       compare: async (_, req) => {
         return await service.compare(req.ref, req.test);
       },
-      saveComparisonResult: async (_, name) => {
-        return await service.saveComparison(name);
+      save: async (_, name) => {
+        return await service.save(name);
       },
     },
   };
@@ -29,8 +29,6 @@ export function registerComparisonHandlers(service: ComparisonService) {
   ipcMain.on(ComparisonChannelKey.send.openInExplorer, handler.send.openInExplorer);
 
   ipcMain.handle(ComparisonChannelKey.invoke.getAvailableSets, handler.invoke.getAvailableSets);
-
   ipcMain.handle(ComparisonChannelKey.invoke.compare, handler.invoke.compare);
-
-  ipcMain.handle(ComparisonChannelKey.invoke.saveComparisonResult, handler.invoke.saveComparisonResult);
+  ipcMain.handle(ComparisonChannelKey.invoke.save, handler.invoke.save);
 }

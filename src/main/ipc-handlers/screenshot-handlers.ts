@@ -12,25 +12,23 @@ export function registerScreenshotHandlers(service: ScreenshotService) {
       openInExplorer: () => {
         openInExplorer(FilepathHelper.tempScreenshotDir());
       },
-      startScreenshot: (_, req) => {
-        void service.newScreenshotSet(req.storybookUrl, req.viewport, req.concurrency);
+      createNewSet: (_, req) => {
+        void service.createNewSet(req.storybookUrl, req.viewport, req.concurrency);
       },
     },
     invoke: {
       getLocalIPAddress: async _ => {
         return service.getLocalIPAddress();
       },
-      saveScreenshot: async (_, req) => {
-        return await service.saveScreenshot(req.type, req.project, req.branch, req.name);
+      save: async (_, req) => {
+        return await service.save(req.type, req.project, req.branch, req.name);
       },
     },
   };
 
   ipcMain.on(ScreenshotChannelKey.send.openInExplorer, handler.send.openInExplorer);
-
-  ipcMain.on(ScreenshotChannelKey.send.startScreenshot, handler.send.startScreenshot);
+  ipcMain.on(ScreenshotChannelKey.send.createNewSet, handler.send.createNewSet);
 
   ipcMain.handle(ScreenshotChannelKey.invoke.getLocalIPAddress, handler.invoke.getLocalIPAddress);
-
-  ipcMain.handle(ScreenshotChannelKey.invoke.saveScreenshot, handler.invoke.saveScreenshot);
+  ipcMain.handle(ScreenshotChannelKey.invoke.save, handler.invoke.save);
 }

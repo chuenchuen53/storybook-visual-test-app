@@ -67,7 +67,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     };
     // drop reactive to allow object clone
     req = JSON.parse(JSON.stringify(req));
-    void window.screenshotApi.send.startScreenshot(req);
+    void window.screenshotApi.send.createNewSet(req);
   };
 
   const selectedStory = ref<StoryMetadataInExplorer | null>(null);
@@ -94,7 +94,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
       if (story.state !== StoryState.FINISHED) {
         removeImg();
       } else {
-        await updateImg(() => window.imgApi.invoke.getScreenshotImg(id));
+        await updateImg(() => window.imgApi.invoke.getTempScreenshotImg(id));
       }
     }
   };
@@ -111,7 +111,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const saveScreenshot = async () => {
     try {
       isSaving.value = true;
-      const result = await window.screenshotApi.invoke.saveScreenshot({
+      const result = await window.screenshotApi.invoke.save({
         type: saveInfo.value.type,
         project: saveInfo.value.project,
         branch: saveInfo.value.branch,
@@ -184,7 +184,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
           endTime: new Date().toISOString(),
         });
         if (storyId === selectedStory.value?.id) {
-          await updateImg(() => window.imgApi.invoke.getScreenshotImg(storyId));
+          await updateImg(() => window.imgApi.invoke.getTempScreenshotImg(storyId));
         }
       }
     }

@@ -74,9 +74,9 @@ export class CrawlerImpl implements Crawler {
       // wait for chrome in container to start
       await sleep(2000);
 
-      onStartScreenshot();
-
       await this.connectToBrowser(concurrency, container, browsers);
+
+      onStartScreenshot();
       const storyScreenshotMetadataList = await this.screenshot(
         storybookUrl,
         browsers,
@@ -148,10 +148,10 @@ export class CrawlerImpl implements Crawler {
   }
 
   @Log()
-  private async startScreenshotBrowser(parallel: number): Promise<DockerContainer> {
+  private async startScreenshotBrowser(concurrency: number): Promise<DockerContainer> {
     const container = DockerContainer.getInstance("screenshot");
 
-    for (let i = 0; i < parallel; i++) {
+    for (let i = 0; i < concurrency; i++) {
       await container.start();
     }
 
@@ -159,10 +159,10 @@ export class CrawlerImpl implements Crawler {
   }
 
   @Log()
-  private async connectToBrowser(parallel: number, container: DockerContainer, browsers: NamedBrowser[]) {
+  private async connectToBrowser(concurrency: number, container: DockerContainer, browsers: NamedBrowser[]) {
     const containerInfo = container.getContainerInfo();
     await Promise.all(
-      Array.from({ length: parallel }, async (_, i) => {
+      Array.from({ length: concurrency }, async (_, i) => {
         const browser = await puppeteer.connect({
           browserURL: `http://localhost:${containerInfo[i].port}`,
         });
