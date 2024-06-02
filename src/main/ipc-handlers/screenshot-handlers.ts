@@ -14,7 +14,7 @@ export function registerScreenshotHandlers(service: ScreenshotService) {
     },
     invoke: {
       getLocalIPAddress: async _ => service.getLocalIPAddress(),
-      save: async (_, req) => await service.save(req.type, req.project, req.branch, req.name),
+      save: async (_, req) => await service.save(req.project, req.branch, req.name),
     },
   };
 

@@ -1,36 +1,34 @@
 import type {
   DeleteComparisonSetRequest,
   DeleteProjectRequest,
-  DeleteRefTestBranchRequest,
-  DeleteRefTestSetRequest,
+  DeleteScreenshotBranchRequest,
+  DeleteScreenshotSetRequest,
   OpenComparisonSetInExplorerRequest,
-  OpenTestRefSetInExplorerRequest,
+  OpenScreenshotSetInExplorerRequest,
   GetAllSavedSetsResponse,
-  GetAllSavedRefTestSetsResponse,
-  GetComparisonSavedSetMetadataRequest,
-  GetComparisonSavedSetMetadataResponse,
-  StoryMetadataWithRenderStatus,
-  GetRefTestSavedSetMetadataRequest,
+  GetAllSavedScreenshotSetsResponse,
+  GetSavedComparisonMetadataRequest,
+  GetSavedComparisonMetadataResponse,
+  GetSavedScreenshotMetadataRequest,
+  GetSavedScreenshotMetadataResponse,
 } from "./type";
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
 
 export interface SavedSetApi extends IpcApi {
   listen: Record<string, never>;
   send: {
-    openTestRefSetInExplorer: (req: OpenTestRefSetInExplorerRequest) => void;
+    openScreenshotSetInExplorer: (req: OpenScreenshotSetInExplorerRequest) => void;
     openComparisonSetInExplorer: (req: OpenComparisonSetInExplorerRequest) => void;
   };
   invoke: {
     getAllSavedProjects: () => Promise<string[]>;
-    getAllSavedRefTestSets: (project: string) => Promise<GetAllSavedRefTestSetsResponse>;
+    getAllSavedScreenshotSets: (project: string) => Promise<GetAllSavedScreenshotSetsResponse>;
     getAllSavedSets: (project: string) => Promise<GetAllSavedSetsResponse>;
-    getRefTestSavedSetMetadata: (req: GetRefTestSavedSetMetadataRequest) => Promise<StoryMetadataWithRenderStatus[]>;
-    getComparisonSavedSetMetadata: (
-      req: GetComparisonSavedSetMetadataRequest,
-    ) => Promise<GetComparisonSavedSetMetadataResponse>;
-    deleteRefTestSet: (req: DeleteRefTestSetRequest) => Promise<GetAllSavedSetsResponse | null>;
+    getSavedScreenshotMetadata: (req: GetSavedScreenshotMetadataRequest) => Promise<GetSavedScreenshotMetadataResponse>;
+    getSavedComparisonMetadata: (req: GetSavedComparisonMetadataRequest) => Promise<GetSavedComparisonMetadataResponse>;
+    deleteScreenshotSet: (req: DeleteScreenshotSetRequest) => Promise<GetAllSavedSetsResponse | null>;
     deleteComparisonSet: (req: DeleteComparisonSetRequest) => Promise<GetAllSavedSetsResponse | null>;
-    deleteRefTestBranch: (req: DeleteRefTestBranchRequest) => Promise<GetAllSavedSetsResponse | null>;
+    deleteScreenshotBranch: (req: DeleteScreenshotBranchRequest) => Promise<GetAllSavedSetsResponse | null>;
     deleteProject: (req: DeleteProjectRequest) => Promise<boolean>;
   };
 }
@@ -38,18 +36,18 @@ export interface SavedSetApi extends IpcApi {
 export const SavedSetChannelKey: IpcChannel<SavedSetApi> = {
   listen: {},
   send: {
-    openTestRefSetInExplorer: "savedSet:openTestRefSetInExplorer",
+    openScreenshotSetInExplorer: "savedSet:openScreenshotSetInExplorer",
     openComparisonSetInExplorer: "savedSet:openComparisonSetInExplorer",
   },
   invoke: {
     getAllSavedProjects: "savedSet:getAllSavedProjects",
-    getAllSavedRefTestSets: "savedSet:getAllSavedRefTestSets",
+    getAllSavedScreenshotSets: "savedSet:getAllSavedScreenshotSets",
     getAllSavedSets: "savedSet:getAllSavedSets",
-    getRefTestSavedSetMetadata: "savedSet:getRefTestSavedSetMetadata",
-    getComparisonSavedSetMetadata: "savedSet:getComparisonSavedSetMetadata",
-    deleteRefTestSet: "savedSet:deleteRefTestSet",
+    getSavedScreenshotMetadata: "savedSet:getSavedScreenshotMetadata",
+    getSavedComparisonMetadata: "savedSet:getSavedComparisonMetadata",
+    deleteScreenshotSet: "savedSet:deleteScreenshotSet",
     deleteComparisonSet: "savedSet:deleteComparisonSet",
-    deleteRefTestBranch: "savedSet:deleteRefTestBranch",
+    deleteScreenshotBranch: "savedSet:deleteScreenshotBranch",
     deleteProject: "savedSet:deleteProject",
   },
 };

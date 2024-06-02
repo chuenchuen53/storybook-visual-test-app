@@ -10,8 +10,8 @@ export function registerImgHandlers(imgService: ImgService) {
     invoke: {
       getTempScreenshotImg: async (_, id) => await imgService.getTempScreenshotImg(id),
       getTempComparisonDiffImg: async (_, id) => await imgService.getTempComparisonDiffImg(id),
-      getSavedRefTestImg: async (_, req) =>
-        await imgService.getSavedRefTestImg(req.type, req.project, req.branch, req.setId, req.id),
+      getSavedScreenshotImg: async (_, req) =>
+        await imgService.getSavedScreenshotImg(req.project, req.branch, req.setId, req.id),
       getSavedComparisonDiffImg: async (_, req) =>
         await imgService.getSavedComparisonDiffImg(req.project, req.setId, req.id),
     },
@@ -19,6 +19,6 @@ export function registerImgHandlers(imgService: ImgService) {
 
   ipcMain.handle(ImgChannelKey.invoke.getTempScreenshotImg, handler.invoke.getTempScreenshotImg);
   ipcMain.handle(ImgChannelKey.invoke.getTempComparisonDiffImg, handler.invoke.getTempComparisonDiffImg);
-  ipcMain.handle(ImgChannelKey.invoke.getSavedRefTestImg, handler.invoke.getSavedRefTestImg);
+  ipcMain.handle(ImgChannelKey.invoke.getSavedScreenshotImg, handler.invoke.getSavedScreenshotImg);
   ipcMain.handle(ImgChannelKey.invoke.getSavedComparisonDiffImg, handler.invoke.getSavedComparisonDiffImg);
 }

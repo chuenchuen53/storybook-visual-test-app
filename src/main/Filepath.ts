@@ -1,6 +1,5 @@
 import os from "os";
 import path from "path";
-import type { SaveScreenshotType } from "../shared/type";
 
 const home = os.homedir();
 const appDataRootDir = path.join(home, "visual-test-app");
@@ -10,7 +9,7 @@ const savedDir = path.join(appDataRootDir, "saved");
 
 const appLogFilepath = path.join(tempDir, "app.log");
 
-const screenshotDir = path.join(tempDir, "screenshots");
+const screenshotDir = path.join(tempDir, "screenshot");
 const screenshotMetadataFilename = "metadata.json";
 
 const comparisonDir = path.join(tempDir, "comparison");
@@ -18,8 +17,7 @@ const comparisonDiffDirName = "diff";
 const comparisonDiffDir = path.join(comparisonDir, comparisonDiffDirName);
 const comparisonMetadataFilename = "metadata.json";
 
-const savedReferenceDir = path.join(savedDir, "reference");
-const savedTestDir = path.join(savedDir, "test");
+const savedScreenshotDir = path.join(savedDir, "screenshot");
 const savedComparisonDir = path.join(savedDir, "comparison");
 
 const userSettingFilepath = path.join(appDataRootDir, "user-setting.json");
@@ -57,48 +55,28 @@ export class FilepathHelper {
     return path.join(comparisonDir, comparisonMetadataFilename);
   }
 
-  public static savedRefDir(): string {
-    return savedReferenceDir;
+  public static savedScreenshotDir(): string {
+    return savedScreenshotDir;
   }
 
-  public static savedTestDir(): string {
-    return savedTestDir;
+  public static savedScreenshotProjectDir(project: string): string {
+    return path.join(savedScreenshotDir, project);
   }
 
-  public static savedRefTestProjectDir(type: SaveScreenshotType, project: string): string {
-    switch (type) {
-      case "reference":
-        return path.join(savedReferenceDir, project);
-      case "test":
-        return path.join(savedTestDir, project);
-    }
+  public static savedScreenshotBranchDir(project: string, branch: string): string {
+    return path.join(this.savedScreenshotProjectDir(project), branch);
   }
 
-  public static savedRefTestBranchDir(type: SaveScreenshotType, project: string, branch: string): string {
-    return path.join(this.savedRefTestProjectDir(type, project), branch);
+  public static savedScreenshotSetDir(project: string, branch: string, setId: string): string {
+    return path.join(this.savedScreenshotBranchDir(project, branch), setId);
   }
 
-  public static savedRefTestSetDir(type: SaveScreenshotType, project: string, branch: string, setId: string): string {
-    return path.join(this.savedRefTestBranchDir(type, project, branch), setId);
+  public static savedScreenshotImgPath(project: string, branch: string, setId: string, imgFilename: string): string {
+    return path.join(this.savedScreenshotSetDir(project, branch, setId), imgFilename);
   }
 
-  public static savedRefTestImgPath(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-    setId: string,
-    imgFilename: string,
-  ): string {
-    return path.join(this.savedRefTestSetDir(type, project, branch, setId), imgFilename);
-  }
-
-  public static savedRefTestMetadataPath(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-    setId: string,
-  ): string {
-    return path.join(this.savedRefTestSetDir(type, project, branch, setId), screenshotMetadataFilename);
+  public static savedScreenshotMetadataPath(project: string, branch: string, setId: string): string {
+    return path.join(this.savedScreenshotSetDir(project, branch, setId), screenshotMetadataFilename);
   }
 
   public static savedScreenshotMetadataFilename(): string {

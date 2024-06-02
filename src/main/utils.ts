@@ -45,6 +45,7 @@ export function computeArrDiff(
 }
 
 export function openInExplorer(dir: string) {
+  if (!fs.pathExists(dir)) return;
   const platform = os.platform();
 
   if (platform === "darwin") {

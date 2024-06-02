@@ -7,24 +7,23 @@ import { useComparisonResultExplorer } from "../composables/useComparisonResultE
 import { useComparisonImage } from "../composables/useComparisonImage";
 import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
 import type {
-  ComparisonSavedInfo,
+  SavedComparisonInfo,
   DeleteComparisonSetRequest,
   DeleteProjectRequest,
-  DeleteRefTestBranchRequest,
-  DeleteRefTestSetRequest,
+  DeleteScreenshotBranchRequest,
+  DeleteScreenshotSetRequest,
   OpenComparisonSetInExplorerRequest,
-  OpenTestRefSetInExplorerRequest,
-  RefTestSavedInfo,
+  OpenScreenshotSetInExplorerRequest,
+  SavedScreenshotSetInfo,
   GetAllSavedSetsResponse,
-  SaveScreenshotType,
   StoryMetadataWithRenderStatus,
 } from "../../shared/type";
 
 type CurrentSelectedSet =
-  | { type: SaveScreenshotType; data: RefTestSavedInfo }
+  | { type: "screenshot"; data: SavedScreenshotSetInfo }
   | {
       type: "comparison";
-      data: ComparisonSavedInfo;
+      data: SavedComparisonInfo;
     }
   | null;
 
@@ -43,8 +42,8 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     const searchText = searchTextForSavedSets.value.trim().toLowerCase();
     if (searchText === "") return _savedSets.value;
 
-    const getFilteredInfoForTestRef = (all: Record<string, Record<string, RefTestSavedInfo>>) => {
-      const filteredData: Record<string, Record<string, RefTestSavedInfo>> = {};
+    const getFilteredInfoForScreenshot = (all: Record<string, Record<string, SavedScreenshotSetInfo>>) => {
+      const filteredData: Record<string, Record<string, SavedScreenshotSetInfo>> = {};
       const entries = Object.entries(all);
       for (const [branch, infoMap] of entries) {
         if (branch.includes(searchText)) {
@@ -66,7 +65,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
       return filteredData;
     };
 
-    const getFilteredInfoForComparison = (all: ComparisonSavedInfo[]) => {
+    const getFilteredInfoForComparison = (all: SavedComparisonInfo[]) => {
       return all.filter(
         info =>
           info.name.toLowerCase().includes(searchText) ||
@@ -78,24 +77,23 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     };
 
     return {
-      ref: getFilteredInfoForTestRef(_savedSets.value.ref),
-      test: getFilteredInfoForTestRef(_savedSets.value.test),
+      screenshot: getFilteredInfoForScreenshot(_savedSets.value.screenshot),
       comparison: getFilteredInfoForComparison(_savedSets.value.comparison),
     };
   });
 
   const {
-    searchText: refTestSearchText,
-    storyTypeFilter: refTestStoryTypeFilter,
-    highlightKey: refTestHighlightKey,
-    expandedKeys: refTestExpandedKeys,
-    treeData: refTestTreeData,
-    reset: refTestReset,
-    replaceBackingData: refTestReplaceBackingData,
-    expandAll: refTestExpandAll,
-    collapseAll: refTestCollapseAll,
+    searchText: screenshotSearchText,
+    storyTypeFilter: screenshotStoryTypeFilter,
+    highlightKey: screenshotHighlightKey,
+    expandedKeys: screenshotExpandedKeys,
+    treeData: screenshotTreeData,
+    reset: screenshotReset,
+    replaceBackingData: screenshotReplaceBackingData,
+    expandAll: screenshotExpandAll,
+    collapseAll: screenshotCollapseAll,
   } = useStoryExplorer<StoryMetadataWithRenderStatus>();
-  const { imgState: refTestImgState, removeImg: refTestRemoveImg, updateImg: refTestUpdateImg } = useImage();
+  const { imgState: screenshotImgState, removeImg: screenshotRemoveImg, updateImg: screenshotUpdateImg } = useImage();
 
   const {
     treeData: comparisonTreeData,
@@ -164,21 +162,24 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     _savedSets.value = await window.savedSetApi.invoke.getAllSavedSets(project.value);
   };
 
-  const openRefTestSet = async (set: RefTestSavedInfo) => {
-    currentSelectedSet.value = { type: set.type, data: set };
-    const { type, project, branch, id } = set;
-    const metadataList = await window.savedSetApi.invoke.getRefTestSavedSetMetadata({
-      type,
+  const openScreenshotSet = async (set: SavedScreenshotSetInfo) => {
+    currentSelectedSet.value = { type: "screenshot", data: set };
+    const { project, branch, id } = set;
+    const resp = await window.savedSetApi.invoke.getSavedScreenshotMetadata({
       project,
       branch,
       setId: id,
     });
-    refTestReplaceBackingData(metadataList);
+    if (!resp.data) {
+      _toast.add({ severity: "error", summary: "Error", detail: "Fail to get screenshot set" });
+      return;
+    }
+    screenshotReplaceBackingData(resp.data.storyMetadataList);
   };
 
-  const openComparisonSet = async (set: ComparisonSavedInfo) => {
+  const openComparisonSet = async (set: SavedComparisonInfo) => {
     currentSelectedSet.value = { type: "comparison", data: set };
-    const { data } = await window.savedSetApi.invoke.getComparisonSavedSetMetadata({
+    const { data } = await window.savedSetApi.invoke.getSavedComparisonMetadata({
       project: set.project,
       setId: set.id,
     });
@@ -191,10 +192,9 @@ export const useSavedSetStore = defineStore("savedSet", () => {
 
   const updateDisplayingImg = async (id: string) => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type === "comparison") return;
-    const { project, branch, type, id: setId } = currentSelectedSet.value.data;
-    await refTestUpdateImg(() =>
-      window.imgApi.invoke.getSavedRefTestImg({
-        type,
+    const { project, branch, id: setId } = currentSelectedSet.value.data;
+    await screenshotUpdateImg(() =>
+      window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch,
         setId,
@@ -205,24 +205,22 @@ export const useSavedSetStore = defineStore("savedSet", () => {
 
   const deselectSavedSet = async () => {
     currentSelectedSet.value = null;
-    refTestReset();
-    refTestRemoveImg();
+    screenshotReset();
+    screenshotRemoveImg();
   };
 
   const updateComparisonDisplayImg = async (data: ComparisonResultTreeLeaf) => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type !== "comparison") return;
     const { project, id, refBranch, testBranch, refSetId, testSetId } = currentSelectedSet.value.data;
     const getRefImgFn = () =>
-      window.imgApi.invoke.getSavedRefTestImg({
-        type: "reference",
+      window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch: refBranch,
         setId: refSetId,
         id: data.id,
       });
     const getTestImgFn = () =>
-      window.imgApi.invoke.getSavedRefTestImg({
-        type: "test",
+      window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch: testBranch,
         setId: testSetId,
@@ -255,16 +253,15 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     }
   };
 
-  const openTestRefSetInExplorer = () => {
+  const openScreenshotSetInExplorer = () => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type === "comparison") return;
-    const { type, project, branch, id } = currentSelectedSet.value.data;
-    const req: OpenTestRefSetInExplorerRequest = {
-      type,
+    const { project, branch, id } = currentSelectedSet.value.data;
+    const req: OpenScreenshotSetInExplorerRequest = {
       project,
       branch,
       setId: id,
     };
-    window.savedSetApi.send.openTestRefSetInExplorer(req);
+    window.savedSetApi.send.openScreenshotSetInExplorer(req);
   };
 
   const openComparisonSetInExplorer = () => {
@@ -282,14 +279,13 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     _toast.add({ severity: "error", summary: "Error", detail: "Fail to delete", life: 5000 });
   };
 
-  const deleteRefTestSet = async (set: RefTestSavedInfo) => {
-    const req: DeleteRefTestSetRequest = {
-      type: set.type,
+  const deleteScreenshotSet = async (set: SavedScreenshotSetInfo) => {
+    const req: DeleteScreenshotSetRequest = {
       project: set.project,
       branch: set.branch,
       setId: set.id,
     };
-    const result = await window.savedSetApi.invoke.deleteRefTestSet(req);
+    const result = await window.savedSetApi.invoke.deleteScreenshotSet(req);
     if (result) {
       onSuccessDelete();
       _savedSets.value = result;
@@ -298,7 +294,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     }
   };
 
-  const deleteComparisonSet = async (set: ComparisonSavedInfo) => {
+  const deleteComparisonSet = async (set: SavedComparisonInfo) => {
     const req: DeleteComparisonSetRequest = {
       project: set.project,
       setId: set.id,
@@ -312,14 +308,13 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     }
   };
 
-  const deleteRefTestBranch = async (type: SaveScreenshotType, branch: string) => {
+  const deleteScreenshotBranch = async (branch: string) => {
     if (project.value === null) return;
-    const req: DeleteRefTestBranchRequest = {
-      type,
+    const req: DeleteScreenshotBranchRequest = {
       project: project.value,
       branch,
     };
-    const result = await window.savedSetApi.invoke.deleteRefTestBranch(req);
+    const result = await window.savedSetApi.invoke.deleteScreenshotBranch(req);
     if (result) {
       onSuccessDelete();
       _savedSets.value = result;
@@ -350,12 +345,12 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     filteredSavedSets,
     searchTextForSavedSets,
     currentSelectedSet,
-    refTestSearchText,
-    refTestStoryTypeFilter,
-    refTestHighlightKey,
-    refTestExpandedKeys,
-    refTestTreeData,
-    refTestImgState,
+    screenshotSearchText,
+    screenshotStoryTypeFilter,
+    screenshotHighlightKey,
+    screenshotExpandedKeys,
+    screenshotTreeData,
+    screenshotImgState,
     comparisonTreeData,
     comparisonSearchText,
     comparisonTypeOptions,
@@ -365,8 +360,8 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     comparisonImageState,
     showDiffImg,
     diffViewInVertical,
-    refTestExpandAll,
-    refTestCollapseAll,
+    screenshotExpandAll,
+    screenshotCollapseAll,
     comparisonExpandAll,
     comparisonCollapseAll,
     deselectSavedSet,
@@ -374,15 +369,15 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     updateProject,
     updateProjectsInTab,
     getAllSavedSets,
-    openRefTestSet,
+    openScreenshotSet,
     updateDisplayingImg,
     openComparisonSet,
     updateComparisonDisplayImg,
-    openTestRefSetInExplorer,
+    openScreenshotSetInExplorer,
     openComparisonSetInExplorer,
-    deleteRefTestSet,
+    deleteScreenshotSet,
     deleteComparisonSet,
-    deleteRefTestBranch,
+    deleteScreenshotBranch,
     deleteProject,
   };
 });

@@ -4,7 +4,7 @@ import { useToast } from "primevue/usetoast";
 import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
 import { useComparisonImage } from "../composables/useComparisonImage";
 import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
-import type { ComparisonRequest, GetAllSavedRefTestSetsResponse } from "../../shared/type";
+import type { CreateNewComparisonSetRequest, GetAllSavedScreenshotSetsResponse } from "../../shared/type";
 
 export interface CompareSet {
   branch: string | null;
@@ -21,9 +21,8 @@ export const useComparisonStore = defineStore("comparison", () => {
   const project = ref<string | null>(null);
   const availableProjects = ref<string[]>([]);
   const projectsInTab = ref<string[]>([]);
-  const availableSets = ref<GetAllSavedRefTestSetsResponse>({
-    ref: {},
-    test: {},
+  const availableSets = ref<GetAllSavedScreenshotSetsResponse>({
+    screenshot: {},
   });
   const refSet = ref<CompareSet>({
     branch: null,
@@ -68,7 +67,7 @@ export const useComparisonStore = defineStore("comparison", () => {
 
     try {
       isComparing.value = true;
-      const req: ComparisonRequest = {
+      const req: CreateNewComparisonSetRequest = {
         ref: { project: project.value, branch: refSet.value.branch, setId: refSet.value.setId },
         test: { project: project.value, branch: testSet.value.branch, setId: testSet.value.setId },
       };
@@ -100,7 +99,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     if (skipIfSame && projectName === project.value) return;
 
     project.value = projectName;
-    availableSets.value = await window.savedSetApi.invoke.getAllSavedRefTestSets(projectName);
+    availableSets.value = await window.savedSetApi.invoke.getAllSavedScreenshotSets(projectName);
     refSet.value = {
       branch: null,
       setId: null,
@@ -128,8 +127,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     if (projectsInTab.value.length === 0) {
       project.value = null;
       availableSets.value = {
-        ref: {},
-        test: {},
+        screenshot: {},
       };
       refSet.value = {
         branch: null,
@@ -164,7 +162,7 @@ export const useComparisonStore = defineStore("comparison", () => {
 
       await updateProject(project.value, false);
 
-      const oldRefBranchData = oldRefBranch ? availableSets.value.ref[oldRefBranch] : null;
+      const oldRefBranchData = oldRefBranch ? availableSets.value.screenshot[oldRefBranch] : null;
       if (oldRefBranchData) {
         refSet.value.branch = oldRefBranch;
         if (oldRefSetId && oldRefBranchData[oldRefSetId]) {
@@ -172,7 +170,7 @@ export const useComparisonStore = defineStore("comparison", () => {
         }
       }
 
-      const oldTestBranchData = oldTestBranch ? availableSets.value.test[oldTestBranch] : null;
+      const oldTestBranchData = oldTestBranch ? availableSets.value.screenshot[oldTestBranch] : null;
       if (oldTestBranchData) {
         testSet.value.branch = oldTestBranch;
         if (oldTestSetId && oldTestBranchData[oldTestSetId]) {
@@ -213,16 +211,14 @@ export const useComparisonStore = defineStore("comparison", () => {
     if (!comparisonSetSummary.value) return;
     const { project, refBranch, testBranch, refSetId, testSetId } = comparisonSetSummary.value;
     const getRefImgFn = () =>
-      window.imgApi.invoke.getSavedRefTestImg({
-        type: "reference",
+      window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch: refBranch,
         setId: refSetId,
         id: data.id,
       });
     const getTestImgFn = () =>
-      window.imgApi.invoke.getSavedRefTestImg({
-        type: "test",
+      window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch: testBranch,
         setId: testSetId,

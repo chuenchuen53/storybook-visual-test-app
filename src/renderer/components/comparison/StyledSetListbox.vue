@@ -22,23 +22,23 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import Listbox from "primevue/listbox";
-import type { RefTestSavedInfo } from "../../../shared/type";
+import type { SavedScreenshotSetInfo } from "../../../shared/type";
 
 const selectedId = defineModel<string | null>("selectedId", { required: true });
 
 defineProps<{
-  options: RefTestSavedInfo[];
+  options: SavedScreenshotSetInfo[];
 }>();
 
-function labelDisplay(x: RefTestSavedInfo) {
+function labelDisplay(x: SavedScreenshotSetInfo) {
   return x.name;
 }
 
-function viewportDisplay(x: RefTestSavedInfo) {
+function viewportDisplay(x: SavedScreenshotSetInfo) {
   return `${x.viewport.width}x${x.viewport.height}`;
 }
 
-function createdAtDisplay(x: RefTestSavedInfo) {
+function createdAtDisplay(x: SavedScreenshotSetInfo) {
   return dayjs(x.createdAt).format("DD/MM/YYYY HH:mm");
 }
 </script>

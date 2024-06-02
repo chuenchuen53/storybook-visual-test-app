@@ -8,11 +8,11 @@ import { CatchError } from "../decorator/CatchError";
 import { TempComparisonMetadataHelper } from "../persistence/TempComparisonMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../persistence/SavedComparisonMetadataHelper";
 import type {
-  ComparisonResponse,
+  CreateNewComparisonSetResponse,
   TempComparisonMetadata,
   SavedComparisonMetadata,
   SaveScreenshotResponse,
-  RefTestSetLocationIdentifier,
+  SavedScreenshotSetLocationIdentifier,
   StoryMetadataWithRenderStatus,
 } from "../../shared/type";
 import type { ComparisonService } from "./ComparisonService";
@@ -27,12 +27,12 @@ export class ComparisonServiceImpl implements ComparisonService {
 
   private constructor() {}
 
-  @CatchError<ComparisonResponse>({ success: false, data: null, storyMetadataList: null })
+  @CatchError<CreateNewComparisonSetResponse>({ success: false, data: null, storyMetadataList: null })
   @Log()
   public async compare(
-    refSet: RefTestSetLocationIdentifier,
-    testSet: RefTestSetLocationIdentifier,
-  ): Promise<ComparisonResponse> {
+    refSet: SavedScreenshotSetLocationIdentifier,
+    testSet: SavedScreenshotSetLocationIdentifier,
+  ): Promise<CreateNewComparisonSetResponse> {
     const id = uuidv4();
     const now = new Date();
 
@@ -44,8 +44,8 @@ export class ComparisonServiceImpl implements ComparisonService {
     const testBranch = testSet.branch;
     const testProject = testSet.project;
 
-    const refSetMetadata = await SavedScreenshotMetadataHelper.read("reference", refProject, refBranch, refSetId);
-    const testSetMetadata = await SavedScreenshotMetadataHelper.read("test", testProject, testBranch, testSetId);
+    const refSetMetadata = await SavedScreenshotMetadataHelper.read(refProject, refBranch, refSetId);
+    const testSetMetadata = await SavedScreenshotMetadataHelper.read(testProject, testBranch, testSetId);
 
     if (!refSetMetadata || !testSetMetadata) {
       throw new Error("Metadata not found for provided ref or test directory.");
@@ -56,8 +56,8 @@ export class ComparisonServiceImpl implements ComparisonService {
     await fs.emptydir(FilepathHelper.tempComparisonDir());
     await fs.ensureDir(FilepathHelper.tempComparisonDiffDir());
 
-    const refDir = FilepathHelper.savedRefTestSetDir("reference", refProject, refBranch, refSetId);
-    const testDir = FilepathHelper.savedRefTestSetDir("test", testProject, testBranch, testSetId);
+    const refDir = FilepathHelper.savedScreenshotSetDir(refProject, refBranch, refSetId);
+    const testDir = FilepathHelper.savedScreenshotSetDir(testProject, testBranch, testSetId);
 
     const differ: StoriesDiffer = new StoriesDifferImpl();
     const tolerance = 5;

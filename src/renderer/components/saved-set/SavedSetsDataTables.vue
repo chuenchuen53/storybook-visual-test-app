@@ -10,23 +10,13 @@
         />
       </section>
 
-      <section id="saved-page-ref-table-section" class="mb-8">
-        <div class="pb-4 text-lg font-semibold">Reference Sets</div>
+      <section id="saved-page-screenshot-table-section" class="mb-8">
+        <div class="pb-4 text-lg font-semibold">Screenshot</div>
         <RefTestSetTable
-          :data="refSetsData"
-          @view-set="handleRefTestViewClick"
-          @del-set="handleRefTestDeleteClick"
-          @del-branch="handleDelRefBranch"
-        />
-      </section>
-
-      <section id="saved-page-test-table-section" class="mb-8">
-        <div class="py-4 text-lg font-semibold">Test Sets</div>
-        <RefTestSetTable
-          :data="testSetsData"
-          @view-set="handleRefTestViewClick"
-          @del-set="handleRefTestDeleteClick"
-          @del-branch="handleDelTestBranch"
+          :data="screenshotSetsData"
+          @view-set="handleScreenshotViewClick"
+          @del-set="handleScreenshotDeleteClick"
+          @del-branch="handleDelScreenshotBranch"
         />
       </section>
     </div>
@@ -39,54 +29,45 @@ import { computed, onMounted } from "vue";
 import ScrollPanel from "primevue/scrollpanel";
 import { useSavedSetStore } from "../../stores/SavedSetStore";
 import { treeNodesForUi } from "../general/tree/tree-helper";
-import RefTestSetTable from "./RefTestSetTable.vue";
+import RefTestSetTable from "./ScreenshotSetTable.vue";
 import ComparisonSavedSet from "./ComparisonSetDataTable.vue";
-import type { ComparisonSavedInfo, RefTestSavedInfo } from "../../../shared/type";
+import type { SavedComparisonInfo, SavedScreenshotSetInfo } from "../../../shared/type";
 
 const store = useSavedSetStore();
 const { filteredSavedSets } = storeToRefs(store);
 const {
   getAllSavedSets,
-  openRefTestSet,
+  openScreenshotSet,
   openComparisonSet,
-  deleteRefTestSet,
+  deleteScreenshotSet,
   deleteComparisonSet,
-  deleteRefTestBranch,
+  deleteScreenshotBranch,
   deleteProject,
 } = store;
 
-const refSetsData = computed(() => {
-  const raw = filteredSavedSets.value?.ref;
+const screenshotSetsData = computed(() => {
+  const raw = filteredSavedSets.value?.screenshot;
   return raw ? treeNodesForUi(raw, x => "id" in x) : [];
 });
 
-const testSetsData = computed(() => {
-  const raw = filteredSavedSets.value?.test;
-  return raw ? treeNodesForUi(raw, x => "id" in x) : [];
-});
-
-function handleRefTestViewClick(data: RefTestSavedInfo) {
-  openRefTestSet(data);
+function handleScreenshotViewClick(data: SavedScreenshotSetInfo) {
+  openScreenshotSet(data);
 }
 
-function handleRefTestDeleteClick(data: RefTestSavedInfo) {
-  deleteRefTestSet(data);
+function handleScreenshotDeleteClick(data: SavedScreenshotSetInfo) {
+  deleteScreenshotSet(data);
 }
 
-function handleComparisonViewClick(data: ComparisonSavedInfo) {
+function handleComparisonViewClick(data: SavedComparisonInfo) {
   openComparisonSet(data);
 }
 
-function handleComparisonDeleteClick(data: ComparisonSavedInfo) {
+function handleComparisonDeleteClick(data: SavedComparisonInfo) {
   deleteComparisonSet(data);
 }
 
-function handleDelRefBranch(branch: string) {
-  deleteRefTestBranch("reference", branch);
-}
-
-function handleDelTestBranch(branch: string) {
-  deleteRefTestBranch("test", branch);
+function handleDelScreenshotBranch(branch: string) {
+  deleteScreenshotBranch(branch);
 }
 
 onMounted(() => {

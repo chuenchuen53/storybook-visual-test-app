@@ -2,20 +2,23 @@
   <main>
     <LeftRightSplitContainer :init-left-width="325">
       <template #left>
-        <div v-if="currentSelectedSet === null" class="flex flex-col">
-          <Menu :model="items" :pt="{ root: { style: { border: 'none', background: 'transparent' } } }" />
-        </div>
-        <div v-if="currentSelectedSet?.type === 'reference' || currentSelectedSet?.type === 'test'">
+        <Menu
+          v-if="currentSelectedSet === null"
+          :model="items"
+          :pt="{ root: { style: { border: 'none', background: 'transparent' } } }"
+          class="px-2 pt-2"
+        />
+        <div v-if="currentSelectedSet?.type === 'screenshot'">
           <StoryTreeExplorer
-            v-model:expanded-keys="refTestExpandedKeys"
-            v-model:highlight-key="refTestHighlightKey"
-            v-model:story-type-filter="refTestStoryTypeFilter"
-            v-model:search-text="refTestSearchText"
-            :tree-data="refTestTreeData"
+            v-model:expanded-keys="screenshotExpandedKeys"
+            v-model:highlight-key="screenshotHighlightKey"
+            v-model:story-type-filter="screenshotStoryTypeFilter"
+            v-model:search-text="screenshotSearchText"
+            :tree-data="screenshotTreeData"
             :show-save="false"
-            :open-in-explorer="openTestRefSetInExplorer"
-            :expand-all="refTestExpandAll"
-            :collapse-all="refTestCollapseAll"
+            :open-in-explorer="openScreenshotSetInExplorer"
+            :expand-all="screenshotExpandAll"
+            :collapse-all="screenshotCollapseAll"
             :handle-select-story="updateDisplayingImg"
           >
             <template #story-display="slotProps">
@@ -54,7 +57,7 @@
             @click-project="updateProject"
             @confirm-picker="updateProjectsInTab"
           />
-          <div class="mt-6">
+          <div v-if="project !== null" class="mt-6">
             <div class="mx-6 flex justify-between">
               <IconField>
                 <InputIcon class="pi pi-search" />
@@ -71,7 +74,7 @@
             <SavedSetsDataTables />
           </div>
         </div>
-        <div v-else-if="currentSelectedSet.type === 'reference' || currentSelectedSet.type === 'test'">
+        <div v-else-if="currentSelectedSet.type === 'screenshot'">
           <div class="flex items-center justify-between px-6">
             <div class="pb-8 pt-4 text-lg">
               {{ currentSelectedSet.data.project }}
@@ -84,7 +87,7 @@
           </div>
           <ScrollPanel class="ref-test-scroll-panel-height">
             <div class="flex justify-center px-6 pb-6">
-              <StyledImg :img="refTestImgState" alt="screenshot" />
+              <StyledImg :img="screenshotImgState" alt="screenshot" />
             </div>
           </ScrollPanel>
         </div>
@@ -147,12 +150,12 @@ const {
   availableProjects,
   projectsInTab,
   currentSelectedSet,
-  refTestSearchText,
-  refTestStoryTypeFilter,
-  refTestHighlightKey,
-  refTestExpandedKeys,
-  refTestTreeData,
-  refTestImgState,
+  screenshotSearchText,
+  screenshotStoryTypeFilter,
+  screenshotHighlightKey,
+  screenshotExpandedKeys,
+  screenshotTreeData,
+  screenshotImgState,
   comparisonTreeData,
   comparisonSearchText,
   comparisonHighlightKey,
@@ -171,11 +174,11 @@ const {
   updateDisplayingImg,
   deselectSavedSet,
   updateComparisonDisplayImg,
-  refTestExpandAll,
-  refTestCollapseAll,
+  screenshotExpandAll,
+  screenshotCollapseAll,
   comparisonExpandAll,
   comparisonCollapseAll,
-  openTestRefSetInExplorer,
+  openScreenshotSetInExplorer,
   openComparisonSetInExplorer,
   deleteProject,
 } = store;
@@ -208,20 +211,14 @@ const scrollToComparison = () => {
   if (el) el.scrollIntoView();
 };
 
-const scrollToRef = () => {
-  const el = document.getElementById("saved-page-ref-table-section");
-  if (el) el.scrollIntoView();
-};
-
-const scrollToTest = () => {
-  const el = document.getElementById("saved-page-test-table-section");
+const scrollToScreenshot = () => {
+  const el = document.getElementById("saved-page-screenshot-table-section");
   if (el) el.scrollIntoView();
 };
 
 const items = ref([
   { label: "Comparison", icon: "pi pi-eye", command: scrollToComparison },
-  { label: "Reference", icon: "pi pi-book", command: scrollToRef },
-  { label: "Test", icon: "pi pi-chart-bar", command: scrollToTest },
+  { label: "Screenshot", icon: "pi pi-camera", command: scrollToScreenshot },
 ]);
 
 onMounted(() => {

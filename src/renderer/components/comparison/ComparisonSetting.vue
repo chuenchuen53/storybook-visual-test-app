@@ -13,13 +13,8 @@
         <div>Test Set</div>
 
         <div class="leading-[42px]">Branch</div>
-        <Select class="w-full" :model-value="refSet.branch" :options="availableRefBranch" @change="updateRefBranch" />
-        <Select
-          class="w-full"
-          :model-value="testSet.branch"
-          :options="availableTestBranch"
-          @change="updateTestBranch"
-        />
+        <Select class="w-full" :model-value="refSet.branch" :options="availableBranch" @change="updateRefBranch" />
+        <Select class="w-full" :model-value="testSet.branch" :options="availableBranch" @change="updateTestBranch" />
 
         <div class="leading-[42px]">Set</div>
         <StyledSetListbox v-model:selected-id="refSet.setId" :options="availableRefSets" />
@@ -52,15 +47,18 @@ const { isComparing, project, availableSets, refSet, testSet, availableProjects,
 const { updateRefSetBranch, updateTestSetBranch, compare, updateProject, updateProjectsInTab } = store;
 
 const disableCompareBtn = computed(() => {
-  return !project.value || !refSet.value.branch || !testSet.value.branch || !refSet.value.setId || !testSet.value.setId;
+  return (
+    !project.value ||
+    !refSet.value.branch ||
+    !testSet.value.branch ||
+    !refSet.value.setId ||
+    !testSet.value.setId ||
+    refSet.value.setId === testSet.value.setId
+  );
 });
 
-const availableRefBranch = computed(() => {
-  return Object.keys(availableSets.value.ref);
-});
-
-const availableTestBranch = computed(() => {
-  return Object.keys(availableSets.value.test);
+const availableBranch = computed(() => {
+  return Object.keys(availableSets.value.screenshot);
 });
 
 const updateRefBranch = (e: SelectChangeEvent) => {
@@ -73,13 +71,13 @@ const updateTestBranch = (e: SelectChangeEvent) => {
 
 const availableRefSets = computed(() => {
   if (refSet.value.branch === null) return [];
-  if (availableSets.value.ref[refSet.value.branch] === undefined) return [];
-  return Object.values(availableSets.value.ref[refSet.value.branch]);
+  if (availableSets.value.screenshot[refSet.value.branch] === undefined) return [];
+  return Object.values(availableSets.value.screenshot[refSet.value.branch]);
 });
 
 const availableTestSets = computed(() => {
   if (testSet.value.branch === null) return [];
-  if (availableSets.value.test[testSet.value.branch] === undefined) return [];
-  return Object.values(availableSets.value.test[testSet.value.branch]);
+  if (availableSets.value.screenshot[testSet.value.branch] === undefined) return [];
+  return Object.values(availableSets.value.screenshot[testSet.value.branch]);
 });
 </script>

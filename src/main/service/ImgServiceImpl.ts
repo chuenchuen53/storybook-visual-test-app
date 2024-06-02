@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import { FilepathHelper } from "../Filepath";
 import { LogError } from "../decorator/LogError";
-import type { GetImgResponse, SaveScreenshotType } from "../../shared/type";
+import type { GetImgResponse } from "../../shared/type";
 import type { ImgService } from "./ImgService";
 
 export class ImgServiceImpl implements ImgService {
@@ -26,14 +26,13 @@ export class ImgServiceImpl implements ImgService {
   }
 
   @LogError()
-  public async getSavedRefTestImg(
-    type: SaveScreenshotType,
+  public async getSavedScreenshotImg(
     project: string,
     branch: string,
     setId: string,
     id: string,
   ): Promise<GetImgResponse> {
-    const filepath = FilepathHelper.savedRefTestImgPath(type, project, branch, setId, id + ".png");
+    const filepath = FilepathHelper.savedScreenshotImgPath(project, branch, setId, id + ".png");
     return await this.getImg(filepath);
   }
 

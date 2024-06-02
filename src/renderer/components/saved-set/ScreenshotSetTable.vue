@@ -84,7 +84,7 @@ import { ref, watch } from "vue";
 import { useConfirm } from "primevue/useconfirm";
 import IconButton from "../general/IconButton.vue";
 import type { TreeNode } from "primevue/treenode";
-import type { RefTestSavedInfo } from "../../../shared/type";
+import type { SavedScreenshotSetInfo } from "../../../shared/type";
 
 const confirm = useConfirm();
 
@@ -93,8 +93,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  viewSet: [data: RefTestSavedInfo];
-  delSet: [data: RefTestSavedInfo];
+  viewSet: [data: SavedScreenshotSetInfo];
+  delSet: [data: SavedScreenshotSetInfo];
   delBranch: [branch: string];
 }>();
 
@@ -134,19 +134,19 @@ watch(
   { immediate: true },
 );
 
-function labelDisplay(x?: RefTestSavedInfo) {
+function labelDisplay(x?: SavedScreenshotSetInfo) {
   return x?.name ?? "";
 }
 
-function viewportDisplay(x?: RefTestSavedInfo) {
+function viewportDisplay(x?: SavedScreenshotSetInfo) {
   return x ? `${x.viewport.width}x${x.viewport.height}` : "";
 }
 
-function createdAtDisplay(x?: RefTestSavedInfo) {
+function createdAtDisplay(x?: SavedScreenshotSetInfo) {
   return x ? dayjs(x.createdAt).format("DD/MM/YYYY HH:mm") : "";
 }
 
-function fileSizeDisplay(x?: RefTestSavedInfo) {
+function fileSizeDisplay(x?: SavedScreenshotSetInfo) {
   if (!x) return "";
   const kb = x.fileSize / 1024;
   if (kb < 1024) {
@@ -156,11 +156,11 @@ function fileSizeDisplay(x?: RefTestSavedInfo) {
   }
 }
 
-function storyNumberDisplay(x?: RefTestSavedInfo) {
+function storyNumberDisplay(x?: SavedScreenshotSetInfo) {
   return x ? `${x.stories}` : "";
 }
 
-function errStoryNumberDisplay(x?: RefTestSavedInfo) {
+function errStoryNumberDisplay(x?: SavedScreenshotSetInfo) {
   return x ? x.errStories : "";
 }
 
@@ -175,7 +175,7 @@ const acceptProps = {
   severity: "danger",
 };
 
-const confirmDelSet = (event: Event, data: RefTestSavedInfo) => {
+const confirmDelSet = (event: Event, data: SavedScreenshotSetInfo) => {
   confirm.require({
     target: event.currentTarget as HTMLElement,
     message: "Do you want to delete this set?",

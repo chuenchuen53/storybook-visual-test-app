@@ -5,10 +5,9 @@ import { ScreenshotState, StoryState } from "../../shared/type";
 import { type StoryMetadataInExplorer } from "../components/shared/story-explorer/helper";
 import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
-import type { SaveScreenshotType, CreateNewScreenshotSetRequest, Viewport } from "../../shared/type";
+import type { CreateNewScreenshotSetRequest, Viewport } from "../../shared/type";
 
 export interface SaveInfo {
-  type: SaveScreenshotType;
   project: string;
   branch: string;
   name: string;
@@ -102,7 +101,6 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const isSaving = ref(false);
   const saveDialogOpen = ref(false);
   const saveInfo = ref<SaveInfo>({
-    type: "reference",
     project: "my-project",
     branch: "main",
     name: "feature 123",
@@ -112,7 +110,6 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     try {
       isSaving.value = true;
       const result = await window.screenshotApi.invoke.save({
-        type: saveInfo.value.type,
         project: saveInfo.value.project,
         branch: saveInfo.value.branch,
         name: saveInfo.value.name,

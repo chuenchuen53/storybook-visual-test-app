@@ -6,13 +6,13 @@ import { SavedComparisonMetadataHelper } from "../persistence/SavedComparisonMet
 import { LogError } from "../decorator/LogError";
 import { CatchError } from "../decorator/CatchError";
 import type {
-  ComparisonSavedInfo,
-  RefTestSavedInfo,
+  SavedComparisonInfo,
+  SavedScreenshotSetInfo,
   GetAllSavedSetsResponse,
-  SaveScreenshotType,
-  GetAllSavedRefTestSetsResponse,
+  GetAllSavedScreenshotSetsResponse,
   StoryMetadataWithRenderStatus,
-  GetComparisonSavedSetMetadataResponse,
+  GetSavedComparisonMetadataResponse,
+  GetSavedScreenshotMetadataResponse,
 } from "../../shared/type";
 import type { SavedSetService } from "./SavedSetService";
 
@@ -27,88 +27,51 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   @LogError()
   public async getAllSavedProjects(): Promise<string[]> {
-    const [refs, tests] = await Promise.all([
-      getAllFolders(FilepathHelper.savedRefDir()),
-      getAllFolders(FilepathHelper.savedTestDir()),
-    ]);
-    const set = new Set([...refs, ...tests]);
-    return Array.from(set);
+    const dir = FilepathHelper.savedScreenshotDir();
+    if (!(await fs.pathExists(dir))) return [];
+    return getAllFolders(dir);
   }
 
   @LogError()
-  public async getAllSavedRefTestSets(project: string): Promise<GetAllSavedRefTestSetsResponse> {
-    const [refBranches, testBranches] = await Promise.all([
-      this.getAllRefTestBranches("reference", project),
-      this.getAllRefTestBranches("test", project),
-    ]);
-
-    const [refSetsInfo, testSetsInfo] = await Promise.all([
-      (
-        await Promise.all(refBranches.map(branch => this.getAllRefTestSetsFromBranch("reference", project, branch)))
-      ).flat(),
-      (await Promise.all(testBranches.map(branch => this.getAllRefTestSetsFromBranch("test", project, branch)))).flat(),
-    ]);
+  public async getAllSavedScreenshotSets(project: string): Promise<GetAllSavedScreenshotSetsResponse> {
+    const allBranches = await this.getAllScreenshotBranches(project);
+    const info = await Promise.all(allBranches.map(branch => this.getAllScreenshotSetsFromBranch(project, branch)));
+    const flatInfo = info.flat();
 
     return {
-      ref: this.groupByBranch(this.sortSavedRefTestSets(refSetsInfo)),
-      test: this.groupByBranch(this.sortSavedRefTestSets(testSetsInfo)),
+      screenshot: this.groupByBranch(this.sortScreenshotSets(flatInfo)),
     };
   }
 
   @LogError()
   public async getAllSavedSets(project: string): Promise<GetAllSavedSetsResponse> {
-    const [refBranches, testBranches] = await Promise.all([
-      this.getAllRefTestBranches("reference", project),
-      this.getAllRefTestBranches("test", project),
-    ]);
-
-    const [refSetsInfo, testSetsInfo, comparisonSets] = await Promise.all([
-      (
-        await Promise.all(refBranches.map(branch => this.getAllRefTestSetsFromBranch("reference", project, branch)))
-      ).flat(),
-      (await Promise.all(testBranches.map(branch => this.getAllRefTestSetsFromBranch("test", project, branch)))).flat(),
-      this.getSavedComparisonSets(project),
-    ]);
+    const { screenshot } = await this.getAllSavedScreenshotSets(project);
+    const comparison = this.sortCompareSets(await this.getSavedComparisonSets(project));
 
     return {
-      ref: this.groupByBranch(this.sortSavedRefTestSets(refSetsInfo)),
-      test: this.groupByBranch(this.sortSavedRefTestSets(testSetsInfo)),
-      comparison: this.sortCompareSets(comparisonSets),
+      screenshot,
+      comparison,
     };
   }
 
   @LogError()
-  public async getRefTestSavedSetMetadata(
-    type: SaveScreenshotType,
+  public async getSavedScreenshotMetadata(
     project: string,
     branch: string,
     setId: string,
-  ): Promise<StoryMetadataWithRenderStatus[]> {
-    const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, setId);
-    return metadata === null ? [] : metadata.storyMetadataList;
+  ): Promise<GetSavedScreenshotMetadataResponse> {
+    const data = await SavedScreenshotMetadataHelper.read(project, branch, setId);
+    return { data };
   }
 
   @LogError()
-  public async getComparisonSavedSetMetadata(
-    project: string,
-    setId: string,
-  ): Promise<GetComparisonSavedSetMetadataResponse> {
+  public async getSavedComparisonMetadata(project: string, setId: string): Promise<GetSavedComparisonMetadataResponse> {
     const metadata = await SavedComparisonMetadataHelper.read(project, setId);
 
     if (metadata === null) return { data: null };
 
-    const refSetMetadata = await SavedScreenshotMetadataHelper.read(
-      "reference",
-      project,
-      metadata.refBranch,
-      metadata.refSetId,
-    );
-    const testSetMetadata = await SavedScreenshotMetadataHelper.read(
-      "test",
-      project,
-      metadata.testBranch,
-      metadata.testSetId,
-    );
+    const refSetMetadata = await SavedScreenshotMetadataHelper.read(project, metadata.refBranch, metadata.refSetId);
+    const testSetMetadata = await SavedScreenshotMetadataHelper.read(project, metadata.testBranch, metadata.testSetId);
 
     if (refSetMetadata === null || testSetMetadata === null) return { data: null };
 
@@ -132,13 +95,12 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   @CatchError<null>(null)
   @LogError()
-  public async deleteRefTestSet(
-    type: SaveScreenshotType,
+  public async deleteScreenshotSet(
     project: string,
     branch: string,
     setId: string,
   ): Promise<GetAllSavedSetsResponse | null> {
-    const dir = FilepathHelper.savedRefTestSetDir(type, project, branch, setId);
+    const dir = FilepathHelper.savedScreenshotSetDir(project, branch, setId);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
     return await this.getAllSavedSets(project);
@@ -155,12 +117,8 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   @CatchError<null>(null)
   @LogError()
-  public async deleteRefTestBranch(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-  ): Promise<GetAllSavedSetsResponse | null> {
-    const dir = FilepathHelper.savedRefTestBranchDir(type, project, branch);
+  public async deleteScreenshotBranch(project: string, branch: string): Promise<GetAllSavedSetsResponse | null> {
+    const dir = FilepathHelper.savedScreenshotBranchDir(project, branch);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
     return await this.getAllSavedSets(project);
@@ -169,35 +127,29 @@ export class SavedSetServiceImpl implements SavedSetService {
   @CatchError<boolean>(false)
   @LogError()
   public async deleteProject(project: string): Promise<boolean> {
-    const refDir = FilepathHelper.savedRefTestProjectDir("reference", project);
-    const testDir = FilepathHelper.savedRefTestProjectDir("test", project);
+    const screenshotDir = FilepathHelper.savedScreenshotProjectDir(project);
     const comparisonDir = FilepathHelper.savedComparisonProjectDir(project);
-    await Promise.all([fs.remove(refDir), fs.remove(testDir), fs.remove(comparisonDir)]);
+    await Promise.all([fs.remove(screenshotDir), fs.remove(comparisonDir)]);
     return true;
   }
 
-  private async getAllRefTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
-    const dir = FilepathHelper.savedRefTestProjectDir(type, project);
+  private async getAllScreenshotBranches(project: string): Promise<string[]> {
+    const dir = FilepathHelper.savedScreenshotProjectDir(project);
     if (!(await fs.pathExists(dir))) return [];
     return await getAllFolders(dir);
   }
 
-  private async getAllRefTestSetsFromBranch(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-  ): Promise<RefTestSavedInfo[]> {
-    const dir = FilepathHelper.savedRefTestBranchDir(type, project, branch);
+  private async getAllScreenshotSetsFromBranch(project: string, branch: string): Promise<SavedScreenshotSetInfo[]> {
+    const dir = FilepathHelper.savedScreenshotBranchDir(project, branch);
     const allSets = await getAllFolders(dir);
 
-    const getSavedInfo = async (setId: string): Promise<RefTestSavedInfo | null> => {
-      const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, setId);
+    const getSavedInfo = async (setId: string): Promise<SavedScreenshotSetInfo | null> => {
+      const metadata = await SavedScreenshotMetadataHelper.read(project, branch, setId);
       return metadata === null
         ? null
         : {
             id: metadata.id,
             createdAt: metadata.createdAt,
-            type: metadata.type,
             project: metadata.project,
             branch: metadata.branch,
             viewport: metadata.viewport,
@@ -212,12 +164,12 @@ export class SavedSetServiceImpl implements SavedSetService {
     return filterNonNull(results);
   }
 
-  private async getSavedComparisonSets(project: string): Promise<ComparisonSavedInfo[]> {
+  private async getSavedComparisonSets(project: string): Promise<SavedComparisonInfo[]> {
     const dir = FilepathHelper.savedComparisonProjectDir(project);
     if (!(await fs.pathExists(dir))) return [];
     const allSets = await getAllFolders(dir);
 
-    const getSavedInfo = async (setId: string): Promise<ComparisonSavedInfo | null> => {
+    const getSavedInfo = async (setId: string): Promise<SavedComparisonInfo | null> => {
       const metadata = await SavedComparisonMetadataHelper.read(project, setId);
       return metadata === null
         ? null
@@ -246,7 +198,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     return filterNonNull(results);
   }
 
-  private sortSavedRefTestSets(savedSets: RefTestSavedInfo[]): RefTestSavedInfo[] {
+  private sortScreenshotSets(savedSets: SavedScreenshotSetInfo[]): SavedScreenshotSetInfo[] {
     return savedSets.sort((a, b) => {
       if (a.branch !== b.branch) {
         return a.branch.localeCompare(b.branch);
@@ -255,14 +207,14 @@ export class SavedSetServiceImpl implements SavedSetService {
     });
   }
 
-  private sortCompareSets(savedSets: ComparisonSavedInfo[]): ComparisonSavedInfo[] {
+  private sortCompareSets(savedSets: SavedComparisonInfo[]): SavedComparisonInfo[] {
     return savedSets.sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // desc
     });
   }
 
-  private groupByBranch(savedSets: RefTestSavedInfo[]): Record<string, Record<string, RefTestSavedInfo>> {
-    const branchGroup: Record<string, Record<string, RefTestSavedInfo>> = {};
+  private groupByBranch(savedSets: SavedScreenshotSetInfo[]): Record<string, Record<string, SavedScreenshotSetInfo>> {
+    const branchGroup: Record<string, Record<string, SavedScreenshotSetInfo>> = {};
     for (const set of savedSets) {
       if (!branchGroup[set.branch]) {
         branchGroup[set.branch] = {};

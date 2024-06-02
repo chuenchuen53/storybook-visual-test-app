@@ -1,33 +1,22 @@
 import type {
   GetAllSavedSetsResponse,
-  SaveScreenshotType,
-  GetAllSavedRefTestSetsResponse,
-  StoryMetadataWithRenderStatus,
-  GetComparisonSavedSetMetadataResponse,
+  GetAllSavedScreenshotSetsResponse,
+  GetSavedComparisonMetadataResponse,
+  GetSavedScreenshotMetadataResponse,
 } from "../../shared/type";
 
 export interface SavedSetService {
   getAllSavedProjects(): Promise<string[]>;
-  getAllSavedRefTestSets(project: string): Promise<GetAllSavedRefTestSetsResponse>;
+  getAllSavedScreenshotSets(project: string): Promise<GetAllSavedScreenshotSetsResponse>;
   getAllSavedSets(project: string): Promise<GetAllSavedSetsResponse>;
-  getRefTestSavedSetMetadata(
-    type: SaveScreenshotType,
+  getSavedScreenshotMetadata(
     project: string,
     branch: string,
     setId: string,
-  ): Promise<StoryMetadataWithRenderStatus[]>;
-  getComparisonSavedSetMetadata(project: string, setId: string): Promise<GetComparisonSavedSetMetadataResponse>;
-  deleteRefTestSet(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-    setId: string,
-  ): Promise<GetAllSavedSetsResponse | null>;
+  ): Promise<GetSavedScreenshotMetadataResponse>;
+  getSavedComparisonMetadata(project: string, setId: string): Promise<GetSavedComparisonMetadataResponse>;
+  deleteScreenshotSet(project: string, branch: string, setId: string): Promise<GetAllSavedSetsResponse | null>;
   deleteComparisonSet(project: string, setId: string): Promise<GetAllSavedSetsResponse | null>;
-  deleteRefTestBranch(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-  ): Promise<GetAllSavedSetsResponse | null>;
+  deleteScreenshotBranch(project: string, branch: string): Promise<GetAllSavedSetsResponse | null>;
   deleteProject(project: string): Promise<boolean>;
 }

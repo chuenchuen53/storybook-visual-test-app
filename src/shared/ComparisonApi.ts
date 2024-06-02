@@ -1,5 +1,5 @@
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
-import type { ComparisonRequest, ComparisonResponse, SaveScreenshotResponse } from "./type";
+import type { CreateNewComparisonSetRequest, CreateNewComparisonSetResponse, SaveScreenshotResponse } from "./type";
 
 export interface ComparisonApi extends IpcApi {
   listen: Record<string, never>;
@@ -7,7 +7,7 @@ export interface ComparisonApi extends IpcApi {
     openInExplorer: () => void;
   };
   invoke: {
-    compare: (req: ComparisonRequest) => Promise<ComparisonResponse>;
+    compare: (req: CreateNewComparisonSetRequest) => Promise<CreateNewComparisonSetResponse>;
     save: (name: string) => Promise<SaveScreenshotResponse>;
   };
 }

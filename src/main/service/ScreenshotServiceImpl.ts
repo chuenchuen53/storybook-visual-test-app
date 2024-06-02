@@ -17,7 +17,6 @@ import { LogError } from "../decorator/LogError";
 import type {
   SavedScreenshotMetadata,
   SaveScreenshotResponse,
-  SaveScreenshotType,
   StoryMetadata,
   StoryMetadataWithRenderStatus,
   TempScreenshotMetadata,
@@ -84,19 +83,14 @@ export class ScreenshotServiceImpl implements ScreenshotService {
 
   @CatchError<SaveScreenshotResponse>({ success: false, errMsg: "Fail to save screenshot" })
   @Log()
-  public async save(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-    name: string,
-  ): Promise<SaveScreenshotResponse> {
+  public async save(project: string, branch: string, name: string): Promise<SaveScreenshotResponse> {
     const metadata = await TempScreenshotMetadataHelper.read();
     if (metadata === null) return { success: false, errMsg: "Fail to read metadata" };
 
     const { id, createdAt, viewport, storyMetadataList } = metadata;
 
     const srcDir = FilepathHelper.tempScreenshotDir();
-    const destDir = FilepathHelper.savedRefTestSetDir(type, project, branch, id);
+    const destDir = FilepathHelper.savedScreenshotSetDir(project, branch, id);
     await fs.ensureDir(destDir);
     await fs.copy(srcDir, destDir, { overwrite: true });
 
@@ -106,7 +100,6 @@ export class ScreenshotServiceImpl implements ScreenshotService {
       id,
       createdAt,
       viewport,
-      type,
       project,
       branch,
       name,

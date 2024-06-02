@@ -9,9 +9,9 @@ import type { SavedSetService } from "../service/SavedSetService";
 export function registerSavedSetHandlers(service: SavedSetService) {
   const handler: IpcMainHandler<SavedSetApi> = {
     send: {
-      openTestRefSetInExplorer: (_, req) => {
-        const { type, project, branch, setId } = req;
-        const dir = FilepathHelper.savedRefTestSetDir(type, project, branch, setId);
+      openScreenshotSetInExplorer: (_, req) => {
+        const { project, branch, setId } = req;
+        const dir = FilepathHelper.savedScreenshotSetDir(project, branch, setId);
         openInExplorer(dir);
       },
       openComparisonSetInExplorer: (_, req) => {
@@ -22,28 +22,28 @@ export function registerSavedSetHandlers(service: SavedSetService) {
     },
     invoke: {
       getAllSavedProjects: async () => service.getAllSavedProjects(),
-      getAllSavedRefTestSets: async (_, project) => await service.getAllSavedRefTestSets(project),
+      getAllSavedScreenshotSets: async (_, project) => await service.getAllSavedScreenshotSets(project),
       getAllSavedSets: async (_, project) => await service.getAllSavedSets(project),
-      getRefTestSavedSetMetadata: async (_, req) =>
-        service.getRefTestSavedSetMetadata(req.type, req.project, req.branch, req.setId),
-      getComparisonSavedSetMetadata: async (_, req) => service.getComparisonSavedSetMetadata(req.project, req.setId),
-      deleteRefTestSet: (_, req) => service.deleteRefTestSet(req.type, req.project, req.branch, req.setId),
+      getSavedScreenshotMetadata: async (_, req) =>
+        service.getSavedScreenshotMetadata(req.project, req.branch, req.setId),
+      getSavedComparisonMetadata: async (_, req) => service.getSavedComparisonMetadata(req.project, req.setId),
+      deleteScreenshotSet: (_, req) => service.deleteScreenshotSet(req.project, req.branch, req.setId),
       deleteComparisonSet: (_, req) => service.deleteComparisonSet(req.project, req.setId),
-      deleteRefTestBranch: (_, req) => service.deleteRefTestBranch(req.type, req.project, req.branch),
+      deleteScreenshotBranch: (_, req) => service.deleteScreenshotBranch(req.project, req.branch),
       deleteProject: (_, req) => service.deleteProject(req.project),
     },
   };
 
-  ipcMain.on(SavedSetChannelKey.send.openTestRefSetInExplorer, handler.send.openTestRefSetInExplorer);
+  ipcMain.on(SavedSetChannelKey.send.openScreenshotSetInExplorer, handler.send.openScreenshotSetInExplorer);
   ipcMain.on(SavedSetChannelKey.send.openComparisonSetInExplorer, handler.send.openComparisonSetInExplorer);
 
   ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedProjects, handler.invoke.getAllSavedProjects);
-  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedRefTestSets, handler.invoke.getAllSavedRefTestSets);
+  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedScreenshotSets, handler.invoke.getAllSavedScreenshotSets);
   ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedSets, handler.invoke.getAllSavedSets);
-  ipcMain.handle(SavedSetChannelKey.invoke.getRefTestSavedSetMetadata, handler.invoke.getRefTestSavedSetMetadata);
-  ipcMain.handle(SavedSetChannelKey.invoke.getComparisonSavedSetMetadata, handler.invoke.getComparisonSavedSetMetadata);
-  ipcMain.handle(SavedSetChannelKey.invoke.deleteRefTestSet, handler.invoke.deleteRefTestSet);
+  ipcMain.handle(SavedSetChannelKey.invoke.getSavedScreenshotMetadata, handler.invoke.getSavedScreenshotMetadata);
+  ipcMain.handle(SavedSetChannelKey.invoke.getSavedComparisonMetadata, handler.invoke.getSavedComparisonMetadata);
+  ipcMain.handle(SavedSetChannelKey.invoke.deleteScreenshotSet, handler.invoke.deleteScreenshotSet);
   ipcMain.handle(SavedSetChannelKey.invoke.deleteComparisonSet, handler.invoke.deleteComparisonSet);
-  ipcMain.handle(SavedSetChannelKey.invoke.deleteRefTestBranch, handler.invoke.deleteRefTestBranch);
+  ipcMain.handle(SavedSetChannelKey.invoke.deleteScreenshotBranch, handler.invoke.deleteScreenshotBranch);
   ipcMain.handle(SavedSetChannelKey.invoke.deleteProject, handler.invoke.deleteProject);
 }

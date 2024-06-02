@@ -34,6 +34,8 @@ export type IpcRendererHandler<T extends IpcApi> = {
   invoke: { [K in keyof T["invoke"]]: IpcRendererHandlerType<T["invoke"][K]> };
 };
 
+export type FirstParamType<T extends (args: any) => void> = Parameters<T>[0];
+
 export type FirstParamTypeForListener<T extends IpcApi, K extends keyof T["listen"]> = Parameters<
   Parameters<T["listen"][K]>[0]
 >[0];

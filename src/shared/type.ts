@@ -4,23 +4,28 @@ export interface GlobalMessage {
   title?: string;
 }
 
-export interface GetSavedRefTestImgRequest {
-  type: SaveScreenshotType;
+export interface SavedScreenshotSetLocationIdentifier {
   project: string;
   branch: string;
   setId: string;
-  id: string;
 }
 
-export interface GetSavedComparisonImgRequest {
+export interface SavedComparisonSetLocationIdentifier {
   project: string;
   setId: string;
-  id: string;
 }
 
 export interface GetImgResponse {
   isExist: boolean;
   base64: string | null;
+}
+
+export interface GetSavedScreenshotImgRequest extends SavedScreenshotSetLocationIdentifier {
+  id: string;
+}
+
+export interface GetSavedComparisonImgRequest extends SavedComparisonSetLocationIdentifier {
+  id: string;
 }
 
 export interface UserSetting {
@@ -80,10 +85,7 @@ export interface StoryUpdateEventData {
   storyErr: boolean | null;
 }
 
-export type SaveScreenshotType = "reference" | "test";
-
 export interface SaveScreenshotRequest {
-  type: SaveScreenshotType;
   project: string;
   branch: string;
   name: string;
@@ -93,7 +95,6 @@ export interface SavedScreenshotMetadata {
   id: string;
   createdAt: string;
   viewport: Viewport;
-  type: SaveScreenshotType;
   project: string;
   branch: string;
   name: string;
@@ -127,18 +128,12 @@ export interface TempComparisonMetadata {
   result: StoriesDiffResult;
 }
 
-export interface RefTestSetLocationIdentifier {
-  project: string;
-  branch: string;
-  setId: string;
+export interface CreateNewComparisonSetRequest {
+  ref: SavedScreenshotSetLocationIdentifier;
+  test: SavedScreenshotSetLocationIdentifier;
 }
 
-export interface ComparisonRequest {
-  ref: RefTestSetLocationIdentifier;
-  test: RefTestSetLocationIdentifier;
-}
-
-export interface ComparisonResponse {
+export interface CreateNewComparisonSetResponse {
   success: boolean;
   data: TempComparisonMetadata | null;
   storyMetadataList: StoryMetadataWithRenderStatus[] | null;
@@ -148,10 +143,9 @@ export interface SavedComparisonMetadata extends TempComparisonMetadata {
   name: string;
 }
 
-export interface RefTestSavedInfo {
+export interface SavedScreenshotSetInfo {
   id: string;
   createdAt: string;
-  type: SaveScreenshotType;
   project: string;
   branch: string;
   viewport: Viewport;
@@ -161,9 +155,9 @@ export interface RefTestSavedInfo {
   errStories: number;
 }
 
-export type ComparisonSavedInfo$Result = Record<keyof StoriesDiffResult, number>;
+export type SavedComparisonSetInfo$Result = Record<keyof StoriesDiffResult, number>;
 
-export interface ComparisonSavedInfo {
+export interface SavedComparisonInfo {
   id: string;
   createdAt: string;
   project: string;
@@ -175,65 +169,42 @@ export interface ComparisonSavedInfo {
   testSetId: string;
   testSetName: string;
   viewport: Viewport;
-  result: ComparisonSavedInfo$Result;
+  result: SavedComparisonSetInfo$Result;
 }
 
-export interface GetAllSavedRefTestSetsResponse {
-  ref: Record<string, Record<string, RefTestSavedInfo>>;
-  test: Record<string, Record<string, RefTestSavedInfo>>;
+export interface GetAllSavedScreenshotSetsResponse {
+  screenshot: Record<string, Record<string, SavedScreenshotSetInfo>>;
 }
 
 export interface GetAllSavedSetsResponse {
-  ref: Record<string, Record<string, RefTestSavedInfo>>;
-  test: Record<string, Record<string, RefTestSavedInfo>>;
-  comparison: ComparisonSavedInfo[];
+  screenshot: Record<string, Record<string, SavedScreenshotSetInfo>>;
+  comparison: SavedComparisonInfo[];
 }
 
-export interface GetRefTestSavedSetMetadataRequest {
-  type: SaveScreenshotType;
-  project: string;
-  branch: string;
-  setId: string;
-}
+export type GetSavedScreenshotMetadataRequest = SavedScreenshotSetLocationIdentifier;
 
-export interface GetComparisonSavedSetMetadataRequest {
-  project: string;
-  setId: string;
-}
+export type GetSavedScreenshotMetadataResponse = {
+  data: SavedScreenshotMetadata | null;
+};
 
-export interface GetComparisonSavedSetMetadataResponse {
+export type GetSavedComparisonMetadataRequest = SavedComparisonSetLocationIdentifier;
+
+export interface GetSavedComparisonMetadataResponse {
   data: {
     metadata: SavedComparisonMetadata;
     storyMetadataList: StoryMetadataWithRenderStatus[];
   } | null;
 }
 
-export interface OpenTestRefSetInExplorerRequest {
-  type: SaveScreenshotType;
-  project: string;
-  branch: string;
-  setId: string;
-}
+export type OpenScreenshotSetInExplorerRequest = SavedScreenshotSetLocationIdentifier;
 
-export interface OpenComparisonSetInExplorerRequest {
-  project: string;
-  setId: string;
-}
+export type OpenComparisonSetInExplorerRequest = SavedComparisonSetLocationIdentifier;
 
-export interface DeleteRefTestSetRequest {
-  type: SaveScreenshotType;
-  project: string;
-  branch: string;
-  setId: string;
-}
+export type DeleteScreenshotSetRequest = SavedScreenshotSetLocationIdentifier;
 
-export interface DeleteComparisonSetRequest {
-  project: string;
-  setId: string;
-}
+export type DeleteComparisonSetRequest = SavedComparisonSetLocationIdentifier;
 
-export interface DeleteRefTestBranchRequest {
-  type: SaveScreenshotType;
+export interface DeleteScreenshotBranchRequest {
   project: string;
   branch: string;
 }
