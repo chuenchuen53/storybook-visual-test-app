@@ -4,7 +4,7 @@ import { useToast } from "primevue/usetoast";
 import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
 import { useComparisonImage } from "../composables/useComparisonImage";
 import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
-import type { ComparisonRequest, GetAvailableSetResponse } from "../../shared/type";
+import type { ComparisonRequest, GetAllSavedRefTestSetsResponse } from "../../shared/type";
 
 export interface CompareSet {
   branch: string | null;
@@ -21,9 +21,9 @@ export const useComparisonStore = defineStore("comparison", () => {
   const project = ref<string | null>(null);
   const availableProjects = ref<string[]>([]);
   const projectsInTab = ref<string[]>([]);
-  const availableSets = ref<GetAvailableSetResponse>({
-    ref: [],
-    test: [],
+  const availableSets = ref<GetAllSavedRefTestSetsResponse>({
+    ref: {},
+    test: {},
   });
   const refSet = ref<CompareSet>({
     branch: null,
@@ -100,7 +100,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     if (skipIfSame && projectName === project.value) return;
 
     project.value = projectName;
-    availableSets.value = await window.comparisonApi.invoke.getAvailableSets(projectName);
+    availableSets.value = await window.savedSetApi.invoke.getAllSavedRefTestSets(projectName);
     refSet.value = {
       branch: null,
       setId: null,
@@ -128,8 +128,8 @@ export const useComparisonStore = defineStore("comparison", () => {
     if (projectsInTab.value.length === 0) {
       project.value = null;
       availableSets.value = {
-        ref: [],
-        test: [],
+        ref: {},
+        test: {},
       };
       refSet.value = {
         branch: null,
@@ -164,18 +164,18 @@ export const useComparisonStore = defineStore("comparison", () => {
 
       await updateProject(project.value, false);
 
-      const oldRefBranchData = availableSets.value.ref.find(x => x.branch === oldRefBranch);
+      const oldRefBranchData = oldRefBranch ? availableSets.value.ref[oldRefBranch] : null;
       if (oldRefBranchData) {
         refSet.value.branch = oldRefBranch;
-        if (oldRefSetId && oldRefBranchData.setList.find(x => x.id === oldRefSetId)) {
+        if (oldRefSetId && oldRefBranchData[oldRefSetId]) {
           refSet.value.setId = oldRefSetId;
         }
       }
 
-      const oldTestBranchData = availableSets.value.test.find(x => x.branch === oldTestBranch);
+      const oldTestBranchData = oldTestBranch ? availableSets.value.test[oldTestBranch] : null;
       if (oldTestBranchData) {
         testSet.value.branch = oldTestBranch;
-        if (oldTestSetId && oldTestBranchData.setList.find(x => x.id === oldTestSetId)) {
+        if (oldTestSetId && oldTestBranchData[oldTestSetId]) {
           testSet.value.setId = oldTestSetId;
         }
       }

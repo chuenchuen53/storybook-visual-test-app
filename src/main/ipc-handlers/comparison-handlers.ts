@@ -9,26 +9,16 @@ import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 export function registerComparisonHandlers(service: ComparisonService) {
   const handler: IpcMainHandler<ComparisonApi> = {
     send: {
-      openInExplorer: () => {
-        openInExplorer(FilepathHelper.tempComparisonDir());
-      },
+      openInExplorer: () => openInExplorer(FilepathHelper.tempComparisonDir()),
     },
     invoke: {
-      getAvailableSets: async (_, project) => {
-        return await service.getAvailableSets(project);
-      },
-      compare: async (_, req) => {
-        return await service.compare(req.ref, req.test);
-      },
-      save: async (_, name) => {
-        return await service.save(name);
-      },
+      compare: async (_, req) => await service.compare(req.ref, req.test),
+      save: async (_, name) => await service.save(name),
     },
   };
 
   ipcMain.on(ComparisonChannelKey.send.openInExplorer, handler.send.openInExplorer);
 
-  ipcMain.handle(ComparisonChannelKey.invoke.getAvailableSets, handler.invoke.getAvailableSets);
   ipcMain.handle(ComparisonChannelKey.invoke.compare, handler.invoke.compare);
   ipcMain.handle(ComparisonChannelKey.invoke.save, handler.invoke.save);
 }

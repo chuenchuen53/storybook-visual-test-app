@@ -56,11 +56,11 @@ const disableCompareBtn = computed(() => {
 });
 
 const availableRefBranch = computed(() => {
-  return availableSets.value.ref.map(x => x.branch);
+  return Object.keys(availableSets.value.ref);
 });
 
 const availableTestBranch = computed(() => {
-  return availableSets.value.test.map(x => x.branch);
+  return Object.keys(availableSets.value.test);
 });
 
 const updateRefBranch = (e: SelectChangeEvent) => {
@@ -71,19 +71,15 @@ const updateTestBranch = (e: SelectChangeEvent) => {
   updateTestSetBranch(e.value);
 };
 
-const availableRefSets = computed(
-  () =>
-    availableSets.value.ref
-      .find(x => x.branch === refSet.value.branch)
-      ?.setList.slice()
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) ?? [],
-);
+const availableRefSets = computed(() => {
+  if (refSet.value.branch === null) return [];
+  if (availableSets.value.ref[refSet.value.branch] === undefined) return [];
+  return Object.values(availableSets.value.ref[refSet.value.branch]);
+});
 
-const availableTestSets = computed(
-  () =>
-    availableSets.value.test
-      .find(x => x.branch === testSet.value.branch)
-      ?.setList.slice()
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) ?? [],
-);
+const availableTestSets = computed(() => {
+  if (testSet.value.branch === null) return [];
+  if (availableSets.value.test[testSet.value.branch] === undefined) return [];
+  return Object.values(availableSets.value.test[testSet.value.branch]);
+});
 </script>

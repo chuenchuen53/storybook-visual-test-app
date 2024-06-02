@@ -9,20 +9,12 @@ import type { ScreenshotService } from "../service/ScreenshotService";
 export function registerScreenshotHandlers(service: ScreenshotService) {
   const handler: IpcMainHandler<ScreenshotApi> = {
     send: {
-      openInExplorer: () => {
-        openInExplorer(FilepathHelper.tempScreenshotDir());
-      },
-      createNewSet: (_, req) => {
-        void service.createNewSet(req.storybookUrl, req.viewport, req.concurrency);
-      },
+      openInExplorer: () => openInExplorer(FilepathHelper.tempScreenshotDir()),
+      createNewSet: (_, req) => void service.createNewSet(req.storybookUrl, req.viewport, req.concurrency),
     },
     invoke: {
-      getLocalIPAddress: async _ => {
-        return service.getLocalIPAddress();
-      },
-      save: async (_, req) => {
-        return await service.save(req.type, req.project, req.branch, req.name);
-      },
+      getLocalIPAddress: async _ => service.getLocalIPAddress(),
+      save: async (_, req) => await service.save(req.type, req.project, req.branch, req.name),
     },
   };
 

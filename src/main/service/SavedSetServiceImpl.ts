@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import { getAllFolders } from "../utils";
+import { getAllFolders, filterNonNull } from "../utils";
 import { FilepathHelper } from "../Filepath";
 import { SavedScreenshotMetadataHelper } from "../persistence/SavedScreenshotMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../persistence/SavedComparisonMetadataHelper";
@@ -7,11 +7,10 @@ import { LogError } from "../decorator/LogError";
 import { CatchError } from "../decorator/CatchError";
 import type {
   ComparisonSavedInfo,
-  GetComparisonSavedSetMetadataResponse,
   RefTestSavedInfo,
-  SavedSets,
+  GetAllSavedSetsResponse,
   SaveScreenshotType,
-  StoryMetadataWithRenderStatus,
+  GetAllSavedRefTestSetsResponse,
 } from "../../shared/type";
 import type { SavedSetService } from "./SavedSetService";
 
@@ -35,17 +34,37 @@ export class SavedSetServiceImpl implements SavedSetService {
   }
 
   @LogError()
-  public async getAllSavedSets(project: string): Promise<SavedSets> {
+  public async getAllSavedRefTestSets(project: string): Promise<GetAllSavedRefTestSetsResponse> {
     const [refBranches, testBranches] = await Promise.all([
-      this.getAllRefOrTestBranches("reference", project),
-      this.getAllRefOrTestBranches("test", project),
+      this.getAllRefTestBranches("reference", project),
+      this.getAllRefTestBranches("test", project),
+    ]);
+
+    const [refSetsInfo, testSetsInfo] = await Promise.all([
+      (
+        await Promise.all(refBranches.map(branch => this.getAllRefTestSetsFromBranch("reference", project, branch)))
+      ).flat(),
+      (await Promise.all(testBranches.map(branch => this.getAllRefTestSetsFromBranch("test", project, branch)))).flat(),
+    ]);
+
+    return {
+      ref: this.groupByBranch(this.sortSavedRefTestSets(refSetsInfo)),
+      test: this.groupByBranch(this.sortSavedRefTestSets(testSetsInfo)),
+    };
+  }
+
+  @LogError()
+  public async getAllSavedSets(project: string): Promise<GetAllSavedSetsResponse> {
+    const [refBranches, testBranches] = await Promise.all([
+      this.getAllRefTestBranches("reference", project),
+      this.getAllRefTestBranches("test", project),
     ]);
 
     const [refSetsInfo, testSetsInfo, comparisonSets] = await Promise.all([
       (
-        await Promise.all(refBranches.map(branch => this.getAllRefOrTestSavedSets("reference", project, branch)))
+        await Promise.all(refBranches.map(branch => this.getAllRefTestSetsFromBranch("reference", project, branch)))
       ).flat(),
-      (await Promise.all(testBranches.map(branch => this.getAllRefOrTestSavedSets("test", project, branch)))).flat(),
+      (await Promise.all(testBranches.map(branch => this.getAllRefTestSetsFromBranch("test", project, branch)))).flat(),
       this.getSavedComparisonSets(project),
     ]);
 
@@ -56,59 +75,6 @@ export class SavedSetServiceImpl implements SavedSetService {
     };
   }
 
-  @LogError()
-  public async getRefOrTestSavedSetMetadata(
-    type: SaveScreenshotType,
-    project: string,
-    branch: string,
-    setId: string,
-  ): Promise<StoryMetadataWithRenderStatus[]> {
-    const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, setId);
-    return metadata === null ? [] : metadata.storyMetadataList;
-  }
-
-  @LogError()
-  public async getComparisonSavedSetMetadata(
-    project: string,
-    setId: string,
-  ): Promise<GetComparisonSavedSetMetadataResponse> {
-    const metadata = await SavedComparisonMetadataHelper.read(project, setId);
-
-    if (metadata === null) return { data: null };
-
-    const refSetMetadata = await SavedScreenshotMetadataHelper.read(
-      "reference",
-      project,
-      metadata.refBranch,
-      metadata.refSetId,
-    );
-    const testSetMetadata = await SavedScreenshotMetadataHelper.read(
-      "test",
-      project,
-      metadata.testBranch,
-      metadata.testSetId,
-    );
-
-    if (refSetMetadata === null || testSetMetadata === null) return { data: null };
-
-    const map = new Map<string, StoryMetadataWithRenderStatus>();
-    for (const x of refSetMetadata.storyMetadataList) {
-      map.set(x.id, x);
-    }
-    for (const x of testSetMetadata.storyMetadataList) {
-      map.set(x.id, x);
-    }
-
-    const storyMetadataList = Array.from(map.values());
-
-    return {
-      data: {
-        metadata,
-        storyMetadataList,
-      },
-    };
-  }
-
   @CatchError<null>(null)
   @LogError()
   public async deleteRefTestSet(
@@ -116,7 +82,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     project: string,
     branch: string,
     setId: string,
-  ): Promise<SavedSets | null> {
+  ): Promise<GetAllSavedSetsResponse | null> {
     const dir = FilepathHelper.savedRefTestSetDir(type, project, branch, setId);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
@@ -125,7 +91,7 @@ export class SavedSetServiceImpl implements SavedSetService {
 
   @CatchError<null>(null)
   @LogError()
-  public async deleteComparisonSet(project: string, setId: string): Promise<SavedSets | null> {
+  public async deleteComparisonSet(project: string, setId: string): Promise<GetAllSavedSetsResponse | null> {
     const dir = FilepathHelper.savedComparisonSetDir(project, setId);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
@@ -138,7 +104,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     type: SaveScreenshotType,
     project: string,
     branch: string,
-  ): Promise<SavedSets | null> {
+  ): Promise<GetAllSavedSetsResponse | null> {
     const dir = FilepathHelper.savedRefTestBranchDir(type, project, branch);
     if (!(await fs.pathExists(dir))) return null;
     await fs.remove(dir);
@@ -155,13 +121,13 @@ export class SavedSetServiceImpl implements SavedSetService {
     return true;
   }
 
-  private async getAllRefOrTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
+  private async getAllRefTestBranches(type: SaveScreenshotType, project: string): Promise<string[]> {
     const dir = FilepathHelper.savedRefTestProjectDir(type, project);
     if (!(await fs.pathExists(dir))) return [];
     return await getAllFolders(dir);
   }
 
-  private async getAllRefOrTestSavedSets(
+  private async getAllRefTestSetsFromBranch(
     type: SaveScreenshotType,
     project: string,
     branch: string,
@@ -188,7 +154,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     };
 
     const results = await Promise.all(allSets.map(getSavedInfo));
-    return results.filter((info): info is RefTestSavedInfo => info !== null);
+    return filterNonNull(results);
   }
 
   private async getSavedComparisonSets(project: string): Promise<ComparisonSavedInfo[]> {
@@ -198,44 +164,31 @@ export class SavedSetServiceImpl implements SavedSetService {
 
     const getSavedInfo = async (setId: string): Promise<ComparisonSavedInfo | null> => {
       const metadata = await SavedComparisonMetadataHelper.read(project, setId);
-
-      if (metadata === null) return null;
-
-      return {
-        id: metadata.id,
-        createdAt: metadata.createdAt,
-        project: metadata.project,
-        name: metadata.name,
-        refBranch: metadata.refBranch,
-        refSetId: metadata.refSetId,
-        refSetName: metadata.refSetName,
-        testBranch: metadata.testBranch,
-        testSetId: metadata.testSetId,
-        testSetName: metadata.testSetName,
-        viewport: metadata.viewport,
-        result: {
-          same: metadata.result.same.length,
-          added: metadata.result.added.length,
-          removed: metadata.result.removed.length,
-          diff: metadata.result.diff.length,
-        },
-      };
+      return metadata === null
+        ? null
+        : {
+            id: metadata.id,
+            createdAt: metadata.createdAt,
+            project: metadata.project,
+            name: metadata.name,
+            refBranch: metadata.refBranch,
+            refSetId: metadata.refSetId,
+            refSetName: metadata.refSetName,
+            testBranch: metadata.testBranch,
+            testSetId: metadata.testSetId,
+            testSetName: metadata.testSetName,
+            viewport: metadata.viewport,
+            result: {
+              same: metadata.result.same.length,
+              added: metadata.result.added.length,
+              removed: metadata.result.removed.length,
+              diff: metadata.result.diff.length,
+            },
+          };
     };
 
-    return (await Promise.all(allSets.map(getSavedInfo))).filter((info): info is ComparisonSavedInfo => info !== null);
-  }
-
-  private groupByBranch(savedSets: RefTestSavedInfo[]): Record<string, Record<string, RefTestSavedInfo>> {
-    const map = new Map<string, Record<string, RefTestSavedInfo>>();
-    for (const set of savedSets) {
-      let branchMap = map.get(set.branch);
-      if (!branchMap) {
-        branchMap = {};
-        map.set(set.branch, branchMap);
-      }
-      branchMap[set.id] = set;
-    }
-    return Object.fromEntries(map);
+    const results = await Promise.all(allSets.map(getSavedInfo));
+    return filterNonNull(results);
   }
 
   private sortSavedRefTestSets(savedSets: RefTestSavedInfo[]): RefTestSavedInfo[] {
@@ -251,5 +204,16 @@ export class SavedSetServiceImpl implements SavedSetService {
     return savedSets.sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // desc
     });
+  }
+
+  private groupByBranch(savedSets: RefTestSavedInfo[]): Record<string, Record<string, RefTestSavedInfo>> {
+    const branchGroup: Record<string, Record<string, RefTestSavedInfo>> = {};
+    for (const set of savedSets) {
+      if (!branchGroup[set.branch]) {
+        branchGroup[set.branch] = {};
+      }
+      branchGroup[set.branch][set.id] = set;
+    }
+    return branchGroup;
   }
 }

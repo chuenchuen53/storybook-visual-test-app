@@ -94,3 +94,7 @@ export async function sumPngFileSize(dirPath: string): Promise<number> {
     throw error;
   }
 }
+
+export function filterNonNull<T>(arr: (T | null)[]): T[] {
+  return arr.filter((item): item is T => item !== null);
+}

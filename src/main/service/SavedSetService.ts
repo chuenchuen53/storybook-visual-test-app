@@ -1,22 +1,20 @@
-import type {
-  GetComparisonSavedSetMetadataResponse,
-  SavedSets,
-  SaveScreenshotType,
-  StoryMetadataWithRenderStatus,
-} from "../../shared/type";
+import type { GetAllSavedSetsResponse, SaveScreenshotType, GetAllSavedRefTestSetsResponse } from "../../shared/type";
 
 export interface SavedSetService {
   getAllSavedProjects(): Promise<string[]>;
-  getAllSavedSets(project: string): Promise<SavedSets>;
-  getRefOrTestSavedSetMetadata(
+  getAllSavedRefTestSets(project: string): Promise<GetAllSavedRefTestSetsResponse>;
+  getAllSavedSets(project: string): Promise<GetAllSavedSetsResponse>;
+  deleteRefTestSet(
     type: SaveScreenshotType,
     project: string,
     branch: string,
     setId: string,
-  ): Promise<StoryMetadataWithRenderStatus[]>;
-  getComparisonSavedSetMetadata(project: string, setId: string): Promise<GetComparisonSavedSetMetadataResponse>;
-  deleteRefTestSet(type: SaveScreenshotType, project: string, branch: string, setId: string): Promise<SavedSets | null>;
-  deleteComparisonSet(project: string, setId: string): Promise<SavedSets | null>;
-  deleteRefTestBranch(type: SaveScreenshotType, project: string, branch: string): Promise<SavedSets | null>;
+  ): Promise<GetAllSavedSetsResponse | null>;
+  deleteComparisonSet(project: string, setId: string): Promise<GetAllSavedSetsResponse | null>;
+  deleteRefTestBranch(
+    type: SaveScreenshotType,
+    project: string,
+    branch: string,
+  ): Promise<GetAllSavedSetsResponse | null>;
   deleteProject(project: string): Promise<boolean>;
 }

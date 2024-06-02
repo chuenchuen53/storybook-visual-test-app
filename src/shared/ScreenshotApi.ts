@@ -2,7 +2,7 @@ import type {
   SaveScreenshotRequest,
   SaveScreenshotResponse,
   ScreenshotState,
-  StartScreenshotRequest,
+  CreateNewScreenshotSetRequest,
   StoryMetadata,
   StoryUpdateEventData,
 } from "./type";
@@ -16,7 +16,7 @@ export interface ScreenshotApi extends IpcApi {
   };
   send: {
     openInExplorer: () => void;
-    createNewSet: (req: StartScreenshotRequest) => void;
+    createNewSet: (req: CreateNewScreenshotSetRequest) => void;
   };
   invoke: {
     getLocalIPAddress: () => Promise<string | undefined>;

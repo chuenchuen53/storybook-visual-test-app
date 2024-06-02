@@ -1,25 +1,18 @@
-import path from "path";
 import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
 import { StoriesDifferImpl } from "../differ/stories-differ/StoriesDifferImpl";
 import { FilepathHelper } from "../Filepath";
-import { getAllFolders } from "../utils";
 import { SavedScreenshotMetadataHelper } from "../persistence/SavedScreenshotMetadataHelper";
 import { Log } from "../decorator/Log";
 import { CatchError } from "../decorator/CatchError";
 import { TempComparisonMetadataHelper } from "../persistence/TempComparisonMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../persistence/SavedComparisonMetadataHelper";
-import { LogError } from "../decorator/LogError";
 import type {
-  BranchScreenshotSet,
   ComparisonResponse,
   TempComparisonMetadata,
-  GetAvailableSetResponse,
   SavedComparisonMetadata,
   SaveScreenshotResponse,
-  SaveScreenshotType,
   RefTestSetLocationIdentifier,
-  SetItem,
   StoryMetadataWithRenderStatus,
 } from "../../shared/type";
 import type { ComparisonService } from "./ComparisonService";
@@ -33,25 +26,6 @@ export class ComparisonServiceImpl implements ComparisonService {
   }
 
   private constructor() {}
-
-  @LogError()
-  public async getAvailableSets(project: string): Promise<GetAvailableSetResponse> {
-    const result: GetAvailableSetResponse = {
-      ref: [],
-      test: [],
-    };
-
-    const refProjectDir = FilepathHelper.savedRefTestProjectDir("reference", project);
-    const testProjectDir = FilepathHelper.savedRefTestProjectDir("test", project);
-
-    const refExists = await fs.pathExists(refProjectDir);
-    const testExists = await fs.pathExists(testProjectDir);
-
-    if (refExists) result.ref = await this.getSetsFromDir("reference", project);
-    if (testExists) result.test = await this.getSetsFromDir("test", project);
-
-    return result;
-  }
 
   @CatchError<ComparisonResponse>({ success: false, data: null, storyMetadataList: null })
   @Log()
@@ -145,36 +119,5 @@ export class ComparisonServiceImpl implements ComparisonService {
     };
     await SavedComparisonMetadataHelper.save(savedMetadata);
     return { success: true };
-  }
-
-  private async getSetsFromDir(type: SaveScreenshotType, project: string): Promise<BranchScreenshotSet[]> {
-    const projectDir = FilepathHelper.savedRefTestProjectDir(type, project);
-    const branches = await getAllFolders(projectDir);
-
-    return await Promise.all(
-      branches.map(async branch => {
-        const branchDir = path.join(projectDir, branch);
-        const setIds = await getAllFolders(branchDir);
-        const setList = (
-          await Promise.all(
-            setIds.map<Promise<SetItem | null>>(async id => {
-              const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, id);
-              return metadata
-                ? {
-                    id,
-                    createdAt: metadata.createdAt,
-                    viewport: metadata.viewport,
-                    name: metadata.name,
-                  }
-                : null;
-            }),
-          )
-        ).filter((x): x is SetItem => x !== null);
-        return {
-          branch,
-          setList,
-        };
-      }),
-    );
   }
 }

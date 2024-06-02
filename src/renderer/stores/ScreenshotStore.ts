@@ -5,7 +5,7 @@ import { ScreenshotState, StoryState } from "../../shared/type";
 import { type StoryMetadataInExplorer } from "../components/shared/story-explorer/helper";
 import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
-import type { SaveScreenshotType, StartScreenshotRequest, Viewport } from "../../shared/type";
+import type { SaveScreenshotType, CreateNewScreenshotSetRequest, Viewport } from "../../shared/type";
 
 export interface SaveInfo {
   type: SaveScreenshotType;
@@ -60,7 +60,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const startScreenshot = async () => {
     if (isProcessing.value) return;
     state.value = ScreenshotState.CHECKING_SERVICE;
-    let req: StartScreenshotRequest = {
+    let req: CreateNewScreenshotSetRequest = {
       storybookUrl: storybookUrl.value,
       viewport: viewport.value,
       concurrency: concurrency.value,

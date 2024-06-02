@@ -3,13 +3,10 @@ import type {
   DeleteProjectRequest,
   DeleteRefTestBranchRequest,
   DeleteRefTestSetRequest,
-  GetComparisonSavedSetMetadataRequest,
-  GetComparisonSavedSetMetadataResponse,
   OpenComparisonSetInExplorerRequest,
   OpenTestRefSetInExplorerRequest,
-  RetRefOrTestSavedSetMetadataRequest,
-  SavedSets,
-  StoryMetadataWithRenderStatus,
+  GetAllSavedSetsResponse,
+  GetAllSavedRefTestSetsResponse,
 } from "./type";
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
 
@@ -21,16 +18,11 @@ export interface SavedSetApi extends IpcApi {
   };
   invoke: {
     getAllSavedProjects: () => Promise<string[]>;
-    getAllSavedSets: (project: string) => Promise<SavedSets>;
-    getRefOrTestSavedSetMetadata: (
-      req: RetRefOrTestSavedSetMetadataRequest,
-    ) => Promise<StoryMetadataWithRenderStatus[]>;
-    getComparisonSavedSetMetadata: (
-      req: GetComparisonSavedSetMetadataRequest,
-    ) => Promise<GetComparisonSavedSetMetadataResponse>;
-    deleteRefTestSet: (req: DeleteRefTestSetRequest) => Promise<SavedSets | null>;
-    deleteComparisonSet: (req: DeleteComparisonSetRequest) => Promise<SavedSets | null>;
-    deleteRefTestBranch: (req: DeleteRefTestBranchRequest) => Promise<SavedSets | null>;
+    getAllSavedRefTestSets: (project: string) => Promise<GetAllSavedRefTestSetsResponse>;
+    getAllSavedSets: (project: string) => Promise<GetAllSavedSetsResponse>;
+    deleteRefTestSet: (req: DeleteRefTestSetRequest) => Promise<GetAllSavedSetsResponse | null>;
+    deleteComparisonSet: (req: DeleteComparisonSetRequest) => Promise<GetAllSavedSetsResponse | null>;
+    deleteRefTestBranch: (req: DeleteRefTestBranchRequest) => Promise<GetAllSavedSetsResponse | null>;
     deleteProject: (req: DeleteProjectRequest) => Promise<boolean>;
   };
 }
@@ -43,9 +35,8 @@ export const SavedSetChannelKey: IpcChannel<SavedSetApi> = {
   },
   invoke: {
     getAllSavedProjects: "savedSet:getAllSavedProjects",
+    getAllSavedRefTestSets: "savedSet:getAllSavedRefTestSets",
     getAllSavedSets: "savedSet:getAllSavedSets",
-    getRefOrTestSavedSetMetadata: "savedSet:getRefOrTestSavedSetMetadata",
-    getComparisonSavedSetMetadata: "savedSet:getComparisonSavedSetMetadata",
     deleteRefTestSet: "savedSet:deleteRefTestSet",
     deleteComparisonSet: "savedSet:deleteComparisonSet",
     deleteRefTestBranch: "savedSet:deleteRefTestBranch",

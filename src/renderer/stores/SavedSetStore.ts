@@ -15,7 +15,7 @@ import type {
   OpenComparisonSetInExplorerRequest,
   OpenTestRefSetInExplorerRequest,
   RefTestSavedInfo,
-  SavedSets,
+  GetAllSavedSetsResponse,
   SaveScreenshotType,
   StoryMetadataWithRenderStatus,
 } from "../../shared/type";
@@ -34,11 +34,11 @@ export const useSavedSetStore = defineStore("savedSet", () => {
   const project = ref<string | null>(null);
   const availableProjects = ref<string[]>([]);
   const projectsInTab = ref<string[]>([]);
-  const _savedSets = ref<SavedSets | null>(null);
+  const _savedSets = ref<GetAllSavedSetsResponse | null>(null);
   const searchTextForSavedSets = ref<string>("");
   const currentSelectedSet = ref<CurrentSelectedSet>(null);
 
-  const filteredSavedSets = computed<SavedSets | null>(() => {
+  const filteredSavedSets = computed<GetAllSavedSetsResponse | null>(() => {
     if (_savedSets.value === null) return null;
     const searchText = searchTextForSavedSets.value.trim().toLowerCase();
     if (searchText === "") return _savedSets.value;

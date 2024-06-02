@@ -32,6 +32,12 @@ export interface Viewport {
   height: number;
 }
 
+export interface CreateNewScreenshotSetRequest {
+  storybookUrl: string;
+  viewport: Viewport;
+  concurrency: number;
+}
+
 export enum ScreenshotState {
   IDLE = "IDLE",
   CHECKING_SERVICE = "CHECKING_SERVICE",
@@ -142,38 +148,6 @@ export interface SavedComparisonMetadata extends TempComparisonMetadata {
   name: string;
 }
 
-export interface GetComparisonSavedSetMetadataRequest {
-  project: string;
-  setId: string;
-}
-
-export interface GetComparisonSavedSetMetadataResponse {
-  data: {
-    metadata: SavedComparisonMetadata;
-    storyMetadataList: StoryMetadataWithRenderStatus[];
-  } | null;
-}
-
-export interface SetItem {
-  id: string;
-  createdAt: string;
-  viewport: {
-    width: number;
-    height: number;
-  };
-  name: string;
-}
-
-export interface BranchScreenshotSet {
-  branch: string;
-  setList: SetItem[];
-}
-
-export interface GetAvailableSetResponse {
-  ref: BranchScreenshotSet[];
-  test: BranchScreenshotSet[];
-}
-
 export interface RefTestSavedInfo {
   id: string;
   createdAt: string;
@@ -187,12 +161,7 @@ export interface RefTestSavedInfo {
   errStories: number;
 }
 
-export interface ComparisonSavedInfo$Result {
-  same: number;
-  added: number;
-  removed: number;
-  diff: number;
-}
+export type ComparisonSavedInfo$Result = Record<keyof StoriesDiffResult, number>;
 
 export interface ComparisonSavedInfo {
   id: string;
@@ -209,23 +178,15 @@ export interface ComparisonSavedInfo {
   result: ComparisonSavedInfo$Result;
 }
 
-export interface SavedSets {
+export interface GetAllSavedRefTestSetsResponse {
+  ref: Record<string, Record<string, RefTestSavedInfo>>;
+  test: Record<string, Record<string, RefTestSavedInfo>>;
+}
+
+export interface GetAllSavedSetsResponse {
   ref: Record<string, Record<string, RefTestSavedInfo>>;
   test: Record<string, Record<string, RefTestSavedInfo>>;
   comparison: ComparisonSavedInfo[];
-}
-
-export interface RetRefOrTestSavedSetMetadataRequest {
-  type: SaveScreenshotType;
-  project: string;
-  branch: string;
-  setId: string;
-}
-
-export interface StartScreenshotRequest {
-  storybookUrl: string;
-  viewport: Viewport;
-  concurrency: number;
 }
 
 export interface OpenTestRefSetInExplorerRequest {
