@@ -167,7 +167,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
   const openRefTestSet = async (set: RefTestSavedInfo) => {
     currentSelectedSet.value = { type: set.type, data: set };
     const { type, project, branch, id } = set;
-    const metadataList = await window.savedSetApi.invoke.getRefOrTestSavedSetMetadata({
+    const metadataList = await window.savedSetApi.invoke.getRefTestSavedSetMetadata({
       type,
       project,
       branch,

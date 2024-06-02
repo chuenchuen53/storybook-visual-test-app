@@ -11,6 +11,8 @@ import type {
   GetAllSavedSetsResponse,
   SaveScreenshotType,
   GetAllSavedRefTestSetsResponse,
+  StoryMetadataWithRenderStatus,
+  GetComparisonSavedSetMetadataResponse,
 } from "../../shared/type";
 import type { SavedSetService } from "./SavedSetService";
 
@@ -72,6 +74,59 @@ export class SavedSetServiceImpl implements SavedSetService {
       ref: this.groupByBranch(this.sortSavedRefTestSets(refSetsInfo)),
       test: this.groupByBranch(this.sortSavedRefTestSets(testSetsInfo)),
       comparison: this.sortCompareSets(comparisonSets),
+    };
+  }
+
+  @LogError()
+  public async getRefTestSavedSetMetadata(
+    type: SaveScreenshotType,
+    project: string,
+    branch: string,
+    setId: string,
+  ): Promise<StoryMetadataWithRenderStatus[]> {
+    const metadata = await SavedScreenshotMetadataHelper.read(type, project, branch, setId);
+    return metadata === null ? [] : metadata.storyMetadataList;
+  }
+
+  @LogError()
+  public async getComparisonSavedSetMetadata(
+    project: string,
+    setId: string,
+  ): Promise<GetComparisonSavedSetMetadataResponse> {
+    const metadata = await SavedComparisonMetadataHelper.read(project, setId);
+
+    if (metadata === null) return { data: null };
+
+    const refSetMetadata = await SavedScreenshotMetadataHelper.read(
+      "reference",
+      project,
+      metadata.refBranch,
+      metadata.refSetId,
+    );
+    const testSetMetadata = await SavedScreenshotMetadataHelper.read(
+      "test",
+      project,
+      metadata.testBranch,
+      metadata.testSetId,
+    );
+
+    if (refSetMetadata === null || testSetMetadata === null) return { data: null };
+
+    const map = new Map<string, StoryMetadataWithRenderStatus>();
+    for (const x of refSetMetadata.storyMetadataList) {
+      map.set(x.id, x);
+    }
+    for (const x of testSetMetadata.storyMetadataList) {
+      map.set(x.id, x);
+    }
+
+    const storyMetadataList = Array.from(map.values());
+
+    return {
+      data: {
+        metadata,
+        storyMetadataList,
+      },
     };
   }
 

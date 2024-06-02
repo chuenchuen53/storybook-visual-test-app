@@ -189,6 +189,25 @@ export interface GetAllSavedSetsResponse {
   comparison: ComparisonSavedInfo[];
 }
 
+export interface GetRefTestSavedSetMetadataRequest {
+  type: SaveScreenshotType;
+  project: string;
+  branch: string;
+  setId: string;
+}
+
+export interface GetComparisonSavedSetMetadataRequest {
+  project: string;
+  setId: string;
+}
+
+export interface GetComparisonSavedSetMetadataResponse {
+  data: {
+    metadata: SavedComparisonMetadata;
+    storyMetadataList: StoryMetadataWithRenderStatus[];
+  } | null;
+}
+
 export interface OpenTestRefSetInExplorerRequest {
   type: SaveScreenshotType;
   project: string;
