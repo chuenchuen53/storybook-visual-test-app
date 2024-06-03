@@ -109,7 +109,7 @@ module.exports = {
         project: "./tsconfig.json",
       },
       rules: {
-        "local-rules/catch-error-decorator": "warn",
+        "local-rules/catch-error-decorator": "error",
       },
     },
   ],

@@ -1,5 +1,5 @@
-import * as ts from "typescript";
-import { TSESTree, ESLintUtils } from "@typescript-eslint/utils";
+import ts from "typescript";
+import { ESLintUtils, TSESTree } from "@typescript-eslint/utils";
 import { containsAllTypesByName } from "@typescript-eslint/type-utils";
 import type { Rule } from "eslint";
 
@@ -9,28 +9,31 @@ const rule: Rule.RuleModule = {
   meta: {
     type: "suggestion",
     docs: {
-      description: "force explicit type 'T' for CatchError decorator if first param is not a function",
+      description: "force explicit type 'T' for CatchError decorator if not rethrow",
       category: "Best Practices",
       recommended: false,
     },
     schema: [],
   },
   create(context: Rule.RuleContext) {
-    const services = ESLintUtils.getParserServices(context as any);
-
     return {
       Decorator(x: Rule.Node): void {
+        const services = ESLintUtils.getParserServices(context as any);
+
         const node = x as unknown as TSESTree.Decorator;
         if (node.expression.type !== TSESTree.AST_NODE_TYPES.CallExpression) return;
         if (node.expression.callee.type !== TSESTree.AST_NODE_TYPES.Identifier) return;
 
         if (node.expression.callee.name === "CatchError") {
+          const secondArgument = node.expression.arguments[1];
+          // if is undefined or false
+          const sldCheck =
+            !secondArgument ||
+            (secondArgument.type === TSESTree.AST_NODE_TYPES.Literal && secondArgument.value === false);
+          if (!sldCheck) return;
+
           const firstArgument = node.expression.arguments[0];
           if (!firstArgument) return;
-          const isFirstArgumentFunction =
-            firstArgument.type === TSESTree.AST_NODE_TYPES.ArrowFunctionExpression ||
-            firstArgument.type === TSESTree.AST_NODE_TYPES.FunctionExpression;
-          if (isFirstArgumentFunction) return;
 
           // check if there is a type argument
           const typeArgument = node.expression.typeParameters?.params[0];
