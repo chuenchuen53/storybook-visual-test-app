@@ -13,12 +13,16 @@ export class DockerContainer {
   private static readonly COMMON_PREFIX = "visual-test-app";
   private static readonly portMap: Record<DockerContainerType, number> = {
     metadata: 6100,
-    screenshot: 6200,
+    screenshot: 6101,
   };
   private static readonly instances: Record<DockerContainerType, DockerContainer> = {
     metadata: new DockerContainer("metadata"),
     screenshot: new DockerContainer("screenshot"),
   };
+
+  private readonly containerName: string;
+  private readonly port: number;
+  private info: ContainerInfo | null = null;
 
   public static getInstance(containerType: DockerContainerType): DockerContainer {
     return DockerContainer.instances[containerType];
@@ -32,36 +36,31 @@ export class DockerContainer {
       .filter(x => x !== "");
     if (allContainerIds.length === 0) return;
     await execa("docker", ["stop", ...allContainerIds]);
-    DockerContainer.instances.metadata.containers = [];
-    DockerContainer.instances.screenshot.containers = [];
+    DockerContainer.instances.metadata.info = null;
+    DockerContainer.instances.screenshot.info = null;
   }
-
-  private readonly containerNamePrefix: string;
-  private readonly startPort: number;
-  private containers: ContainerInfo[] = [];
 
   private constructor(containerType: DockerContainerType) {
-    this.containerNamePrefix = `${DockerContainer.COMMON_PREFIX}-${containerType}`;
-    this.startPort = DockerContainer.portMap[containerType];
+    this.containerName = `${DockerContainer.COMMON_PREFIX}-${containerType}`;
+    this.port = DockerContainer.portMap[containerType];
   }
 
-  public getContainerInfo(): ContainerInfo[] {
+  public getContainerInfo(): ContainerInfo | null {
     // deep clone to prevent being modified
-    return this.containers.map(x => ({ ...x }));
+    return this.info ? { ...this.info } : null;
   }
 
   public async start() {
-    const containerName = `${this.containerNamePrefix}-${this.containers.length}`;
-    const port = this.startPort + this.containers.length;
-    const id = await this.startDockerContainer(containerName, port);
-    this.containers.push({ id, name: containerName, port });
+    if (this.info !== null) return;
+    const containerName = `${this.containerName}`;
+    const id = await this.startDockerContainer(containerName, this.port);
+    this.info = { id, name: containerName, port: this.port };
   }
 
   public async stop() {
-    if (this.containers.length === 0) return;
-    const allContainerIds = this.containers.map(x => x.id);
-    await execa("docker", ["stop", ...allContainerIds]);
-    this.containers = [];
+    if (this.info === null) return;
+    await execa("docker", ["stop", this.info.id]);
+    this.info = null;
   }
 
   /**

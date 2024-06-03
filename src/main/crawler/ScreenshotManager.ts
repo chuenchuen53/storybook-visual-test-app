@@ -6,7 +6,7 @@ import { GlobalChannel } from "../message-emitter/GlobalChannel";
 import type { StoryMetadata, StoryMetadataWithRenderStatus, Viewport } from "../../shared/type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
-export interface NamedBrowser {
+export interface ScreenshotWorker {
   browser: Browser;
   name: string;
 }
@@ -23,7 +23,7 @@ export class ScreenshotManager {
 
   public constructor(
     private readonly storybookUrl: string,
-    private readonly browsers: NamedBrowser[],
+    private readonly browsers: ScreenshotWorker[],
     private readonly storyMetadataList: StoryMetadata[],
     private readonly viewport: Viewport,
     private readonly onStoryStateChange: OnStoryStateChange,
@@ -60,7 +60,7 @@ export class ScreenshotManager {
     return `${storybookUrl}/iframe.html?args=&id=${storyId}`;
   }
 
-  private async screenshot(browser: NamedBrowser, jobIndex: number) {
+  private async screenshot(browser: ScreenshotWorker, jobIndex: number) {
     const story = this.storyMetadataList[jobIndex];
 
     this.onStoryStateChange(story.id, StoryState.CAPTURING, browser.name, null);

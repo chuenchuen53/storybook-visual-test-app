@@ -5,7 +5,7 @@ import { logger } from "../logger";
 import { Log } from "../decorator/Log";
 import { ScreenshotManager } from "./ScreenshotManager";
 import { getStorybookMetadata } from "./client-code";
-import type { NamedBrowser } from "./ScreenshotManager";
+import type { ScreenshotWorker } from "./ScreenshotManager";
 import type { Browser, Page } from "puppeteer-core";
 import type { StoryMetadata, StoryState, Viewport } from "../../shared/type";
 import type { Crawler } from "./Crawler";
@@ -33,7 +33,8 @@ export class CrawlerImpl implements Crawler {
 
     try {
       container = await this.startMetadataBrowser();
-      const containerInfo = container.getContainerInfo()[0];
+      const containerInfo = container.getContainerInfo();
+      if (!containerInfo) throw new Error("Container not available. Logic error in code");
 
       // wait for chrome in container to start
       await sleep(2000);
@@ -66,20 +67,20 @@ export class CrawlerImpl implements Crawler {
     onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
   ): Promise<ScreenshotStoriesResult> {
     let container: DockerContainer | undefined = undefined;
-    const browsers: NamedBrowser[] = [];
+    const workers: ScreenshotWorker[] = [];
 
     try {
-      container = await this.startScreenshotBrowser(concurrency);
+      container = await this.startScreenshotBrowser();
 
       // wait for chrome in container to start
       await sleep(2000);
 
-      await this.connectToBrowser(concurrency, container, browsers);
+      await this.connectToBrowser(concurrency, container, workers);
 
       onStartScreenshot();
       const storyScreenshotMetadataList = await this.screenshot(
         storybookUrl,
-        browsers,
+        workers,
         storyMetadataList,
         viewport,
         onStoryStateChange,
@@ -88,8 +89,8 @@ export class CrawlerImpl implements Crawler {
       return { storyScreenshotMetadataList };
     } finally {
       try {
-        if (browsers.length > 0) {
-          await Promise.all(browsers.map(browser => browser.browser.disconnect()));
+        if (workers.length > 0) {
+          await Promise.all(workers.map(browser => browser.browser.disconnect()));
         }
       } finally {
         if (container) await container.stop();
@@ -148,37 +149,31 @@ export class CrawlerImpl implements Crawler {
   }
 
   @Log()
-  private async startScreenshotBrowser(concurrency: number): Promise<DockerContainer> {
+  private async startScreenshotBrowser(): Promise<DockerContainer> {
     const container = DockerContainer.getInstance("screenshot");
-
-    for (let i = 0; i < concurrency; i++) {
-      await container.start();
-    }
-
+    await container.start();
     return container;
   }
 
   @Log()
-  private async connectToBrowser(concurrency: number, container: DockerContainer, browsers: NamedBrowser[]) {
+  private async connectToBrowser(concurrency: number, container: DockerContainer, workers: ScreenshotWorker[]) {
     const containerInfo = container.getContainerInfo();
-    await Promise.all(
-      Array.from({ length: concurrency }, async (_, i) => {
-        const browser = await puppeteer.connect({
-          browserURL: `http://localhost:${containerInfo[i].port}`,
-        });
-
-        browsers[i] = {
-          browser,
-          name: `browser-${i}`,
-        };
-      }),
-    );
+    if (!containerInfo) throw new Error("Container not available. Logic error in code");
+    const browser = await puppeteer.connect({
+      browserURL: `http://localhost:${containerInfo.port}`,
+    });
+    for (let i = 0; i < concurrency; i++) {
+      workers.push({
+        browser,
+        name: `worker-${i}`,
+      });
+    }
   }
 
   @Log()
   private async screenshot(
     storybookUrl: string,
-    browsers: NamedBrowser[],
+    browsers: ScreenshotWorker[],
     storyMetadataList: StoryMetadata[],
     viewport: Viewport,
     onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
