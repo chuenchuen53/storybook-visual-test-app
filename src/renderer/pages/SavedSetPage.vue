@@ -140,7 +140,7 @@ import LeftRightSplitContainer from "../components/LeftRightSplitContainer.vue";
 import SavedSetsDataTables from "../components/saved-set/SavedSetsDataTables.vue";
 import { useSavedSetStore } from "../stores/SavedSetStore";
 import StyledImg from "../components/general/image/StyledImg.vue";
-import ComparisonResultExplorer from "../components/comparison/comparison-result-explorer/ComparisonResultExplorer.vue";
+import ComparisonResultExplorer from "../components/shared/comparison-result-explorer/ComparisonResultExplorer.vue";
 import IconButton from "../components/general/IconButton.vue";
 import ComparisonImages from "../components/comparison/ComparisonImages.vue";
 

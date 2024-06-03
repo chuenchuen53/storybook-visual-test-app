@@ -1,6 +1,6 @@
 <template>
   <ScrollPanel v-if="filteredSavedSets" class="scroll-panel-height">
-    <div class="px-6">
+    <div class="max-w-screen-2xl px-6">
       <section id="saved-page-comparison-table-section" class="mb-8">
         <div class="py-4 text-lg font-semibold">Comparison</div>
         <ComparisonSavedSet

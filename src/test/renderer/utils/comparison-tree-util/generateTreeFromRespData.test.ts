@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { generateTreeFromRespData } from "@renderer/components/comparison/comparison-result-explorer/helper";
-import type { ComparisonResultTreeLeaf } from "@renderer/components/comparison/comparison-result-explorer/helper";
+import { generateResultTreeFromList } from "../../../../renderer/components/shared/comparison-result-explorer/helper";
+import type { ComparisonResultTreeLeaf } from "../../../../renderer/components/shared/comparison-result-explorer/helper";
 
 describe("generateTreeFromRespData", () => {
   // Function handles empty result arrays for same, added, removed, and diff without errors
   it("should handle empty result arrays without errors", () => {
     const data: ComparisonResultTreeLeaf[] = [];
 
-    expect(generateTreeFromRespData(data)).toEqual({});
+    expect(generateResultTreeFromList(data)).toEqual({});
   });
 
   // Function processes a CompareResponse with multiple entries in each result type correctly
@@ -79,7 +79,7 @@ describe("generateTreeFromRespData", () => {
       return { id, title, name, testData, type, storyErr: false, tags: [] };
     });
 
-    expect(generateTreeFromRespData(flatData)).toEqual({
+    expect(generateResultTreeFromList(flatData)).toEqual({
       comp1: {
         view1: {
           id: "comp1--view1",

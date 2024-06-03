@@ -1,8 +1,8 @@
 import { computed, ref } from "vue";
 import {
-  generateTreeFromRespData,
+  generateResultTreeFromList,
   getCompareResultTreeData,
-} from "../components/comparison/comparison-result-explorer/helper";
+} from "../components/shared/comparison-result-explorer/helper";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import { filterNonNull } from "../utils";
 import type { ComputedRef, Ref } from "vue";
@@ -61,7 +61,7 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     });
     const nunNullDataOfType = filterNonNull(dataOfType);
 
-    return getCompareResultTreeData(generateTreeFromRespData(nunNullDataOfType));
+    return getCompareResultTreeData(generateResultTreeFromList(nunNullDataOfType));
   });
 
   const typeOptions = computed<TypeOptions>(() => {

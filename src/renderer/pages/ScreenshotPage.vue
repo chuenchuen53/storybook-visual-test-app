@@ -28,12 +28,13 @@
                 >Settings & Progress
               </AccordionHeader>
               <AccordionContent :pt="{ content: { style: { padding: '24px' } } }">
-                <Steps :active-step="activeStep" :model="items" class="mb-6"></Steps>
-                <ScreenshotSetting />
+                <div class="flex flex-wrap justify-evenly gap-8">
+                  <ScreenshotSetting />
+                  <ProgressIndicator class="w-[400px]" />
+                </div>
               </AccordionContent>
             </AccordionPanel>
           </Accordion>
-
           <div class="w-full p-6">
             <ScreenshotImg />
           </div>
@@ -61,21 +62,11 @@ import SaveDialog from "../components/screenshot/SaveDialog.vue";
 import ScreenshotImg from "../components/screenshot/ScreenshotImg.vue";
 import StoryDisplayInExplorer from "../components/screenshot/StoryDisplayInExplorer.vue";
 import { ScreenshotState } from "../../shared/type";
+import ProgressIndicator from "../components/screenshot/ProgressIndicator.vue";
 
 const store = useScreenshotStore();
-const { activeStep, saveDialogOpen, treeData, expandedKeys, highlightKey, storyTypeFilter, state, searchText } =
-  storeToRefs(store);
+const { saveDialogOpen, treeData, expandedKeys, highlightKey, storyTypeFilter, state, searchText } = storeToRefs(store);
 const { handleSelectStory, openInExplorer, expandAll, collapseAll } = store;
-
-const items = [
-  { label: "Idle" },
-  { label: "Checking" },
-  { label: "Preparing" },
-  { label: "Metadata" },
-  { label: "Preparing" },
-  { label: "Screenshot" },
-  { label: "Finished" },
-];
 </script>
 
 <style scoped>

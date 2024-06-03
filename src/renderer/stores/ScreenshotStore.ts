@@ -17,28 +17,8 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const _toast = useToast();
 
   const state = ref<ScreenshotState>(ScreenshotState.IDLE);
-  const activeStep = computed<number>(() => {
-    switch (state.value) {
-      case ScreenshotState.IDLE:
-        return 0;
-      case ScreenshotState.CHECKING_SERVICE:
-        return 1;
-      case ScreenshotState.PREPARING_METADATA_BROWSER:
-        return 2;
-      case ScreenshotState.COMPUTING_METADATA:
-        return 3;
-      case ScreenshotState.PREPARING_SCREENSHOT_BROWSER:
-        return 4;
-      case ScreenshotState.CAPTURING_SCREENSHOT:
-        return 5;
-      case ScreenshotState.FINISHED:
-        return 6;
-      case ScreenshotState.FAILED:
-        return 0;
-      default:
-        return 0;
-    }
-  });
+  const stateTimeStamp = ref(new Map<ScreenshotState, Date>());
+  const finishedStoriesCount = ref(0);
   const isProcessing = computed<boolean>(() => {
     return (
       state.value !== ScreenshotState.IDLE &&
@@ -58,10 +38,14 @@ export const useScreenshotStore = defineStore("screenshot", () => {
 
   const startScreenshot = async () => {
     if (isProcessing.value) return;
+    stateTimeStamp.value.clear();
     state.value = ScreenshotState.CHECKING_SERVICE;
+    stateTimeStamp.value.set(ScreenshotState.CHECKING_SERVICE, new Date());
+    finishedStoriesCount.value = 0;
     const req: CreateNewScreenshotSetRequest = {
       storybookUrl: storybookUrl.value,
       viewport: {
+        // do not assign viewport.value directly
         // drop reactive to allow object clone
         width: viewport.value.width,
         height: viewport.value.height,
@@ -78,6 +62,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     highlightKey,
     expandedKeys,
     treeData,
+    totalStoriesCount,
     replaceBackingData,
     getDataById,
     updateItem,
@@ -145,6 +130,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
 
   window.screenshotApi.listen.onUpdateStatus(status => {
     state.value = status;
+    stateTimeStamp.value.set(status, new Date());
   });
 
   window.screenshotApi.listen.onNewMetadata(storyMetadataList => {
@@ -182,6 +168,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
           storyErr,
           endTime: new Date().toISOString(),
         });
+        finishedStoriesCount.value += 1;
         if (storyId === selectedStory.value?.id) {
           await updateImg(() => window.imgApi.invoke.getTempScreenshotImg(storyId));
         }
@@ -191,11 +178,11 @@ export const useScreenshotStore = defineStore("screenshot", () => {
 
   return {
     state,
+    stateTimeStamp,
     storybookUrl,
     viewport,
     concurrency,
     isProcessing,
-    activeStep,
     treeData,
     expandedKeys,
     highlightKey,
@@ -206,6 +193,8 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     isSaving,
     saveDialogOpen,
     selectedStory,
+    totalStoriesCount,
+    finishedStoriesCount,
     handleSelectStory,
     getDefaultStorybookUrl,
     startScreenshot,

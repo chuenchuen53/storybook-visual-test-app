@@ -3,7 +3,7 @@ import { ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
 import { useComparisonImage } from "../composables/useComparisonImage";
-import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
+import type { ComparisonResultTreeLeaf } from "../components/shared/comparison-result-explorer/helper";
 import type { CreateNewComparisonSetRequest, GetAllSavedScreenshotSetsResponse } from "../../shared/type";
 
 export interface CompareSet {

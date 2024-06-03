@@ -60,7 +60,7 @@ import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import ScrollPanel from "primevue/scrollpanel";
 import IconButton from "../components/general/IconButton.vue";
-import ComparisonResultExplorer from "../components/comparison/comparison-result-explorer/ComparisonResultExplorer.vue";
+import ComparisonResultExplorer from "../components/shared/comparison-result-explorer/ComparisonResultExplorer.vue";
 import ComparisonResultSummaryTable from "../components/comparison/ComparisonResultSummaryTable.vue";
 import ComparisonSetting from "../components/comparison/ComparisonSetting.vue";
 import ComparisonResultHeader from "../components/comparison/ComparisonResultHeader.vue";

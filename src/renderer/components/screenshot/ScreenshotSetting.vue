@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto flex w-fit flex-col gap-4">
+  <div class="flex w-fit flex-col gap-4">
     <div class="grid grid-cols-[120px_350px] gap-4">
       <label for="storybook-url-input" class="self-center justify-self-end font-bold">Storybook url:</label>
       <InputText

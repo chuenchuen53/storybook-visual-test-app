@@ -14,6 +14,7 @@ export interface BaseStoryMetadata extends StoryMetadata {
 
 interface UseStoryExplorerReturn<T extends BaseStoryMetadata> {
   treeData: ComputedRef<NodeData[]>;
+  totalStoriesCount: ComputedRef<number>;
   searchText: Ref<string>;
   storyTypeFilter: Ref<StoryTypeFilter>;
   highlightKey: Ref<string | null>;
@@ -31,6 +32,7 @@ export function useStoryExplorer<T extends BaseStoryMetadata>(): UseStoryExplore
 
   // a map of id to index of _metadata for faster search
   const _idToIndexMap = new Map<string, number>();
+  const totalStoriesCount = computed(() => _backingData.value?.length ?? 0);
 
   const searchText = ref<string>("");
   const storyTypeFilter = ref<StoryTypeFilter>("all");
@@ -97,6 +99,7 @@ export function useStoryExplorer<T extends BaseStoryMetadata>(): UseStoryExplore
     highlightKey,
     expandedKeys,
     treeData,
+    totalStoriesCount,
     reset,
     replaceBackingData,
     getDataById,

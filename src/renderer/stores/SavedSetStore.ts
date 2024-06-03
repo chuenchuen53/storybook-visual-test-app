@@ -5,7 +5,7 @@ import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
 import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
 import { useComparisonImage } from "../composables/useComparisonImage";
-import type { ComparisonResultTreeLeaf } from "../components/comparison/comparison-result-explorer/helper";
+import type { ComparisonResultTreeLeaf } from "../components/shared/comparison-result-explorer/helper";
 import type {
   SavedComparisonInfo,
   DeleteComparisonSetRequest,
