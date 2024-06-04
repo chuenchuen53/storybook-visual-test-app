@@ -152,8 +152,8 @@ export class ScreenshotServiceImpl implements ScreenshotService {
       viewport,
       concurrency,
       () => ScreenshotChannel.updateStatus(ScreenshotState.CAPTURING_SCREENSHOT),
-      (storyId, state, browserName, storyErr) =>
-        ScreenshotChannel.updateStoryState({ storyId, state, browserName, storyErr }),
+      (storyId, state, workerName, storyErr) =>
+        ScreenshotChannel.updateStoryState({ storyId, state, workerName, storyErr }),
     );
 
     return result.storyScreenshotMetadataList;

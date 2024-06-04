@@ -27,11 +27,9 @@ defineProps<{
 }>();
 </script>
 
-<script setup lang="ts"></script>
-
 <style scoped lang="scss">
 th {
-  background: var(--p-surface-900);
+  background: var(--p-content-background);
   color: var(--p-panel-header-color);
   font-weight: bold;
 }

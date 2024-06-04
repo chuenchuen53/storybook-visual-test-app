@@ -28,7 +28,10 @@ export interface GetSavedComparisonImgRequest extends SavedComparisonSetLocation
   id: string;
 }
 
+export type AppTheme = "light" | "dark";
+
 export interface UserSetting {
+  appTheme?: AppTheme;
   projectsInTab?: string[];
 }
 
@@ -81,7 +84,7 @@ export interface TempScreenshotMetadata {
 export interface StoryUpdateEventData {
   storyId: string;
   state: StoryState;
-  browserName: string;
+  workerName: string; // currently no used, for debugging purpose
   storyErr: boolean | null;
 }
 
@@ -141,6 +144,11 @@ export interface CreateNewComparisonSetResponse {
 
 export interface SavedComparisonMetadata extends TempComparisonMetadata {
   name: string;
+}
+
+export interface SaveComparisonResponse {
+  success: boolean;
+  errMsg?: string;
 }
 
 export interface SavedScreenshotSetInfo {

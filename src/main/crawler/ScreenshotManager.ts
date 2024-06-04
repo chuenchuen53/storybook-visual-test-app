@@ -23,25 +23,26 @@ export class ScreenshotManager {
 
   public constructor(
     private readonly storybookUrl: string,
-    private readonly browsers: ScreenshotWorker[],
+    private readonly workers: ScreenshotWorker[],
     private readonly storyMetadataList: StoryMetadata[],
     private readonly viewport: Viewport,
     private readonly onStoryStateChange: OnStoryStateChange,
   ) {}
 
   public async startScreenshot(): Promise<StoryMetadataWithRenderStatus[]> {
-    let nextJobIndex = this.browsers.length;
+    let nextJobIndex = this.workers.length;
 
     await Promise.all(
-      this.browsers.map((browser, index) => {
+      this.workers.map((worker, index) => {
         return new Promise<void>((resolve, reject) => {
           (async () => {
             try {
+              // in case of num of workers is more than the num of stories, the worker not need to do anything
               if (!(index + 1 > this.storyMetadataList.length)) {
-                await this.screenshot(browser, index);
+                await this.captureScreenshot(worker, index);
                 while (nextJobIndex < this.storyMetadataList.length) {
                   const jobIndex = nextJobIndex++;
-                  await this.screenshot(browser, jobIndex);
+                  await this.captureScreenshot(worker, jobIndex);
                 }
               }
               resolve();
@@ -60,12 +61,13 @@ export class ScreenshotManager {
     return `${storybookUrl}/iframe.html?args=&id=${storyId}`;
   }
 
-  private async screenshot(browser: ScreenshotWorker, jobIndex: number) {
+  private async captureScreenshot(worker: ScreenshotWorker, jobIndex: number) {
     const story = this.storyMetadataList[jobIndex];
 
-    this.onStoryStateChange(story.id, StoryState.CAPTURING, browser.name, null);
+    this.onStoryStateChange(story.id, StoryState.CAPTURING, worker.name, null);
 
-    const page = await browser.browser.newPage();
+    const page = await worker.browser.newPage();
+    // todo: handle pre defined viewport in story
     await page.setViewport(this.viewport);
     await page.goto(this.storyUrl(this.storybookUrl, story.id), {
       timeout: 30000,
@@ -139,6 +141,6 @@ export class ScreenshotManager {
       storyErr,
     };
 
-    this.onStoryStateChange(story.id, StoryState.FINISHED, browser.name, storyErr);
+    this.onStoryStateChange(story.id, StoryState.FINISHED, worker.name, storyErr);
   }
 }

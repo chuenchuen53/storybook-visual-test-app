@@ -5,24 +5,18 @@ export function useDelayLoading(sourceRef: Ref<boolean>, delay = 500): Ref<boole
   let timeId: number | null = null;
   const delayRef = ref(sourceRef.value);
 
-  watch(
-    sourceRef,
-    () => {
-      if (!sourceRef.value) {
-        if (timeId) clearTimeout(timeId);
+  watch(sourceRef, () => {
+    if (!sourceRef.value) {
+      if (timeId) clearTimeout(timeId);
+      delayRef.value = sourceRef.value;
+    } else {
+      if (timeId) clearTimeout(timeId);
+      timeId = window.setTimeout(() => {
         delayRef.value = sourceRef.value;
-      } else {
-        if (timeId) clearTimeout(timeId);
-        timeId = window.setTimeout(() => {
-          delayRef.value = sourceRef.value;
-          timeId = null;
-        }, delay);
-      }
-    },
-    {
-      immediate: true,
-    },
-  );
+        timeId = null;
+      }, delay);
+    }
+  });
 
   return delayRef;
 }

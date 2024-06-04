@@ -1,4 +1,5 @@
 import path from "path";
+import process from "node:process";
 import { app, BrowserWindow } from "electron";
 import { registerUserSettingHandlers } from "./main/ipc-handlers/user-setting-handlers";
 import { UserSettingServiceImpl } from "./main/service/UserSettingServiceImpl";
@@ -14,11 +15,14 @@ import { registerSavedSetHandlers } from "./main/ipc-handlers/saved-set-handler"
 import { DockerContainer } from "./main/docker-helper/DockerContainer";
 import { SavedSetServiceImpl } from "./main/service/SavedSetServiceImpl";
 import { isDockerAvailable } from "./main/docker-helper/is-docker-available";
+import fixPath from "./main/fix-path";
 import type { SavedSetService } from "./main/service/SavedSetService";
 import type { UserSettingService } from "./main/service/UserSettingService";
 import type { ComparisonService } from "./main/service/ComparisonService";
 import type { ScreenshotService } from "./main/service/ScreenshotService";
 import type { ImgService } from "./main/service/ImgService";
+
+fixPath();
 
 logger.info("app start");
 
@@ -63,6 +67,12 @@ const createWindow = () => {
 };
 
 app.on("ready", () => {
+  if (MainWindow.getMainWindow() !== null) {
+    logger.info("MainWindow has already been registered");
+    MainWindow.getMainWindow()?.focus();
+    return;
+  }
+
   registerImgHandlers(imgService);
   registerUserSettingHandlers(userSettingService);
   registerScreenshotHandlers(screenshotService);

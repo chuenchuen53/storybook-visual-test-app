@@ -6,10 +6,10 @@
       :pt="{ eventOpposite: { style: { width: '100px', flex: 'none' } }, event: { style: { minHeight: '40px' } } }"
     >
       <template #opposite="slotProps">
-        <small class="text-surface-500 dark:text-surface-400">{{ slotProps.item.date }}</small>
+        <small class="text-surface-500 dark:text-surface-400">{{ displayDate(slotProps.item) }}</small>
       </template>
       <template #content="slotProps">
-        {{ slotProps.item.status }}
+        {{ displayStatus(slotProps.item) }}
       </template>
     </Timeline>
   </div>
@@ -22,6 +22,11 @@ import { computed } from "vue";
 import { storeToRefs } from "pinia";
 import { ScreenshotState } from "../../../shared/type";
 import { useScreenshotStore } from "../../stores/ScreenshotStore";
+
+interface Item {
+  date: string;
+  status: string;
+}
 
 const store = useScreenshotStore();
 const { state, stateTimeStamp, totalStoriesCount, finishedStoriesCount } = storeToRefs(store);
@@ -88,12 +93,15 @@ function timeDisplay(x: ScreenshotState) {
   return dayjs(t).format("HH:mm:ss");
 }
 
-function item(x: ScreenshotState) {
+function item(x: ScreenshotState): Item {
   return {
     date: timeDisplay(x),
     status: getStateDescription(x),
   };
 }
+
+const displayDate = (x: Item) => x.date;
+const displayStatus = (x: Item) => x.status;
 </script>
 
 <style scoped></style>

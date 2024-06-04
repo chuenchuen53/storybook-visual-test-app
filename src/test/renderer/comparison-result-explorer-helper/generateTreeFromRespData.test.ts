@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { generateResultTreeFromList } from "../../../../renderer/components/shared/comparison-result-explorer/helper";
-import type { ComparisonResultTreeLeaf } from "../../../../renderer/components/shared/comparison-result-explorer/helper";
+import { generateResultTreeFromList } from "@renderer/components/shared/comparison-result-explorer/helper";
+import type { ComparisonResultTreeLeaf } from "@renderer/components/shared/comparison-result-explorer/helper";
 
-describe("generateTreeFromRespData", () => {
+describe("generateResultTreeFromList", () => {
   // Function handles empty result arrays for same, added, removed, and diff without errors
   it("should handle empty result arrays without errors", () => {
     const data: ComparisonResultTreeLeaf[] = [];

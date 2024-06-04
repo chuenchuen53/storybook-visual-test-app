@@ -117,7 +117,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
           detail: "Fail to saved the screenshot",
           life: 5000,
         });
-        console.log(result.errMsg);
+        console.error(result.errMsg);
       }
     } finally {
       isSaving.value = false;
@@ -141,7 +141,7 @@ export const useScreenshotStore = defineStore("screenshot", () => {
         name: x.name,
         tags: x.tags,
         state: StoryState.WAITING,
-        browserName: null,
+        workerName: null,
         startTime: null,
         endTime: null,
         storyErr: null,
@@ -151,20 +151,20 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     removeImg();
   });
 
-  window.screenshotApi.listen.onUpdateStoryState(async ({ storyId, state, browserName, storyErr }) => {
+  window.screenshotApi.listen.onUpdateStoryState(async ({ storyId, state, workerName, storyErr }) => {
     const story = getDataById(storyId);
     if (story) {
       if (state === StoryState.CAPTURING) {
         updateItem(storyId, {
           state,
-          browserName,
+          workerName,
           storyErr,
           startTime: new Date().toISOString(),
         });
       } else if (state === StoryState.FINISHED) {
         updateItem(storyId, {
           state,
-          browserName,
+          workerName,
           storyErr,
           endTime: new Date().toISOString(),
         });

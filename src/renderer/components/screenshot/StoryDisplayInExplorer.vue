@@ -15,13 +15,19 @@
 
 <script setup lang="ts">
 import { StoryState } from "../../../shared/type";
-import { timeSpent } from "../../utils";
 import type { StoryMetadataInScreenshotPageExplorer } from "../shared/story-explorer/helper";
 
 defineProps<{
   label: string;
   data: StoryMetadataInScreenshotPageExplorer;
 }>();
+
+function timeSpent(start: string, end: string): string {
+  const startTime = new Date(start);
+  const endTime = new Date(end);
+  const diff = endTime.getTime() - startTime.getTime();
+  return diff.toString();
+}
 
 function iconCls(state: StoryState): string {
   switch (state) {

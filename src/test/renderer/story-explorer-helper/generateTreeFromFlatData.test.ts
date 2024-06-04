@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { generateTreeFromList } from "../../../../renderer/components/shared/story-explorer/helper";
-import type { ScreenshotPageStoryTree, TreeObj } from "../../../../renderer/components/shared/story-explorer/helper";
+import { generateTreeFromList } from "@renderer/components/shared/story-explorer/helper";
+import type { ScreenshotPageStoryTree, TreeObj } from "@renderer/components/shared/story-explorer/helper";
 import type { StoryMetadata } from "@shared/type";
 
 interface TreeData {
@@ -9,7 +9,7 @@ interface TreeData {
   name: string;
 }
 
-describe("generateTreeFromFlatData", () => {
+describe("generateTreeFromList", () => {
   it("should return an empty object when given an empty array", () => {
     const metadataArr: StoryMetadata[] = [];
     const expectedResult: ScreenshotPageStoryTree = {};

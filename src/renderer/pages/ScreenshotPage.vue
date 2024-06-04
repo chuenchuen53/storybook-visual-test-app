@@ -48,7 +48,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import Steps from "primevue/steps";
 import ScrollPanel from "primevue/scrollpanel";
 import Accordion from "primevue/accordion";
 import AccordionPanel from "primevue/accordionpanel";

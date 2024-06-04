@@ -40,9 +40,11 @@ const showLeftThreshold = 200;
 const [leftInitWidthRatio, rightInitWidthRatio] = getLeftRightRatio(props.initLeftWidth);
 
 const showLeft = ref(true);
-const leftRef = ref(null);
-const rightRef = ref(null);
-const leftDivSnapshotWidth = ref(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const leftRef = ref<any>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const rightRef = ref<any>(null);
+const leftDivSnapshotWidth = ref<number | null>(null);
 
 onMounted(() => {
   leftDivSnapshotWidth.value = leftRef.value.$el.clientWidth;
@@ -54,6 +56,7 @@ onUnmounted(() => {
 });
 
 function handleWindowResize() {
+  if (leftDivSnapshotWidth.value === null) return;
   const [leftWidthRatio, rightWidthRatio] = getLeftRightRatio(leftDivSnapshotWidth.value);
   leftRef.value.$el.style.flexBasis = `calc(${leftWidthRatio}% - 2px)`;
   rightRef.value.$el.style.flexBasis = `calc(${rightWidthRatio}% - 2px)`;

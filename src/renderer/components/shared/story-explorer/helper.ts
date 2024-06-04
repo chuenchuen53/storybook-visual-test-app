@@ -10,7 +10,7 @@ interface StoryData {
 
 export interface StoryMetadataInScreenshotPageExplorer extends StoryMetadata {
   state: StoryState;
-  browserName: string | null;
+  workerName: string | null;
   startTime: string | null;
   endTime: string | null;
   storyErr: boolean | null;
@@ -55,6 +55,6 @@ function isLeafNode<T extends BaseStoryMetadata>(node: T | TreeObj<T>): node is 
   return requiredLeafKeys.every(key => keys.includes(key));
 }
 
-export function getScreenshotPageTreeData(treeObj: TreeObj<BaseStoryMetadata>): NodeData[] {
+export function getStoryExplorerTreeData(treeObj: TreeObj<BaseStoryMetadata>): NodeData[] {
   return treeNodesForUi(treeObj, isLeafNode);
 }

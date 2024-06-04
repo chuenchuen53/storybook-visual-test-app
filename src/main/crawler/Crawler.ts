@@ -10,6 +10,6 @@ export interface Crawler {
     viewport: Viewport,
     concurrency: number,
     onStartScreenshot: () => void,
-    onStoryStateChange: (storyId: string, state: StoryState, browserName: string, storyErr: boolean | null) => void,
+    onStoryStateChange: (storyId: string, state: StoryState, workerName: string, storyErr: boolean | null) => void,
   ): Promise<ScreenshotStoriesResult>;
 }

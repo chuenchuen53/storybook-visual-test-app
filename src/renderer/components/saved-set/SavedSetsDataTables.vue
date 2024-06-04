@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import ScrollPanel from "primevue/scrollpanel";
 import { useSavedSetStore } from "../../stores/SavedSetStore";
 import { treeNodesForUi } from "../general/tree/tree-helper";
@@ -37,14 +37,8 @@ import type { SavedComparisonInfo, SavedScreenshotSetInfo } from "../../../share
 
 const store = useSavedSetStore();
 const { filteredSavedSets } = storeToRefs(store);
-const {
-  getAllSavedSets,
-  openScreenshotSet,
-  openComparisonSet,
-  deleteScreenshotSet,
-  deleteComparisonSet,
-  deleteScreenshotBranch,
-} = store;
+const { openScreenshotSet, openComparisonSet, deleteScreenshotSet, deleteComparisonSet, deleteScreenshotBranch } =
+  store;
 
 const isLeaf: LeafNodePredicate<SavedScreenshotSetInfo> = (
   x: SavedScreenshotSetInfo | TreeObj<SavedScreenshotSetInfo>,
@@ -78,10 +72,6 @@ function handleComparisonDeleteClick(data: SavedComparisonInfo) {
 function handleDelScreenshotBranch(branch: string) {
   deleteScreenshotBranch(branch);
 }
-
-onMounted(() => {
-  getAllSavedSets();
-});
 </script>
 
 <style lang="scss" scoped>

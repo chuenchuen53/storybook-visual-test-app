@@ -35,22 +35,27 @@ export class SavedSetServiceImpl implements SavedSetService {
   @LogError()
   public async getAllSavedScreenshotSets(project: string): Promise<GetAllSavedScreenshotSetsResponse> {
     const allBranches = await this.getAllScreenshotBranches(project);
-    const info = await Promise.all(allBranches.map(branch => this.getAllScreenshotSetsFromBranch(project, branch)));
-    const flatInfo = info.flat();
+    const entries = await Promise.all(
+      allBranches.map(async branch => {
+        const sets = await this.getAllScreenshotSetsFromBranch(project, branch);
+        const sortedSets = this.sortScreenshotSets(sets);
+        return [branch, sortedSets];
+      }),
+    );
+    const groupedSets = Object.fromEntries(entries);
 
-    return {
-      screenshot: this.groupByBranch(this.sortScreenshotSets(flatInfo)),
-    };
+    return { screenshot: groupedSets };
   }
 
-  @LogError()
   public async getAllSavedSets(project: string): Promise<GetAllSavedSetsResponse> {
-    const { screenshot } = await this.getAllSavedScreenshotSets(project);
-    const comparison = this.sortCompareSets(await this.getSavedComparisonSets(project));
+    const [screenshotData, comparison] = await Promise.all([
+      this.getAllSavedScreenshotSets(project),
+      this.getSavedComparisonSets(project),
+    ]);
 
     return {
-      screenshot,
-      comparison,
+      screenshot: screenshotData.screenshot,
+      comparison: this.sortCompareSets(comparison),
     };
   }
 
@@ -70,8 +75,10 @@ export class SavedSetServiceImpl implements SavedSetService {
 
     if (metadata === null) return { data: null };
 
-    const refSetMetadata = await SavedScreenshotMetadataHelper.read(project, metadata.refBranch, metadata.refSetId);
-    const testSetMetadata = await SavedScreenshotMetadataHelper.read(project, metadata.testBranch, metadata.testSetId);
+    const [refSetMetadata, testSetMetadata] = await Promise.all([
+      SavedScreenshotMetadataHelper.read(project, metadata.refBranch, metadata.refSetId),
+      SavedScreenshotMetadataHelper.read(project, metadata.testBranch, metadata.testSetId),
+    ]);
 
     if (refSetMetadata === null || testSetMetadata === null) return { data: null };
 
@@ -199,28 +206,14 @@ export class SavedSetServiceImpl implements SavedSetService {
   }
 
   private sortScreenshotSets(savedSets: SavedScreenshotSetInfo[]): SavedScreenshotSetInfo[] {
-    return savedSets.sort((a, b) => {
-      if (a.branch !== b.branch) {
-        return a.branch.localeCompare(b.branch);
-      }
+    return savedSets.slice().sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // desc
     });
   }
 
   private sortCompareSets(savedSets: SavedComparisonInfo[]): SavedComparisonInfo[] {
-    return savedSets.sort((a, b) => {
+    return savedSets.slice().sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // desc
     });
-  }
-
-  private groupByBranch(savedSets: SavedScreenshotSetInfo[]): Record<string, Record<string, SavedScreenshotSetInfo>> {
-    const branchGroup: Record<string, Record<string, SavedScreenshotSetInfo>> = {};
-    for (const set of savedSets) {
-      if (!branchGroup[set.branch]) {
-        branchGroup[set.branch] = {};
-      }
-      branchGroup[set.branch][set.id] = set;
-    }
-    return branchGroup;
   }
 }

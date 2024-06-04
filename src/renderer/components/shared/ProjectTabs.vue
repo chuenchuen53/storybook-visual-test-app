@@ -30,7 +30,7 @@
     <TransitionFade>
       <div
         v-if="pickerOpened"
-        class="absolute inset-x-0 top-full z-[2] h-screen bg-neutral-300/20 bg-red-400 backdrop-blur-lg dark:bg-neutral-900/20"
+        class="absolute inset-x-0 top-full z-[2] h-screen bg-neutral-300/20 backdrop-blur-lg dark:bg-neutral-900/20"
       ></div>
     </TransitionFade>
     <TransitionCollapse>

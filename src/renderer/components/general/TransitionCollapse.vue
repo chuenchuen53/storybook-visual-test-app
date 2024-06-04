@@ -13,17 +13,20 @@
 </template>
 
 <script setup lang="ts">
-function beforeEnter(element: HTMLElement) {
+function beforeEnter(x: Element) {
+  const element = x as HTMLElement;
   requestAnimationFrame(() => {
     if (!element.style.height) {
       element.style.height = "0px";
     }
 
+    // @ts-ignore
     element.style.display = null;
   });
 }
 
-function enter(element: HTMLElement) {
+function enter(x: Element) {
+  const element = x as HTMLElement;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       element.style.height = `${element.scrollHeight}px`;
@@ -31,11 +34,14 @@ function enter(element: HTMLElement) {
   });
 }
 
-function afterEnter(element: HTMLElement) {
+function afterEnter(x: Element) {
+  const element = x as HTMLElement;
+  // @ts-ignore
   element.style.height = null;
 }
 
-function beforeLeave(element: HTMLElement) {
+function beforeLeave(x: Element) {
+  const element = x as HTMLElement;
   requestAnimationFrame(() => {
     if (!element.style.height) {
       element.style.height = `${element.offsetHeight}px`;
@@ -43,7 +49,8 @@ function beforeLeave(element: HTMLElement) {
   });
 }
 
-function leave(element: HTMLElement) {
+function leave(x: Element) {
+  const element = x as HTMLElement;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       element.style.height = "0px";
@@ -51,7 +58,9 @@ function leave(element: HTMLElement) {
   });
 }
 
-function afterLeave(element: HTMLElement) {
+function afterLeave(x: Element) {
+  const element = x as HTMLElement;
+  // @ts-ignore
   element.style.height = null;
 }
 </script>

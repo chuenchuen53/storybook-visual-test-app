@@ -20,17 +20,17 @@
           <div v-else>{{ node.label }}</div>
         </template>
       </Column>
-      <Column field="createdAt" header="Created At">
+      <Column header="Created At">
         <template #body="{ node }">
           <div>{{ createdAtDisplay(node.data) }}</div>
         </template>
       </Column>
-      <Column field="viewport" header="Viewport">
+      <Column header="Viewport">
         <template #body="{ node }">
           <span>{{ viewportDisplay(node.data) }}</span>
         </template>
       </Column>
-      <Column field="stories" header="Stories">
+      <Column header="Stories">
         <template #body="{ node }">
           <span>{{ storyNumberDisplay(node.data) }}</span>
           <span v-if="errStoryNumberDisplay(node.data)" class="text-xs text-[var(--p-button-text-danger-color)]"
@@ -43,7 +43,7 @@
           <div>{{ fileSizeDisplay(node.data) }}</div>
         </template>
       </Column>
-      <Column field="actions" header="Actions">
+      <Column header="Actions">
         <template #body="{ node }">
           <div v-if="node.data" class="flex h-[21px] items-center space-x-2">
             <IconButton
@@ -211,6 +211,15 @@ const confirmDelBranch = (event: Event, branch: string) => {
   background: var(--p-content-background);
   padding: 8px 12px 16px;
   border-radius: 10px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--p-surface-200);
+}
+
+.dark {
+  .ref-test-data-table-container {
+    border-color: transparent;
+  }
 }
 
 .ref-test-data-table {

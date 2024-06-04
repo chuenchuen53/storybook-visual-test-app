@@ -2,8 +2,18 @@
   <div class="relative flex h-full flex-col bg-[--p-content-background]">
     <div class="flex justify-between gap-2 px-2 py-1">
       <div class="flex gap-[2px]">
-        <IconButton v-tooltip.right="'Open in explorer'" icon="pi pi-folder-open" @click="openInExplorer" />
-        <IconButton v-if="showSave" v-tooltip.bottom="'Save'" icon="pi pi-save" @click="openSaveDialog" />
+        <Tooltip>
+          <template #trigger>
+            <IconButton icon="pi pi-folder-open" @click="openInExplorer" />
+          </template>
+          <template #popover>Open in explorer</template>
+        </Tooltip>
+        <Tooltip>
+          <template #trigger>
+            <IconButton v-if="showSave" icon="pi pi-save" @click="openSaveDialog" />
+          </template>
+          <template #popover>Save</template>
+        </Tooltip>
       </div>
       <div class="flex gap-[2px]">
         <IconButton icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" @click="expandAll" />
@@ -66,6 +76,7 @@ import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import ScrollPanel from "primevue/scrollpanel";
 import SelectButton from "primevue/selectbutton";
+import Tooltip from "../../general/Tooltip.vue";
 import StyledTree from "../../general/tree/StyledTree.vue";
 import IconButton from "../../general/IconButton.vue";
 import { isLeaf } from "../../general/tree/tree-helper";

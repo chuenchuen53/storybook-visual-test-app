@@ -8,11 +8,15 @@ export function registerUserSettingHandlers(service: UserSettingService) {
   const handler: IpcMainHandler<UserSettingApi> = {
     send: {},
     invoke: {
+      getAppTheme: async () => await service.getAppTheme(),
+      setAppTheme: async (_, theme) => await service.setAppTheme(theme),
       getProjectsInTab: async () => await service.getProjectsInTab(),
-      updateProjectsInTab: async (_, projects) => await service.updateProjectsInTab(projects),
+      setProjectsInTab: async (_, projects) => await service.setProjectsInTab(projects),
     },
   };
 
+  ipcMain.handle(UserSettingChannelKey.invoke.getAppTheme, handler.invoke.getAppTheme);
+  ipcMain.handle(UserSettingChannelKey.invoke.setAppTheme, handler.invoke.setAppTheme);
   ipcMain.handle(UserSettingChannelKey.invoke.getProjectsInTab, handler.invoke.getProjectsInTab);
-  ipcMain.handle(UserSettingChannelKey.invoke.updateProjectsInTab, handler.invoke.updateProjectsInTab);
+  ipcMain.handle(UserSettingChannelKey.invoke.setProjectsInTab, handler.invoke.setProjectsInTab);
 }

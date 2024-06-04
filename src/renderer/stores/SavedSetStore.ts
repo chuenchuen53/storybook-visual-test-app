@@ -134,6 +134,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
 
     if (projectsInTab.value.length === 0) {
       project.value = null;
+      _savedSets.value = null;
       return;
     }
 
@@ -152,8 +153,14 @@ export const useSavedSetStore = defineStore("savedSet", () => {
   };
 
   const updateProjectsInTab = async (projects: string[]) => {
-    await window.userSettingApi.invoke.updateProjectsInTab(projects);
+    await window.userSettingApi.invoke.setProjectsInTab(projects);
     projectsInTab.value = projects;
+    if (project.value && projects.includes(project.value)) return;
+    if (projects.length > 0) {
+      await updateProject(projects[0]);
+    } else {
+      project.value = null;
+    }
   };
 
   const getAllSavedSets = async () => {
@@ -189,7 +196,17 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     comparisonReplaceBackingData(data.metadata, data.storyMetadataList);
   };
 
-  const updateDisplayingImg = async (id: string) => {
+  const closeSavedSet = async () => {
+    currentSelectedSet.value = null;
+    screenshotReset();
+    screenshotRemoveImg();
+    comparisonReset();
+    resetComparisonImgs();
+    // make sure the table data is up-to-date
+    await refreshData();
+  };
+
+  const updateScreenshotDisplayingImg = async (id: string) => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type === "comparison") return;
     const { project, branch, id: setId } = currentSelectedSet.value.data;
     await screenshotUpdateImg(() =>
@@ -200,14 +217,6 @@ export const useSavedSetStore = defineStore("savedSet", () => {
         id,
       }),
     );
-  };
-
-  const deselectSavedSet = async () => {
-    currentSelectedSet.value = null;
-    screenshotReset();
-    screenshotRemoveImg();
-    comparisonReset();
-    resetComparisonImgs();
   };
 
   const updateComparisonDisplayImg = async (data: ComparisonResultTreeLeaf) => {
@@ -365,13 +374,13 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     screenshotCollapseAll,
     comparisonExpandAll,
     comparisonCollapseAll,
-    deselectSavedSet,
+    closeSavedSet,
     refreshData,
     updateProject,
     updateProjectsInTab,
     getAllSavedSets,
     openScreenshotSet,
-    updateDisplayingImg,
+    updateScreenshotDisplayingImg,
     openComparisonSet,
     updateComparisonDisplayImg,
     openScreenshotSetInExplorer,

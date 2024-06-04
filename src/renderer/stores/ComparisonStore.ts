@@ -6,7 +6,7 @@ import { useComparisonImage } from "../composables/useComparisonImage";
 import type { ComparisonResultTreeLeaf } from "../components/shared/comparison-result-explorer/helper";
 import type { CreateNewComparisonSetRequest, GetAllSavedScreenshotSetsResponse } from "../../shared/type";
 
-export interface CompareSet {
+export interface SelectedSet {
   branch: string | null;
   setId: string | null;
 }
@@ -24,11 +24,11 @@ export const useComparisonStore = defineStore("comparison", () => {
   const availableSets = ref<GetAllSavedScreenshotSetsResponse>({
     screenshot: {},
   });
-  const selectedRefSet = ref<CompareSet>({
+  const selectedRefSet = ref<SelectedSet>({
     branch: null,
     setId: null,
   });
-  const selectedTestSet = ref<CompareSet>({
+  const selectedTestSet = ref<SelectedSet>({
     branch: null,
     setId: null,
   });
@@ -187,7 +187,7 @@ export const useComparisonStore = defineStore("comparison", () => {
   };
 
   const updateProjectsInTab = async (projects: string[]) => {
-    await window.userSettingApi.invoke.updateProjectsInTab(projects);
+    await window.userSettingApi.invoke.setProjectsInTab(projects);
     projectsInTab.value = projects;
     if (project.value && projects.includes(project.value)) return;
     if (projects.length > 0) {

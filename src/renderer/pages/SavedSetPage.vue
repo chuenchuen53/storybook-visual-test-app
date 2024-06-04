@@ -19,7 +19,7 @@
             :open-in-explorer="openScreenshotSetInExplorer"
             :expand-all="screenshotExpandAll"
             :collapse-all="screenshotCollapseAll"
-            :handle-select-story="updateDisplayingImg"
+            :handle-select-story="updateScreenshotDisplayingImg"
           >
             <template #story-display="slotProps">
               <div class="flex gap-2">
@@ -83,7 +83,7 @@
               <i class="pi pi-angle-right"></i>
               {{ currentSelectedSet.data.name }}
             </div>
-            <IconButton icon="pi pi-times" @click="deselectSavedSet" />
+            <IconButton icon="pi pi-times" @click="closeSavedSet" />
           </div>
           <ScrollPanel class="ref-test-scroll-panel-height">
             <div class="flex justify-center px-6 pb-6">
@@ -105,7 +105,7 @@
                 <div>{{ currentSelectedSet.data.testBranch }} / {{ currentSelectedSet.data.testSetName }}</div>
               </div>
             </div>
-            <IconButton icon="pi pi-times" @click="deselectSavedSet" />
+            <IconButton icon="pi pi-times" @click="closeSavedSet" />
           </div>
           <ScrollPanel class="ref-test-scroll-panel-height">
             <ComparisonImages
@@ -171,8 +171,8 @@ const {
   refreshData,
   updateProject,
   updateProjectsInTab,
-  updateDisplayingImg,
-  deselectSavedSet,
+  updateScreenshotDisplayingImg,
+  closeSavedSet,
   updateComparisonDisplayImg,
   screenshotExpandAll,
   screenshotCollapseAll,

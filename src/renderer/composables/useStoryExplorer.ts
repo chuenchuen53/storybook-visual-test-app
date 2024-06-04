@@ -1,5 +1,5 @@
 import { computed, ref } from "vue";
-import { generateTreeFromList, getScreenshotPageTreeData } from "../components/shared/story-explorer/helper";
+import { generateTreeFromList, getStoryExplorerTreeData } from "../components/shared/story-explorer/helper";
 import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import type { StoryMetadataInScreenshotPageExplorer } from "../components/shared/story-explorer/helper";
 import type { ComputedRef, Ref } from "vue";
@@ -48,7 +48,7 @@ export function useStoryExplorer<T extends BaseStoryMetadata>(): UseStoryExplore
         (item.title.toLowerCase().includes(lowerCaseSearchText) ||
           item.name.toLowerCase().includes(lowerCaseSearchText)),
     );
-    return getScreenshotPageTreeData(generateTreeFromList(filteredData));
+    return getStoryExplorerTreeData(generateTreeFromList(filteredData));
   });
 
   const reset = () => {

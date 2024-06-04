@@ -2,7 +2,11 @@ import { logger } from "./logger";
 import type { BrowserWindow } from "electron";
 
 export class MainWindow {
-  public static instance: BrowserWindow | null = null;
+  private static instance: BrowserWindow | null = null;
+
+  public static getMainWindow(): BrowserWindow | null {
+    return MainWindow.instance;
+  }
 
   public static registerMainWindow(x: BrowserWindow) {
     if (MainWindow.instance !== null) {
@@ -18,8 +22,6 @@ export class MainWindow {
       throw new Error("MainWindow has not been registered");
     }
     MainWindow.instance = null;
-
-    throw new Error("MainWindow has not been registered");
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

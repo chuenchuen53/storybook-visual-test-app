@@ -6,5 +6,6 @@ export default defineProject({
   test: {
     environment: "node",
     include: ["**/*.test.ts"],
+    setupFiles: "setup.ts",
   },
 });

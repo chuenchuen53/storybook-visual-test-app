@@ -94,12 +94,13 @@
 import Button from "primevue/button";
 import SplitIcon from "../shared/SplitIcon.vue";
 import StyledImg from "../general/image/StyledImg.vue";
+import type { UnwrapRef } from "vue";
 import type { ComparisonImageState } from "../../composables/useComparisonImage";
 
 defineProps<{
   showDiffImg: boolean;
   diffViewInVertical: boolean;
-  comparisonImageState: ComparisonImageState;
+  comparisonImageState: UnwrapRef<ComparisonImageState>;
 }>();
 
 defineEmits<{

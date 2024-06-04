@@ -2,10 +2,10 @@
   <div class="comparison-data-table-container">
     <DataTable :value="rows" size="small" class="comparison-data-table">
       <template #empty>No saved set.</template>
-      <Column field="name" header="Name"></Column>
-      <Column field="testBranch" header="Test Branch"></Column>
-      <Column field="refBranch" header="Ref Branch"></Column>
-      <Column field="createdAt" header="Created At">
+      <Column :field="fieldName" header="Name"></Column>
+      <Column :field="fieldTestBranch" header="Test Branch"></Column>
+      <Column :field="fieldRefBranch" header="Ref Branch"></Column>
+      <Column :field="fieldCreatedAt" header="Created At">
         <template #body="{ data }">
           <span>{{ createdAtDisplay(data) }}</span>
         </template>
@@ -28,13 +28,13 @@
                 <template #popover>
                   <div class="grid grid-cols-2 grid-rows-4 gap-x-1">
                     <div>Diff:</div>
-                    <div>{{ data.result.diff }}</div>
+                    <div>{{ castData(data).result.diff }}</div>
                     <div>Added:</div>
-                    <div>{{ data.result.added }}</div>
+                    <div>{{ castData(data).result.added }}</div>
                     <div>Removed:</div>
-                    <div>{{ data.result.removed }}</div>
+                    <div>{{ castData(data).result.removed }}</div>
                     <div>Same:</div>
-                    <div>{{ data.result.same }}</div>
+                    <div>{{ castData(data).result.same }}</div>
                   </div>
                 </template>
               </Tooltip>
@@ -72,7 +72,6 @@ import Column from "primevue/column";
 import dayjs from "dayjs";
 import { useConfirm } from "primevue/useconfirm";
 import Tooltip from "../general/Tooltip.vue";
-import { useSavedSetStore } from "../../stores/SavedSetStore";
 import IconButton from "../general/IconButton.vue";
 import type { SavedComparisonInfo } from "../../../shared/type";
 
@@ -119,6 +118,12 @@ function createdAtDisplay(x?: SavedComparisonInfo) {
 function changeDisplay(x?: SavedComparisonInfo) {
   return x ? (x.result.diff + x.result.added + x.result.removed).toString() : "";
 }
+
+const fieldName: keyof SavedComparisonInfo = "name";
+const fieldTestBranch: keyof SavedComparisonInfo = "testBranch";
+const fieldRefBranch: keyof SavedComparisonInfo = "refBranch";
+const fieldCreatedAt: keyof SavedComparisonInfo = "createdAt";
+const castData = (x: unknown): SavedComparisonInfo => x as SavedComparisonInfo;
 </script>
 
 <style>
@@ -126,6 +131,15 @@ function changeDisplay(x?: SavedComparisonInfo) {
   background: var(--p-content-background);
   padding: 8px 12px 16px;
   border-radius: 10px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--p-surface-200);
+}
+
+.dark {
+  .comparison-data-table-container {
+    border-color: transparent;
+  }
 }
 
 .comparison-data-table {

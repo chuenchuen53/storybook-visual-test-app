@@ -11,7 +11,7 @@ import type {
   CreateNewComparisonSetResponse,
   TempComparisonMetadata,
   SavedComparisonMetadata,
-  SaveScreenshotResponse,
+  SaveComparisonResponse,
   SavedScreenshotSetLocationIdentifier,
   StoryMetadataWithRenderStatus,
 } from "../../shared/type";
@@ -33,9 +33,6 @@ export class ComparisonServiceImpl implements ComparisonService {
     refSet: SavedScreenshotSetLocationIdentifier,
     testSet: SavedScreenshotSetLocationIdentifier,
   ): Promise<CreateNewComparisonSetResponse> {
-    const id = uuidv4();
-    const now = new Date();
-
     const refSetId = refSet.setId;
     const refBranch = refSet.branch;
     const refProject = refSet.project;
@@ -56,12 +53,12 @@ export class ComparisonServiceImpl implements ComparisonService {
     await fs.emptydir(FilepathHelper.tempComparisonDir());
     await fs.ensureDir(FilepathHelper.tempComparisonDiffDir());
 
-    const refDir = FilepathHelper.savedScreenshotSetDir(refProject, refBranch, refSetId);
-    const testDir = FilepathHelper.savedScreenshotSetDir(testProject, testBranch, testSetId);
+    const refSetDir = FilepathHelper.savedScreenshotSetDir(refProject, refBranch, refSetId);
+    const testSetDir = FilepathHelper.savedScreenshotSetDir(testProject, testBranch, testSetId);
 
     const differ: StoriesDiffer = new StoriesDifferImpl();
     const tolerance = 5;
-    const result = await differ.computeDiff(refDir, testDir, tolerance);
+    const result = await differ.computeDiff(refSetDir, testSetDir, tolerance);
 
     const map = new Map<string, StoryMetadataWithRenderStatus>();
     for (const x of refSetMetadata.storyMetadataList) {
@@ -72,6 +69,8 @@ export class ComparisonServiceImpl implements ComparisonService {
     }
     const storyMetadataList = Array.from(map.values());
 
+    const id = uuidv4();
+    const now = new Date();
     const metadata: TempComparisonMetadata = {
       id,
       createdAt: now.toISOString(),
@@ -90,12 +89,12 @@ export class ComparisonServiceImpl implements ComparisonService {
     return { success: true, data: metadata, storyMetadataList };
   }
 
-  @CatchError<SaveScreenshotResponse>(e => ({
+  @CatchError<SaveComparisonResponse>(e => ({
     success: false,
     errMsg: e instanceof Error ? e.message : "Unknown error",
   }))
   @Log()
-  public async save(name: string): Promise<SaveScreenshotResponse> {
+  public async save(name: string): Promise<SaveComparisonResponse> {
     const metadata = await TempComparisonMetadataHelper.read();
     if (!metadata) throw new Error("No comparison metadata found");
 

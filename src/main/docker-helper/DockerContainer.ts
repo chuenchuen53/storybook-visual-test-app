@@ -1,4 +1,5 @@
 import execa from "execa";
+import { logger } from "../logger";
 import { CHROME_IMAGE } from "./docker-image";
 
 export type DockerContainerType = "metadata" | "screenshot";
@@ -20,25 +21,29 @@ export class DockerContainer {
     screenshot: new DockerContainer("screenshot"),
   };
 
-  private readonly containerName: string;
-  private readonly port: number;
-  private info: ContainerInfo | null = null;
-
   public static getInstance(containerType: DockerContainerType): DockerContainer {
     return DockerContainer.instances[containerType];
   }
 
   public static async ensureAllStopped() {
-    const { stdout } = await execa("docker", ["ps", "-qf", `name=${DockerContainer.COMMON_PREFIX}`]);
-    const allContainerIds = stdout
-      .trim()
-      .split("\n")
-      .filter(x => x !== "");
-    if (allContainerIds.length === 0) return;
-    await execa("docker", ["stop", ...allContainerIds]);
-    DockerContainer.instances.metadata.info = null;
-    DockerContainer.instances.screenshot.info = null;
+    try {
+      const { stdout } = await execa("docker", ["ps", "-qf", `name=${DockerContainer.COMMON_PREFIX}`]);
+      const allContainerIds = stdout
+        .trim()
+        .split("\n")
+        .filter(x => x !== "");
+      if (allContainerIds.length === 0) return;
+      await execa("docker", ["stop", ...allContainerIds]);
+      DockerContainer.instances.metadata.info = null;
+      DockerContainer.instances.screenshot.info = null;
+    } catch (error) {
+      logger.error(error);
+    }
   }
+
+  private readonly containerName: string;
+  private readonly port: number;
+  private info: ContainerInfo | null = null;
 
   private constructor(containerType: DockerContainerType) {
     this.containerName = `${DockerContainer.COMMON_PREFIX}-${containerType}`;

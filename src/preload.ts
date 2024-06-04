@@ -28,8 +28,10 @@ const userSettingApi: IpcRendererHandler<UserSettingApi> = {
   listen: {},
   send: {},
   invoke: {
+    getAppTheme: () => ipcRenderer.invoke(UserSettingChannelKey.invoke.getAppTheme),
+    setAppTheme: theme => ipcRenderer.invoke(UserSettingChannelKey.invoke.setAppTheme, theme),
     getProjectsInTab: () => ipcRenderer.invoke(UserSettingChannelKey.invoke.getProjectsInTab),
-    updateProjectsInTab: projects => ipcRenderer.invoke(UserSettingChannelKey.invoke.updateProjectsInTab, projects),
+    setProjectsInTab: projects => ipcRenderer.invoke(UserSettingChannelKey.invoke.setProjectsInTab, projects),
   },
 };
 

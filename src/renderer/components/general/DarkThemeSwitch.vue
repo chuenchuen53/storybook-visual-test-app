@@ -1,15 +1,18 @@
 <template>
-  <Button class="h-10" :icon="isDark ? 'pi pi-moon' : 'pi pi-sun'" @click="toggleColorScheme()"></Button>
+  <IconButton class="h-10" :icon="appTheme === 'dark' ? 'pi pi-moon' : 'pi pi-sun'" @click="toggleTheme" />
 </template>
 
 <script setup lang="ts">
-import Button from "primevue/button";
-import { ref } from "vue";
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useGlobalStore } from "../../stores/GlobalStore";
+import IconButton from "./IconButton.vue";
 
-const isDark = ref(document.documentElement.classList.contains("dark"));
+const store = useGlobalStore();
+const { appTheme } = storeToRefs(store);
+const { getThemeFromSetting, toggleTheme } = store;
 
-function toggleColorScheme() {
-  isDark.value = !isDark.value;
-  document.documentElement.classList.toggle("dark");
-}
+onMounted(() => {
+  void getThemeFromSetting();
+});
 </script>
