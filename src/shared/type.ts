@@ -68,6 +68,10 @@ export interface StoryMetadata {
   title: string;
   name: string;
   tags: string[];
+  defaultViewport?: string;
+  skip?: boolean;
+  fullPage?: boolean;
+  delay?: number;
 }
 
 export interface StoryMetadataWithRenderStatus extends StoryMetadata {
@@ -115,6 +119,7 @@ export interface StoriesDiffResult {
   added: string[];
   removed: string[];
   diff: string[];
+  skip: string[];
 }
 
 export interface TempComparisonMetadata {

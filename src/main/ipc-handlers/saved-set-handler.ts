@@ -22,6 +22,7 @@ export function registerSavedSetHandlers(service: SavedSetService) {
     },
     invoke: {
       getAllSavedProjects: async () => service.getAllSavedProjects(),
+      getAllSavedBranches: async (_, project) => await service.getAllSavedBranches(project),
       getAllSavedScreenshotSets: async (_, project) => await service.getAllSavedScreenshotSets(project),
       getAllSavedSets: async (_, project) => await service.getAllSavedSets(project),
       getSavedScreenshotMetadata: async (_, req) =>
@@ -38,6 +39,7 @@ export function registerSavedSetHandlers(service: SavedSetService) {
   ipcMain.on(SavedSetChannelKey.send.openComparisonSetInExplorer, handler.send.openComparisonSetInExplorer);
 
   ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedProjects, handler.invoke.getAllSavedProjects);
+  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedBranches, handler.invoke.getAllSavedBranches);
   ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedScreenshotSets, handler.invoke.getAllSavedScreenshotSets);
   ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedSets, handler.invoke.getAllSavedSets);
   ipcMain.handle(SavedSetChannelKey.invoke.getSavedScreenshotMetadata, handler.invoke.getSavedScreenshotMetadata);

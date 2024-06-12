@@ -22,6 +22,7 @@ export interface SavedSetApi extends IpcApi {
   };
   invoke: {
     getAllSavedProjects: () => Promise<string[]>;
+    getAllSavedBranches: (project: string) => Promise<string[]>;
     getAllSavedScreenshotSets: (project: string) => Promise<GetAllSavedScreenshotSetsResponse>;
     getAllSavedSets: (project: string) => Promise<GetAllSavedSetsResponse>;
     getSavedScreenshotMetadata: (req: GetSavedScreenshotMetadataRequest) => Promise<GetSavedScreenshotMetadataResponse>;
@@ -41,6 +42,7 @@ export const SavedSetChannelKey: IpcChannel<SavedSetApi> = {
   },
   invoke: {
     getAllSavedProjects: "savedSet:getAllSavedProjects",
+    getAllSavedBranches: "savedSet:getAllSavedBranches",
     getAllSavedScreenshotSets: "savedSet:getAllSavedScreenshotSets",
     getAllSavedSets: "savedSet:getAllSavedSets",
     getSavedScreenshotMetadata: "savedSet:getSavedScreenshotMetadata",

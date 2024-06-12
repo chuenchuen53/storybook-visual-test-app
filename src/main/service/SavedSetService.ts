@@ -7,6 +7,7 @@ import type {
 
 export interface SavedSetService {
   getAllSavedProjects(): Promise<string[]>;
+  getAllSavedBranches(project: string): Promise<string[]>;
   getAllSavedScreenshotSets(project: string): Promise<GetAllSavedScreenshotSetsResponse>;
   getAllSavedSets(project: string): Promise<GetAllSavedSetsResponse>;
   getSavedScreenshotMetadata(

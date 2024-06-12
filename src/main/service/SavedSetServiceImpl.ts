@@ -33,6 +33,11 @@ export class SavedSetServiceImpl implements SavedSetService {
   }
 
   @LogError()
+  public async getAllSavedBranches(project: string): Promise<string[]> {
+    return this.getAllScreenshotBranches(project);
+  }
+
+  @LogError()
   public async getAllSavedScreenshotSets(project: string): Promise<GetAllSavedScreenshotSetsResponse> {
     const allBranches = await this.getAllScreenshotBranches(project);
     const entries = await Promise.all(
@@ -47,6 +52,7 @@ export class SavedSetServiceImpl implements SavedSetService {
     return { screenshot: groupedSets };
   }
 
+  @LogError()
   public async getAllSavedSets(project: string): Promise<GetAllSavedSetsResponse> {
     const [screenshotData, comparison] = await Promise.all([
       this.getAllSavedScreenshotSets(project),
@@ -197,6 +203,7 @@ export class SavedSetServiceImpl implements SavedSetService {
               added: metadata.result.added.length,
               removed: metadata.result.removed.length,
               diff: metadata.result.diff.length,
+              skip: metadata.result.skip.length,
             },
           };
     };

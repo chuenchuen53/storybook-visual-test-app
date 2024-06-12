@@ -8,8 +8,10 @@
       <div class="mb-2 text-lg">Removed</div>
       <StyledImg :img="comparisonImageState.refImg" alt="screenshot" class="flex justify-center" />
     </div>
-    <div v-if="comparisonImageState.type === 'same'">
-      <div class="mb-2 text-lg">Same</div>
+    <div v-if="comparisonImageState.type === 'same' || comparisonImageState.type === 'skip'">
+      <div class="mb-2 text-lg">
+        {{ comparisonImageState.type === "same" ? "Same" : "Skip" }}
+      </div>
       <div class="mb-4 flex justify-end gap-[2px]">
         <Button
           class="!size-8 !p-0"

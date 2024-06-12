@@ -17,6 +17,10 @@ export async function getStorybookMetadata(page) {
         title: x.title,
         name: x.name,
         tags: x.tags,
+        defaultViewport: x.parameters?.viewport?.defaultViewport,
+        skip: x.parameters?.visualTest?.skip,
+        fullPage: x.parameters?.visualTest?.fullPage,
+        delay: x.parameters?.visualTest?.delay,
       }));
     });
     return { result };

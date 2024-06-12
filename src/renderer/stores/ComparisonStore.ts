@@ -52,7 +52,8 @@ export const useComparisonStore = defineStore("comparison", () => {
     collapseAll,
   } = useComparisonResultExplorer();
 
-  const { comparisonImageState, resetImgs, setSameImg, setAddedImg, setRemovedImg, setDiffImg } = useComparisonImage();
+  const { comparisonImageState, resetImgs, setSameImg, setAddedImg, setRemovedImg, setDiffImg, setSkipImg } =
+    useComparisonImage();
 
   const saveDialogOpen = ref(false);
   const isSaving = ref(false);
@@ -247,6 +248,10 @@ export const useComparisonStore = defineStore("comparison", () => {
       }
       case "diff": {
         await setDiffImg(getRefImgFn, getTestImgFn, getDiffImgFn);
+        return;
+      }
+      case "skip": {
+        await setSkipImg(getRefImgFn, getTestImgFn);
         return;
       }
     }

@@ -6,6 +6,7 @@
         <th>Added</th>
         <th>Removed</th>
         <th>Same</th>
+        <th>Skip</th>
       </tr>
     </thead>
     <tbody>
@@ -14,6 +15,7 @@
         <td>{{ data.resultSummary.added }}</td>
         <td>{{ data.resultSummary.removed }}</td>
         <td>{{ data.resultSummary.same }}</td>
+        <td>{{ data.resultSummary.skip }}</td>
       </tr>
     </tbody>
   </table>

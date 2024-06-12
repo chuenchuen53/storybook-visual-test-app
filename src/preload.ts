@@ -86,6 +86,7 @@ const savedSetApi: IpcRendererHandler<SavedSetApi> = {
   },
   invoke: {
     getAllSavedProjects: () => ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedProjects),
+    getAllSavedBranches: project => ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedBranches, project),
     getAllSavedScreenshotSets: project =>
       ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedScreenshotSets, project),
     getAllSavedSets: project => ipcRenderer.invoke(SavedSetChannelKey.invoke.getAllSavedSets, project),

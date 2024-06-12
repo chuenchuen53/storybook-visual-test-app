@@ -20,6 +20,7 @@ interface UseComparisonImageReturn {
   setAddedImg: (fn: UpdateFn) => Promise<void>;
   setRemovedImg: (fn: UpdateFn) => Promise<void>;
   setDiffImg: (refUpdateFn: UpdateFn, testUpdateFn: UpdateFn, diffUpdateFn: UpdateFn) => Promise<void>;
+  setSkipImg: (refUpdateFn: UpdateFn, testUpdateFn: UpdateFn) => Promise<void>;
 }
 
 export function useComparisonImage(): UseComparisonImageReturn {
@@ -71,6 +72,12 @@ export function useComparisonImage(): UseComparisonImageReturn {
     ]);
   };
 
+  const setSkipImg = async (refUpdateFn: UpdateFn, testUpdateFn: UpdateFn) => {
+    displayingType.value = "skip";
+    diffImg.removeImg();
+    await Promise.all([refImg.updateImg(refUpdateFn), testImg.updateImg(testUpdateFn)]);
+  };
+
   return {
     comparisonImageState,
     resetImgs,
@@ -78,5 +85,6 @@ export function useComparisonImage(): UseComparisonImageReturn {
     setAddedImg,
     setRemovedImg,
     setDiffImg,
+    setSkipImg,
   };
 }

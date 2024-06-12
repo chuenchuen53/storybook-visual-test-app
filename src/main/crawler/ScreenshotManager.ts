@@ -3,6 +3,7 @@ import { FilepathHelper } from "../Filepath";
 import { StoryState } from "../../shared/type";
 import { logger } from "../logger";
 import { GlobalChannel } from "../message-emitter/GlobalChannel";
+import { viewportMap } from "../viewport-map";
 import type { StoryMetadata, StoryMetadataWithRenderStatus, Viewport } from "../../shared/type";
 import type { Browser, ElementHandle } from "puppeteer-core";
 
@@ -65,10 +66,10 @@ export class ScreenshotManager {
     const story = this.storyMetadataList[jobIndex];
 
     this.onStoryStateChange(story.id, StoryState.CAPTURING, worker.name, null);
-
+    const defaultViewport = story.defaultViewport ? viewportMap[story.defaultViewport] : undefined;
+    const viewport = defaultViewport ?? this.viewport;
     const page = await worker.browser.newPage();
-    // todo: handle pre defined viewport in story
-    await page.setViewport(this.viewport);
+    await page.setViewport(viewport);
     await page.goto(this.storyUrl(this.storybookUrl, story.id), {
       timeout: 30000,
       waitUntil: ["domcontentloaded", "networkidle0"],
@@ -88,7 +89,7 @@ export class ScreenshotManager {
 
     let captureElement: ElementHandle | null = null;
 
-    if (!storyErr && rootElement) {
+    if (!story.fullPage && !storyErr && rootElement) {
       // Selects direct children of the root element
       const children = await rootElement.$$(":scope > *");
       if (children.length === 1) {
@@ -105,20 +106,24 @@ export class ScreenshotManager {
       const delayInterval = 500;
       const maxTrials = 10;
 
+      let elementHeight = 0;
       while (trialTimes < maxTrials) {
         trialTimes++;
-        const isVisible = await page.evaluate(el => {
+        const { isVisible, height } = await page.evaluate(el => {
           const rect = el.getBoundingClientRect();
-          return rect.height > 0 && rect.width > 0;
+          return { isVisible: rect.height > 0 && rect.width > 0, height: rect.height };
         }, captureElement);
 
-        if (isVisible) break;
+        if (isVisible) {
+          elementHeight = height;
+          break;
+        }
 
         await sleep(delayInterval);
       }
 
       if (trialTimes === maxTrials) {
-        // todo: this case are mostly happen when the story have element that is absolute or fixed, like modal, tooltip, etc
+        // this case are mostly happen when the story have element that is absolute or fixed, like modal, tooltip, etc
         logger.warn("Cannot detect size of story " + story.id);
         GlobalChannel.sendGlobalMessage({
           type: "warn",
@@ -126,9 +131,21 @@ export class ScreenshotManager {
         });
         await page.screenshot({ path: filepath });
       } else {
+        if (elementHeight > viewport.height) {
+          await page.setViewport({ width: viewport.width, height: elementHeight + 100 });
+        }
+
+        const delayBeforeCapture = story.delay;
+        if (delayBeforeCapture) {
+          await sleep(delayBeforeCapture);
+        }
         await captureElement.screenshot({ path: filepath });
       }
     } else {
+      const delayBeforeCapture = story.delay;
+      if (delayBeforeCapture) {
+        await sleep(delayBeforeCapture);
+      }
       await page.screenshot({ path: filepath });
     }
 
@@ -139,6 +156,10 @@ export class ScreenshotManager {
       tags: story.tags,
       title: story.title,
       storyErr,
+      defaultViewport: story.defaultViewport,
+      skip: story.skip,
+      fullPage: story.fullPage,
+      delay: story.delay,
     };
 
     this.onStoryStateChange(story.id, StoryState.FINISHED, worker.name, storyErr);

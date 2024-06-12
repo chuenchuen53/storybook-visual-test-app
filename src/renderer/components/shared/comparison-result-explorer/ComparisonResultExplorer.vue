@@ -34,11 +34,11 @@
       class="w-full px-3 [&>*]:flex-grow"
     >
       <template #option="slotProps">
-        <div class="text-nowrap text-xs">
+        <div class="text-nowrap text-[11px]">
           <span>
             {{ slotProps.option.name }}
           </span>
-          <span v-if="shouldShowNumber(slotProps.option.value)" class="text-[10px] text-gray-400">
+          <span v-if="shouldShowNumber(slotProps.option.value)" class="text-[9px] opacity-90">
             ({{ getNumber(slotProps.option.value) }})
           </span>
         </div>
@@ -103,9 +103,10 @@ const props = defineProps<{
 
 const selectOptions: { name: string; value: keyof StoriesDiffResult }[] = [
   { name: "Diff", value: "diff" },
-  { name: "Added", value: "added" },
-  { name: "Removed", value: "removed" },
+  { name: "New", value: "added" },
+  { name: "Del", value: "removed" },
   { name: "Same", value: "same" },
+  { name: "Skip", value: "skip" },
 ];
 
 const onNodeSelect = (node: NodeData) => {

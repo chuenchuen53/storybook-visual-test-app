@@ -1,41 +1,42 @@
 <template>
-  <div class="flex w-fit flex-col gap-4">
-    <div class="grid grid-cols-[120px_350px] gap-4">
-      <label for="storybook-url-input" class="self-center justify-self-end font-bold">Storybook url:</label>
-      <InputText
-        id="storybook-url-input"
-        v-model="storybookUrl"
-        :disabled="isProcessing"
-        type="text"
-        placeholder="input local ip, not localhost"
-      />
-      <label for="storybook-viewport-input" class="self-center justify-self-end font-bold">Viewport:</label>
-      <AutoComplete
-        id="storybook-viewport-input"
-        v-model="viewportInput"
-        dropdown
-        placeholder="input viewport in [width]x[height]"
-        :invalid="viewportInvalid"
-        :disabled="isProcessing"
-        :suggestions="items"
-        :empty-search-message="viewportInput"
-        @complete="search"
-        @blur="updateViewport"
-      />
-      <label for="storybook-concurrency-input" class="self-center justify-self-end font-bold">Concurrency:</label>
-      <InputNumber
-        id="storybook-concurrency-input"
-        v-model="nullableConcurrency"
-        :disabled="isProcessing"
-        type="number"
-        :min="1"
-        :use-grouping="false"
-        placeholder="input concurrency"
-      />
-    </div>
-    <div class="flex justify-end">
-      <Button :disabled="disableSubmit" @click="startScreenshot">screenshot</Button>
-    </div>
+  <div>
+    <form @submit.prevent="startScreenshot">
+      <div class="grid grid-cols-[120px_350px] gap-4">
+        <label for="storybook-url-input" class="self-center justify-self-end font-bold">Storybook url:</label>
+        <InputText
+          id="storybook-url-input"
+          v-model="storybookUrl"
+          :disabled="isProcessing"
+          type="text"
+          placeholder="input local ip, not localhost"
+        />
+        <label for="storybook-viewport-input" class="self-center justify-self-end font-bold">Viewport:</label>
+        <AutoComplete
+          v-model="viewportInput"
+          input-id="storybook-viewport-input"
+          dropdown
+          placeholder="input viewport in [width]x[height]"
+          :invalid="viewportInvalid"
+          :disabled="isProcessing"
+          :suggestions="items"
+          :empty-search-message="viewportInput"
+          @complete="search"
+          @blur="updateViewport"
+        />
+        <label for="storybook-concurrency-input" class="self-center justify-self-end font-bold">Concurrency:</label>
+        <InputNumber
+          v-model="nullableConcurrency"
+          input-id="storybook-concurrency-input"
+          :disabled="isProcessing"
+          type="number"
+          :min="1"
+          :use-grouping="false"
+        />
+      </div>
+      <div class="mt-4 flex justify-end">
+        <Button :disabled="disableSubmit" type="submit">screenshot</Button>
+      </div>
+    </form>
   </div>
 </template>
 

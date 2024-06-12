@@ -114,6 +114,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     setAddedImg,
     setRemovedImg,
     setDiffImg,
+    setSkipImg,
   } = useComparisonImage();
   const diffViewInVertical = ref(false);
   const showDiffImg = ref(false);
@@ -258,6 +259,10 @@ export const useSavedSetStore = defineStore("savedSet", () => {
       }
       case "diff": {
         await setDiffImg(getRefImgFn, getTestImgFn, getDiffImgFn);
+        return;
+      }
+      case "skip": {
+        await setSkipImg(getRefImgFn, getTestImgFn);
         return;
       }
     }

@@ -35,6 +35,8 @@
                     <div>{{ castData(data).result.removed }}</div>
                     <div>Same:</div>
                     <div>{{ castData(data).result.same }}</div>
+                    <div>Skip:</div>
+                    <div>{{ castData(data).result.skip }}</div>
                   </div>
                 </template>
               </Tooltip>

@@ -71,6 +71,7 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
         diff: null,
         added: null,
         removed: null,
+        skip: null,
       };
     }
     return {
@@ -78,6 +79,7 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
       diff: _backingData.value.result.diff.length,
       added: _backingData.value.result.added.length,
       removed: _backingData.value.result.removed.length,
+      skip: _backingData.value.result.skip.length,
     };
   });
 
@@ -111,6 +113,7 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
             added: _backingData.value.result.added.length,
             removed: _backingData.value.result.removed.length,
             same: _backingData.value.result.same.length,
+            skip: _backingData.value.result.skip.length,
           },
         };
   });

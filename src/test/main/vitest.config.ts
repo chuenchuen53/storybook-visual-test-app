@@ -1,3 +1,4 @@
+// @ts-nocheck
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineProject } from "vitest/config";
 

@@ -92,6 +92,8 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     branch: "",
     name: "",
   });
+  const allProjects = ref<string[]>([]);
+  const allBranches = ref<string[]>([]);
 
   const saveScreenshot = async () => {
     try {
@@ -122,6 +124,14 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     } finally {
       isSaving.value = false;
     }
+  };
+
+  const getAllSavedProjects = async () => {
+    allProjects.value = await window.savedSetApi.invoke.getAllSavedProjects();
+  };
+
+  const getAllBranches = async (project: string) => {
+    allBranches.value = await window.savedSetApi.invoke.getAllSavedBranches(project);
   };
 
   const openInExplorer = () => {
@@ -192,9 +202,13 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     saveInfo,
     isSaving,
     saveDialogOpen,
+    allProjects,
+    allBranches,
     selectedStory,
     totalStoriesCount,
     finishedStoriesCount,
+    getAllBranches,
+    getAllSavedProjects,
     handleSelectStory,
     getDefaultStorybookUrl,
     startScreenshot,
