@@ -72,7 +72,7 @@
     "eslint-plugin-local-rules": "2.0.1",
     "execa": "5.1.1",
     "pngjs": "7.0.0",
-    "puppeteer-core": "22.10.1",
+    "puppeteer-core": "22.8.2",
     "shelljs": "0.8.5",
     "uuid": "9.0.1",
     "vue": "3.4.27",

@@ -1,7 +1,6 @@
 import execa from "execa";
 
-// do not change image or the version without testing
-export const CHROME_IMAGE = "yukinying/chrome-headless-browser-stable:124.0.6367.201";
+export const CHROME_IMAGE = "yukinying/chrome-headless-browser-stable:124.0.6367.207";
 
 export async function checkDockerImage(): Promise<boolean> {
   const { exitCode, stdout, stderr } = await execa("docker", ["images", "-q", "--filter=reference=" + CHROME_IMAGE]);

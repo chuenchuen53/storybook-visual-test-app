@@ -77,7 +77,7 @@ export class DockerContainer {
       "run",
       "--rm",
       "-d",
-      "--shm-size=1024m",
+      "--shm-size=1g",
       "--cap-add=SYS_ADMIN",
       "--name",
       containerName,
@@ -87,6 +87,8 @@ export class DockerContainer {
       "--disable-gpu",
       "--hide-scrollbars",
       "--no-first-run",
+      "--no-sandbox",
+      "--disable-extensions",
     ]);
     return stdout;
   }
