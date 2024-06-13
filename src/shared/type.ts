@@ -72,6 +72,8 @@ export interface StoryMetadata {
   skip?: boolean;
   fullPage?: boolean;
   delay?: number;
+  disableCssAnimation?: boolean;
+  hideElementsSelectors?: string[];
 }
 
 export interface StoryMetadataWithRenderStatus extends StoryMetadata {

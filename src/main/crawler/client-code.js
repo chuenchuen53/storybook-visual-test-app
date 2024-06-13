@@ -21,6 +21,8 @@ export async function getStorybookMetadata(page) {
         skip: x.parameters?.visualTest?.skip,
         fullPage: x.parameters?.visualTest?.fullPage,
         delay: x.parameters?.visualTest?.delay,
+        disableCssAnimation: x.parameters?.visualTest?.disableCssAnimation,
+        hideElementsSelectors: x.parameters?.visualTest?.hideElementsSelectors,
       }));
     });
     return { result };

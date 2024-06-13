@@ -75,6 +75,34 @@ export class ScreenshotManager {
       waitUntil: ["domcontentloaded", "networkidle0"],
     });
 
+    if (story.disableCssAnimation) {
+      await page.evaluate(() => {
+        const css = `
+*,
+*::before,
+*::after {
+  -webkit-transition: none !important;
+  transition: none !important;
+  -webkit-animation: none !important;
+  animation: none !important;
+  will-change: auto !important;
+}`;
+        const style = document.createElement("style");
+        style.appendChild(document.createTextNode(css));
+        document.head.appendChild(style);
+      });
+    }
+
+    if (story.hideElementsSelectors && story.hideElementsSelectors.length > 0) {
+      await page.evaluate(selectors => {
+        selectors.forEach(selector => {
+          document.querySelectorAll(selector).forEach(element => {
+            (element as HTMLElement).style.visibility = "hidden";
+          });
+        });
+      }, story.hideElementsSelectors);
+    }
+
     const storyErr = await page.evaluate(() => {
       const errorStack = document.querySelector("#error-stack");
       return Boolean(errorStack?.textContent && errorStack.textContent.trim().length > 0);
@@ -160,6 +188,8 @@ export class ScreenshotManager {
       skip: story.skip,
       fullPage: story.fullPage,
       delay: story.delay,
+      disableCssAnimation: story.disableCssAnimation,
+      hideElementsSelectors: story.hideElementsSelectors,
     };
 
     this.onStoryStateChange(story.id, StoryState.FINISHED, worker.name, storyErr);
