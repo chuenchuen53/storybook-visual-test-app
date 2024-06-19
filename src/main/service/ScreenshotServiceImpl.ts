@@ -14,6 +14,7 @@ import { TempScreenshotMetadataHelper } from "../persistence/TempScreenshotMetad
 import { SavedScreenshotMetadataHelper } from "../persistence/SavedScreenshotMetadataHelper";
 import { sumPngFileSize } from "../utils";
 import { LogError } from "../decorator/LogError";
+import { dataVersion } from "../persistence/dataVersion";
 import type {
   SavedScreenshotMetadata,
   SaveScreenshotResponse,
@@ -97,6 +98,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
     const size = await sumPngFileSize(destDir);
 
     const savedScreenshotSetMetadata: SavedScreenshotMetadata = {
+      version: dataVersion,
       id,
       createdAt,
       viewport,

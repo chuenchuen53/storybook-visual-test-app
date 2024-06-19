@@ -3,8 +3,13 @@ import { ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
 import { useComparisonImage } from "../composables/useComparisonImage";
+import { useComparisonSummaryImgs } from "../composables/useComparisonSummaryImgs";
 import type { ComparisonResultTreeLeaf } from "../components/shared/comparison-result-explorer/helper";
-import type { CreateNewComparisonSetRequest, GetAllSavedScreenshotSetsResponse } from "../../shared/type";
+import type {
+  CreateNewComparisonSetRequest,
+  GetAllSavedScreenshotSetsResponse,
+  StoriesDiffResult,
+} from "../../shared/type";
 
 export interface SelectedSet {
   branch: string | null;
@@ -50,10 +55,16 @@ export const useComparisonStore = defineStore("comparison", () => {
     replaceBackingData,
     expandAll,
     collapseAll,
+    selectNode,
   } = useComparisonResultExplorer();
 
   const { comparisonImageState, resetImgs, setSameImg, setAddedImg, setRemovedImg, setDiffImg, setSkipImg } =
     useComparisonImage();
+  const {
+    comparisonSetSummaryImgs,
+    reset: resetComparisonSummaryImgs,
+    update: updateComparisonSummaryImgs,
+  } = useComparisonSummaryImgs();
 
   const saveDialogOpen = ref(false);
   const isSaving = ref(false);
@@ -88,6 +99,16 @@ export const useComparisonStore = defineStore("comparison", () => {
           summary: "Success",
           detail: "Successfully compared",
           life: 5000,
+        });
+        const { project, refBranch, testBranch, refSetId, testSetId, result } = data;
+        await updateComparisonSummaryImgs({
+          project,
+          refBranch,
+          refSetId,
+          testBranch,
+          testSetId,
+          storyMetadataList,
+          result,
         });
       } else {
         _toast.add({
@@ -214,7 +235,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     window.comparisonApi.send.openInExplorer();
   };
 
-  const handleNodeSelect = async (data: ComparisonResultTreeLeaf) => {
+  const _updateImg = async (type: keyof StoriesDiffResult, id: string) => {
     if (!comparisonSetSummary.value) return;
     const { project, refBranch, testBranch, refSetId, testSetId } = comparisonSetSummary.value;
     const getRefImgFn = () =>
@@ -222,18 +243,18 @@ export const useComparisonStore = defineStore("comparison", () => {
         project,
         branch: refBranch,
         setId: refSetId,
-        id: data.id,
+        id,
       });
     const getTestImgFn = () =>
       window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch: testBranch,
         setId: testSetId,
-        id: data.id,
+        id,
       });
-    const getDiffImgFn = () => window.imgApi.invoke.getTempComparisonDiffImg(data.id);
+    const getDiffImgFn = () => window.imgApi.invoke.getTempComparisonDiffImg(id);
 
-    switch (data.type) {
+    switch (type) {
       case "same": {
         await setSameImg(getRefImgFn, getTestImgFn);
         return;
@@ -257,9 +278,21 @@ export const useComparisonStore = defineStore("comparison", () => {
     }
   };
 
+  const handleNodeSelect = async (data: ComparisonResultTreeLeaf) => {
+    if (!comparisonSetSummary.value) return;
+    await _updateImg(data.type, data.id);
+  };
+
+  const handleClickSummaryTitle = async (type: keyof StoriesDiffResult, id: string) => {
+    if (type === "skip" || type === "same") return;
+    selectNode(type, id);
+    await _updateImg(type, id);
+  };
+
   const removeCurrentResult = () => {
     resetExplorerData();
     resetImgs();
+    resetComparisonSummaryImgs();
   };
 
   const saveScreenshot = async () => {
@@ -310,6 +343,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     showDiffImg,
     isNullResult,
     comparisonSetSummary,
+    comparisonSetSummaryImgs,
     updateProject,
     compare,
     refreshData,
@@ -322,5 +356,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     collapseAll,
     updateProjectsInTab,
     removeCurrentResult,
+    resetImgs,
+    handleClickSummaryTitle,
   };
 });

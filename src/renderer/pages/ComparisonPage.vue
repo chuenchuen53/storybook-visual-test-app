@@ -18,26 +18,49 @@
         />
       </template>
       <template #right>
-        <div class="relative size-full">
+        <div id="comparison-page-right-panel" class="size-full">
           <ComparisonSetting v-if="isNullResult" class="basis-full" />
           <div v-else class="mt-4">
             <div class="mx-6 mb-6 flex justify-between">
               <ComparisonResultHeader v-if="comparisonSetSummary" :data="comparisonSetSummary" />
-              <IconButton
-                v-tooltip.left="'Start new comparison'"
-                icon="pi pi-trash"
-                :wrapper-size="40"
-                :icon-size="16"
-                @click="removeCurrentResult"
-              />
+              <div id="comparison-page-right-btn-group" class="flex gap-2">
+                <IconButton
+                  v-if="!(comparisonSetSummary && comparisonImageState.type === null)"
+                  v-tooltip.left="'Show summary'"
+                  icon="pi pi-info-circle"
+                  :wrapper-size="40"
+                  :icon-size="16"
+                  @click="resetImgs"
+                />
+                <IconButton
+                  v-else
+                  v-tooltip.left="'Save as image'"
+                  icon="pi pi-image"
+                  :wrapper-size="40"
+                  :icon-size="16"
+                  @click="screenshot"
+                />
+                <IconButton
+                  v-tooltip.left="'Start new comparison'"
+                  icon="pi pi-trash"
+                  :wrapper-size="40"
+                  :icon-size="16"
+                  @click="removeCurrentResult"
+                />
+              </div>
             </div>
-            <ComparisonResultSummaryTable
-              v-if="comparisonSetSummary && comparisonImageState.type === null"
-              class="mx-6 my-6"
-              :data="comparisonSetSummary"
-            />
             <ScrollPanel class="scroll-panel-height w-full overflow-hidden">
+              <ComparisonSummary
+                v-if="comparisonSetSummary && comparisonImageState.type === null"
+                class="p-6"
+                :data="comparisonSetSummary"
+                :diff="comparisonSetSummaryImgs.diff"
+                :added="comparisonSetSummaryImgs.added"
+                :removed="comparisonSetSummaryImgs.removed"
+                @click-title="handleClickSummaryTitle"
+              />
               <ComparisonImages
+                v-else
                 class="mx-6"
                 :comparison-image-state="comparisonImageState"
                 :diff-view-in-vertical="diffViewInVertical"
@@ -59,9 +82,10 @@
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import ScrollPanel from "primevue/scrollpanel";
+import html2canvas from "html2canvas";
 import IconButton from "../components/general/IconButton.vue";
 import ComparisonResultExplorer from "../components/shared/comparison-result-explorer/ComparisonResultExplorer.vue";
-import ComparisonResultSummaryTable from "../components/comparison/ComparisonResultSummaryTable.vue";
+import ComparisonSummary from "../components/shared/comparison-summary/ComparisonSummary.vue";
 import ComparisonSetting from "../components/comparison/ComparisonSetting.vue";
 import ComparisonResultHeader from "../components/comparison/ComparisonResultHeader.vue";
 import { useComparisonStore } from "../stores/ComparisonStore";
@@ -83,8 +107,46 @@ const {
   comparisonImageState,
   showDiffImg,
   diffViewInVertical,
+  comparisonSetSummaryImgs,
 } = storeToRefs(store);
-const { refreshData, openInExplorer, expandAll, collapseAll, handleNodeSelect, removeCurrentResult } = store;
+const {
+  refreshData,
+  openInExplorer,
+  expandAll,
+  collapseAll,
+  handleNodeSelect,
+  removeCurrentResult,
+  resetImgs,
+  handleClickSummaryTitle,
+} = store;
+
+const screenshot = () => {
+  let clonedElement: HTMLElement | undefined = undefined;
+  try {
+    const element = document.querySelector("#comparison-page-right-panel") as HTMLElement;
+    clonedElement = element.cloneNode(true) as HTMLElement;
+
+    document.body.appendChild(clonedElement);
+
+    clonedElement.style.width = "1920px";
+    const scrollPanel = clonedElement.querySelector(".scroll-panel-height") as HTMLElement;
+    scrollPanel.style.height = "100%";
+    const btnGroup = clonedElement.querySelector("#comparison-page-right-btn-group") as HTMLElement;
+    btnGroup.style.display = "none";
+
+    html2canvas(clonedElement).then(canvas => {
+      const img = canvas.toDataURL("image/webp");
+      const a = document.createElement("a");
+      a.href = img;
+      a.download = "result.webp";
+      a.click();
+    });
+  } finally {
+    if (clonedElement) {
+      document.body.removeChild(clonedElement);
+    }
+  }
+};
 
 onMounted(() => {
   refreshData();

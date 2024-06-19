@@ -7,6 +7,7 @@ import { Log } from "../decorator/Log";
 import { CatchError } from "../decorator/CatchError";
 import { TempComparisonMetadataHelper } from "../persistence/TempComparisonMetadataHelper";
 import { SavedComparisonMetadataHelper } from "../persistence/SavedComparisonMetadataHelper";
+import { dataVersion } from "../persistence/dataVersion";
 import type {
   CreateNewComparisonSetResponse,
   TempComparisonMetadata,
@@ -103,6 +104,7 @@ export class ComparisonServiceImpl implements ComparisonService {
     const destDir = FilepathHelper.savedComparisonSetDir(project, id);
     await fs.copy(srcDir, destDir, { overwrite: true });
     const savedMetadata: SavedComparisonMetadata = {
+      version: dataVersion,
       id: metadata.id,
       createdAt: metadata.createdAt,
       project: metadata.project,

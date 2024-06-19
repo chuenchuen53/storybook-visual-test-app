@@ -5,6 +5,7 @@ import { useStoryExplorer } from "../composables/useStoryExplorer";
 import { useImage } from "../composables/useImage";
 import { useComparisonResultExplorer } from "../composables/useComparisonResultExplorer";
 import { useComparisonImage } from "../composables/useComparisonImage";
+import { useComparisonSummaryImgs } from "../composables/useComparisonSummaryImgs";
 import type { ComparisonResultTreeLeaf } from "../components/shared/comparison-result-explorer/helper";
 import type {
   SavedComparisonInfo,
@@ -17,6 +18,7 @@ import type {
   SavedScreenshotSetInfo,
   GetAllSavedSetsResponse,
   StoryMetadataWithRenderStatus,
+  StoriesDiffResult,
 } from "../../shared/type";
 
 type CurrentSelectedSet =
@@ -102,10 +104,12 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     selectedType: comparisonSelectedType,
     highlightKey: comparisonHighlightKey,
     expandedKeys: comparisonExpandedKeys,
+    comparisonSetSummary,
     reset: comparisonReset,
     replaceBackingData: comparisonReplaceBackingData,
     expandAll: comparisonExpandAll,
     collapseAll: comparisonCollapseAll,
+    selectNode,
   } = useComparisonResultExplorer();
   const {
     comparisonImageState,
@@ -118,6 +122,11 @@ export const useSavedSetStore = defineStore("savedSet", () => {
   } = useComparisonImage();
   const diffViewInVertical = ref(false);
   const showDiffImg = ref(false);
+  const {
+    comparisonSetSummaryImgs,
+    reset: resetComparisonSummaryImgs,
+    update: updateComparisonSummaryImgs,
+  } = useComparisonSummaryImgs();
 
   const updateProject = async (x: string) => {
     project.value = x;
@@ -195,6 +204,18 @@ export const useSavedSetStore = defineStore("savedSet", () => {
       return;
     }
     comparisonReplaceBackingData(data.metadata, data.storyMetadataList);
+    resetComparisonImgs();
+    const { metadata, storyMetadataList } = data;
+    const { project, refBranch, testBranch, refSetId, testSetId, result } = metadata;
+    updateComparisonSummaryImgs({
+      project,
+      refBranch,
+      refSetId,
+      testBranch,
+      testSetId,
+      storyMetadataList,
+      result,
+    });
   };
 
   const closeSavedSet = async () => {
@@ -203,6 +224,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     screenshotRemoveImg();
     comparisonReset();
     resetComparisonImgs();
+    resetComparisonSummaryImgs();
     // make sure the table data is up-to-date
     await refreshData();
   };
@@ -220,31 +242,31 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     );
   };
 
-  const updateComparisonDisplayImg = async (data: ComparisonResultTreeLeaf) => {
+  const _updateComparisonDisplayImg = async (type: keyof StoriesDiffResult, id: string) => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type !== "comparison") return;
-    const { project, id, refBranch, testBranch, refSetId, testSetId } = currentSelectedSet.value.data;
+    const { project, id: setId, refBranch, testBranch, refSetId, testSetId } = currentSelectedSet.value.data;
     const getRefImgFn = () =>
       window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch: refBranch,
         setId: refSetId,
-        id: data.id,
+        id,
       });
     const getTestImgFn = () =>
       window.imgApi.invoke.getSavedScreenshotImg({
         project,
         branch: testBranch,
         setId: testSetId,
-        id: data.id,
+        id,
       });
     const getDiffImgFn = () =>
       window.imgApi.invoke.getSavedComparisonDiffImg({
         project,
-        setId: id,
-        id: data.id,
+        setId,
+        id,
       });
 
-    switch (data.type) {
+    switch (type) {
       case "same": {
         await setSameImg(getRefImgFn, getTestImgFn);
         return;
@@ -266,6 +288,17 @@ export const useSavedSetStore = defineStore("savedSet", () => {
         return;
       }
     }
+  };
+
+  const updateComparisonDisplayImg = async (data: ComparisonResultTreeLeaf) => {
+    if (currentSelectedSet.value === null || currentSelectedSet.value.type !== "comparison") return;
+    await _updateComparisonDisplayImg(data.type, data.id);
+  };
+
+  const handleClickComparisonSummaryTitle = async (type: keyof StoriesDiffResult, id: string) => {
+    if (type === "skip" || type === "same") return;
+    selectNode(type, id);
+    await _updateComparisonDisplayImg(type, id);
   };
 
   const openScreenshotSetInExplorer = () => {
@@ -373,6 +406,8 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     comparisonHighlightKey,
     comparisonExpandedKeys,
     comparisonImageState,
+    comparisonSetSummary,
+    comparisonSetSummaryImgs,
     showDiffImg,
     diffViewInVertical,
     screenshotExpandAll,
@@ -388,6 +423,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     updateScreenshotDisplayingImg,
     openComparisonSet,
     updateComparisonDisplayImg,
+    handleClickComparisonSummaryTitle,
     openScreenshotSetInExplorer,
     openComparisonSetInExplorer,
     deleteScreenshotSet,

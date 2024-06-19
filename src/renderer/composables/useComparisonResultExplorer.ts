@@ -3,7 +3,7 @@ import {
   generateResultTreeFromList,
   getCompareResultTreeData,
 } from "../components/shared/comparison-result-explorer/helper";
-import { getAllNonLeafKeys } from "../components/general/tree/tree-helper";
+import { checkSingleBranchAndGetLeaf, getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import { filterNonNull } from "../utils";
 import type { ComputedRef, Ref } from "vue";
 import type { TempComparisonMetadata, StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../shared/type";
@@ -35,6 +35,7 @@ export interface UseComparisonResultExplorerReturn {
   replaceBackingData: (data: TempComparisonMetadata, storyMetadataList: StoryMetadataWithRenderStatus[]) => void;
   expandAll: () => void;
   collapseAll: () => void;
+  selectNode: (type: keyof StoriesDiffResult, id: string) => void;
 }
 
 export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn {
@@ -135,6 +136,22 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     _backingData.value = null;
   };
 
+  const selectNode = (type: keyof StoriesDiffResult, id: string) => {
+    const data = _storyMetadataMap.get(id);
+    if (data) {
+      const tree = getCompareResultTreeData(generateResultTreeFromList([{ type, ...data }]));
+      const leaf = checkSingleBranchAndGetLeaf(tree[0]);
+      if (leaf.isSingleBranch) {
+        selectedType.value = type;
+        highlightKey.value = leaf.leafKey;
+        const allNonLeafKeys = getAllNonLeafKeys(tree[0]);
+        for (const key of allNonLeafKeys) {
+          expandedKeys.value.add(key);
+        }
+      }
+    }
+  };
+
   return {
     treeData,
     searchText,
@@ -148,5 +165,6 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     reset,
     expandAll,
     collapseAll,
+    selectNode,
   };
 }

@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ComparisonSetSummary } from "../../composables/useComparisonResultExplorer";
+import type { ComparisonSetSummary } from "../../../composables/useComparisonResultExplorer";
 
 defineProps<{
   data: ComparisonSetSummary;

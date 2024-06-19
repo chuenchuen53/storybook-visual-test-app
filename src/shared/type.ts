@@ -101,6 +101,7 @@ export interface SaveScreenshotRequest {
 }
 
 export interface SavedScreenshotMetadata {
+  version: string;
   id: string;
   createdAt: string;
   viewport: Viewport;
@@ -150,6 +151,7 @@ export interface CreateNewComparisonSetResponse {
 }
 
 export interface SavedComparisonMetadata extends TempComparisonMetadata {
+  version: string;
   name: string;
 }
 
