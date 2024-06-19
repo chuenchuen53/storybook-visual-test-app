@@ -2,6 +2,8 @@ import type { IpcMainInvokeEvent } from "electron";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+type MapIfNotEmpty<T, ValueType> = T extends Record<string, never> ? Record<string, never> : Record<keyof T, ValueType>;
+
 export interface IpcApi {
   listen: Record<string, (cb: (...args: any[]) => void) => void>;
   send: Record<string, (...args: any[]) => void>;
@@ -9,9 +11,9 @@ export interface IpcApi {
 }
 
 export interface IpcChannel<T extends IpcApi> {
-  listen: Record<keyof T["listen"], string>;
-  send: Record<keyof T["send"], string>;
-  invoke: Record<keyof T["invoke"], string>;
+  listen: MapIfNotEmpty<T["listen"], string>;
+  send: MapIfNotEmpty<T["send"], string>;
+  invoke: MapIfNotEmpty<T["invoke"], string>;
 }
 
 export type IpcMainHandlerType<T extends (...args: unknown[]) => unknown | Promise<unknown>> = (

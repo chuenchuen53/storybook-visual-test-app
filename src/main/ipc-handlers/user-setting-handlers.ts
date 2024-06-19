@@ -1,5 +1,5 @@
-import { ipcMain } from "electron";
 import { UserSettingChannelKey } from "../../shared/UserSettingApi";
+import { registerHandlers } from "./register-handlers";
 import type { UserSettingApi } from "../../shared/UserSettingApi";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 import type { UserSettingService } from "../service/UserSettingService";
@@ -15,8 +15,5 @@ export function registerUserSettingHandlers(service: UserSettingService) {
     },
   };
 
-  ipcMain.handle(UserSettingChannelKey.invoke.getAppTheme, handler.invoke.getAppTheme);
-  ipcMain.handle(UserSettingChannelKey.invoke.setAppTheme, handler.invoke.setAppTheme);
-  ipcMain.handle(UserSettingChannelKey.invoke.getProjectsInTab, handler.invoke.getProjectsInTab);
-  ipcMain.handle(UserSettingChannelKey.invoke.setProjectsInTab, handler.invoke.setProjectsInTab);
+  registerHandlers(UserSettingChannelKey, handler);
 }

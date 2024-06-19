@@ -1,7 +1,7 @@
-import { ipcMain } from "electron";
 import { SavedSetChannelKey } from "../../shared/SavedSetApi";
 import { FilepathHelper } from "../Filepath";
 import { openInExplorer } from "../utils";
+import { registerHandlers } from "./register-handlers";
 import type { SavedSetApi } from "../../shared/SavedSetApi";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
 import type { SavedSetService } from "../service/SavedSetService";
@@ -35,17 +35,5 @@ export function registerSavedSetHandlers(service: SavedSetService) {
     },
   };
 
-  ipcMain.on(SavedSetChannelKey.send.openScreenshotSetInExplorer, handler.send.openScreenshotSetInExplorer);
-  ipcMain.on(SavedSetChannelKey.send.openComparisonSetInExplorer, handler.send.openComparisonSetInExplorer);
-
-  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedProjects, handler.invoke.getAllSavedProjects);
-  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedBranches, handler.invoke.getAllSavedBranches);
-  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedScreenshotSets, handler.invoke.getAllSavedScreenshotSets);
-  ipcMain.handle(SavedSetChannelKey.invoke.getAllSavedSets, handler.invoke.getAllSavedSets);
-  ipcMain.handle(SavedSetChannelKey.invoke.getSavedScreenshotMetadata, handler.invoke.getSavedScreenshotMetadata);
-  ipcMain.handle(SavedSetChannelKey.invoke.getSavedComparisonMetadata, handler.invoke.getSavedComparisonMetadata);
-  ipcMain.handle(SavedSetChannelKey.invoke.deleteScreenshotSet, handler.invoke.deleteScreenshotSet);
-  ipcMain.handle(SavedSetChannelKey.invoke.deleteComparisonSet, handler.invoke.deleteComparisonSet);
-  ipcMain.handle(SavedSetChannelKey.invoke.deleteScreenshotBranch, handler.invoke.deleteScreenshotBranch);
-  ipcMain.handle(SavedSetChannelKey.invoke.deleteProject, handler.invoke.deleteProject);
+  registerHandlers(SavedSetChannelKey, handler);
 }

@@ -1,7 +1,7 @@
-import { ipcMain } from "electron";
 import { openInExplorer } from "../utils";
 import { FilepathHelper } from "../Filepath";
 import { ComparisonChannelKey } from "../../shared/ComparisonApi";
+import { registerHandlers } from "./register-handlers";
 import type { ComparisonApi } from "../../shared/ComparisonApi";
 import type { ComparisonService } from "../service/ComparisonService";
 import type { IpcMainHandler } from "../../shared/ipc-type-helper";
@@ -17,8 +17,5 @@ export function registerComparisonHandlers(service: ComparisonService) {
     },
   };
 
-  ipcMain.on(ComparisonChannelKey.send.openInExplorer, handler.send.openInExplorer);
-
-  ipcMain.handle(ComparisonChannelKey.invoke.compare, handler.invoke.compare);
-  ipcMain.handle(ComparisonChannelKey.invoke.save, handler.invoke.save);
+  registerHandlers(ComparisonChannelKey, handler);
 }
