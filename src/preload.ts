@@ -16,9 +16,7 @@ import type { ScreenshotApi } from "./shared/ScreenshotApi";
 const globalApi: IpcRendererHandler<GlobalApi> = {
   listen: {
     onReceiveGlobalMessage: cb =>
-      ipcRenderer.on(GlobalChannelKey.listen.onReceiveGlobalMessage, (_event, msg: FirstParamType<typeof cb>) =>
-        cb(msg),
-      ),
+      ipcRenderer.on(GlobalChannelKey.listen.onReceiveGlobalMessage, (_, msg: FirstParamType<typeof cb>) => cb(msg)),
   },
   send: {},
   invoke: {},

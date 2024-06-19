@@ -133,7 +133,7 @@ export class ScreenshotServiceImpl implements ScreenshotService {
   private async getStoryMetadataList(url: string): Promise<StoryMetadata[]> {
     const crawler: Crawler = CrawlerImpl.getInstance();
     const { storyMetadataList } = await crawler.getStoriesMetadata(url, () =>
-      ScreenshotChannel.updateStatus(ScreenshotState.COMPUTING_METADATA),
+      ScreenshotChannel.updateStatus(ScreenshotState.EXTRACTING_METADATA),
     );
 
     return storyMetadataList;

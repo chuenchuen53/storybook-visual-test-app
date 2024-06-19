@@ -93,14 +93,14 @@ export class ScreenshotManager {
       });
     }
 
-    if (story.hideElementsSelectors && story.hideElementsSelectors.length > 0) {
+    if (story.selectorsForHiddenElements && story.selectorsForHiddenElements.length > 0) {
       await page.evaluate(selectors => {
         selectors.forEach(selector => {
           document.querySelectorAll(selector).forEach(element => {
             (element as HTMLElement).style.visibility = "hidden";
           });
         });
-      }, story.hideElementsSelectors);
+      }, story.selectorsForHiddenElements);
     }
 
     const storyErr = await page.evaluate(() => {
@@ -189,7 +189,7 @@ export class ScreenshotManager {
       fullPage: story.fullPage,
       delay: story.delay,
       disableCssAnimation: story.disableCssAnimation,
-      hideElementsSelectors: story.hideElementsSelectors,
+      selectorsForHiddenElements: story.selectorsForHiddenElements,
     };
 
     this.onStoryStateChange(story.id, StoryState.FINISHED, worker.name, storyErr);

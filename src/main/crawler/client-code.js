@@ -22,7 +22,7 @@ export async function getStorybookMetadata(page) {
         fullPage: x.parameters?.visualTest?.fullPage,
         delay: x.parameters?.visualTest?.delay,
         disableCssAnimation: x.parameters?.visualTest?.disableCssAnimation,
-        hideElementsSelectors: x.parameters?.visualTest?.hideElementsSelectors,
+        selectorsForHiddenElements: x.parameters?.visualTest?.selectorsForHiddenElements,
       }));
     });
     return { result };

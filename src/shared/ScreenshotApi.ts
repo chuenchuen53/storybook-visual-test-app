@@ -4,7 +4,7 @@ import type {
   ScreenshotState,
   CreateNewScreenshotSetRequest,
   StoryMetadata,
-  StoryUpdateEventData,
+  StoryStateUpdateData,
 } from "./type";
 import type { IpcApi, IpcChannel } from "./ipc-type-helper";
 
@@ -12,7 +12,7 @@ export interface ScreenshotApi extends IpcApi {
   listen: {
     onUpdateStatus: (cb: (status: ScreenshotState) => void) => void;
     onNewMetadata: (cb: (storyMetadataList: StoryMetadata[]) => void) => void;
-    onUpdateStoryState: (cb: (params: StoryUpdateEventData) => void) => void;
+    onUpdateStoryState: (cb: (data: StoryStateUpdateData) => void) => void;
   };
   send: {
     openInExplorer: () => void;

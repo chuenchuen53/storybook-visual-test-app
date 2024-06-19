@@ -50,7 +50,7 @@ export enum ScreenshotState {
   IDLE = "IDLE",
   CHECKING_SERVICE = "CHECKING_SERVICE",
   PREPARING_METADATA_BROWSER = "PREPARING_METADATA_BROWSER",
-  COMPUTING_METADATA = "COMPUTING_METADATA",
+  EXTRACTING_METADATA = "EXTRACTING_METADATA",
   PREPARING_SCREENSHOT_BROWSER = "PREPARING_SCREENSHOT_BROWSER",
   CAPTURING_SCREENSHOT = "CAPTURING_SCREENSHOT",
   FINISHED = "FINISHED",
@@ -73,7 +73,7 @@ export interface StoryMetadata {
   fullPage?: boolean;
   delay?: number;
   disableCssAnimation?: boolean;
-  hideElementsSelectors?: string[];
+  selectorsForHiddenElements?: string[];
 }
 
 export interface StoryMetadataWithRenderStatus extends StoryMetadata {
@@ -87,7 +87,7 @@ export interface TempScreenshotMetadata {
   storyMetadataList: StoryMetadataWithRenderStatus[];
 }
 
-export interface StoryUpdateEventData {
+export interface StoryStateUpdateData {
   storyId: string;
   state: StoryState;
   workerName: string; // currently no used, for debugging purpose
@@ -189,12 +189,14 @@ export interface SavedComparisonInfo {
   result: SavedComparisonSetInfo$Result;
 }
 
+/**
+ * branch -> setId -> info
+ */
 export interface GetAllSavedScreenshotSetsResponse {
   screenshot: Record<string, Record<string, SavedScreenshotSetInfo>>;
 }
 
-export interface GetAllSavedSetsResponse {
-  screenshot: Record<string, Record<string, SavedScreenshotSetInfo>>;
+export interface GetAllSavedSetsResponse extends GetAllSavedScreenshotSetsResponse {
   comparison: SavedComparisonInfo[];
 }
 

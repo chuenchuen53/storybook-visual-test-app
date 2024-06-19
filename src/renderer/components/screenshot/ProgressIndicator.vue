@@ -36,7 +36,7 @@ const timelineItems = computed(() => {
   const arr = [
     item(ScreenshotState.CHECKING_SERVICE),
     item(ScreenshotState.PREPARING_METADATA_BROWSER),
-    item(ScreenshotState.COMPUTING_METADATA),
+    item(ScreenshotState.EXTRACTING_METADATA),
     item(ScreenshotState.PREPARING_SCREENSHOT_BROWSER),
     item(ScreenshotState.CAPTURING_SCREENSHOT),
     item(ScreenshotState.FINISHED),
@@ -74,8 +74,8 @@ function getStateDescription(x: ScreenshotState) {
       return "Checking service";
     case ScreenshotState.PREPARING_METADATA_BROWSER:
       return "Preparing metadata browser";
-    case ScreenshotState.COMPUTING_METADATA:
-      return "Computing metadata";
+    case ScreenshotState.EXTRACTING_METADATA:
+      return "Extracting metadata";
     case ScreenshotState.PREPARING_SCREENSHOT_BROWSER:
       return "Preparing screenshot browser";
     case ScreenshotState.CAPTURING_SCREENSHOT:
