@@ -27,7 +27,7 @@
         v-show="expandedKeys.has(data.key)"
         v-model:expanded-keys="expandedKeysModel"
         v-model:highlight-key="highlightKeyModel"
-        :data="props.data.children"
+        :data="props.data.children || []"
         @node-click="handleNodeClick"
       >
         <template #node-content="{ node }">

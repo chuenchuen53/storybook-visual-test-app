@@ -12,6 +12,7 @@
 import { provide, readonly, ref } from "vue";
 import TreeNode from "./TreeNode.vue";
 import { isLeaf } from "./tree-helper";
+import type { ModelRef } from "vue";
 import type { EmitEvent, NodeData, NodeSlots } from "./type";
 
 const highlightKeyModel = defineModel<string | null>("highlightKey");
@@ -27,7 +28,8 @@ const emit = defineEmits<EmitEvent>();
 
 // handle controlled or uncontrolled state
 const highlightKey = highlightKeyModel.value !== undefined ? highlightKeyModel : ref<null | string>(null);
-const expandedKeys = expandedKeysModel.value !== undefined ? expandedKeysModel : ref(new Set<string>());
+const expandedKeys =
+  expandedKeysModel.value !== undefined ? (expandedKeysModel as ModelRef<Set<string>>) : ref(new Set<string>());
 
 provide("expandedKeys", readonly(expandedKeys));
 provide("highlightKey", readonly(highlightKey));

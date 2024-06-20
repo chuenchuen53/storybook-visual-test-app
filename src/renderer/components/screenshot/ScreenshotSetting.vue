@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import InputText from "primevue/inputtext";
-import InputNumber from "primevue/InputNumber";
+import InputNumber from "primevue/inputnumber";
 import AutoComplete from "primevue/autocomplete";
 import Button from "primevue/button";
 import { storeToRefs } from "pinia";
