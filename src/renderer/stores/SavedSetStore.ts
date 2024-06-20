@@ -342,6 +342,11 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     await _selectNextComparisonStory(handleSelectComparisonStory);
   };
 
+  const showComparisonSummary = () => {
+    resetComparisonImgs();
+    _selectedComparisonStory.value = null;
+  };
+
   const openScreenshotSetInExplorer = () => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type === "comparison") return;
     const { project, branch, id } = currentSelectedSet.value.data;
@@ -469,6 +474,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     handleSelectComparisonStory,
     selectPrevComparisonStory,
     selectNextComparisonStory,
+    showComparisonSummary,
     openScreenshotSetInExplorer,
     openComparisonSetInExplorer,
     deleteScreenshotSet,

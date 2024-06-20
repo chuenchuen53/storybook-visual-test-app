@@ -48,7 +48,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     typeOptions,
     selectedType,
     highlightKey,
-    selectedStory,
+    selectedStory: _selectedStory,
     expandedKeys,
     isNullResult,
     comparisonSetSummary,
@@ -284,7 +284,7 @@ export const useComparisonStore = defineStore("comparison", () => {
 
   const handleNodeSelect = async (data: ComparisonResultTreeLeaf) => {
     if (!comparisonSetSummary.value) return;
-    selectedStory.value = data;
+    _selectedStory.value = data;
     await _updateImg(data.type, data.id);
   };
 
@@ -307,14 +307,14 @@ export const useComparisonStore = defineStore("comparison", () => {
 
   const showComparisonSummary = () => {
     resetImgs();
-    selectedStory.value = null;
+    _selectedStory.value = null;
   };
 
   const removeCurrentResult = () => {
     resetExplorerData();
     resetImgs();
     resetComparisonSummaryImgs();
-    selectedStory.value = null;
+    _selectedStory.value = null;
   };
 
   const saveScreenshot = async () => {

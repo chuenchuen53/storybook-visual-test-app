@@ -42,12 +42,11 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    minWidth: 1280,
-    minHeight: 720,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+  mainWindow.setMenu(null);
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {

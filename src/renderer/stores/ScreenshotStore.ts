@@ -74,7 +74,6 @@ export const useScreenshotStore = defineStore("screenshot", () => {
   const { imgState, removeImg, updateImg } = useImage();
 
   const handleSelectStory = async (id: string) => {
-    if (id === selectedStory.value?.id) return;
     const story = getDataById(id);
     if (story) {
       selectedStory.value = story;

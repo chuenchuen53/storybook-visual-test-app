@@ -29,9 +29,9 @@
               />
               <div class="flex gap-2">
                 <IconButton
-                  v-if="!(comparisonSetSummary && comparisonImageState.type === null)"
+                  v-if="comparisonSetSummary && comparisonImageState.type !== null"
                   v-tooltip.left="'Show summary'"
-                  icon="pi pi-info-circle"
+                  icon="pi pi-list"
                   :wrapper-size="40"
                   :icon-size="16"
                   @click="showComparisonSummary"

@@ -106,7 +106,15 @@
               </div>
               <div class="flex gap-2">
                 <IconButton
-                  v-if="comparisonSetSummary && comparisonImageState.type === null"
+                  v-if="comparisonSetSummary && comparisonImageState.type !== null"
+                  v-tooltip.left="'Show summary'"
+                  icon="pi pi-list"
+                  :wrapper-size="40"
+                  :icon-size="16"
+                  @click="showComparisonSummary"
+                />
+                <IconButton
+                  v-else
                   v-tooltip.left="'Save as image'"
                   icon="pi pi-image"
                   :wrapper-size="40"
@@ -211,6 +219,7 @@ const {
   handleSelectComparisonStory,
   selectPrevComparisonStory,
   selectNextComparisonStory,
+  showComparisonSummary,
 } = store;
 
 const confirm = useConfirm();
