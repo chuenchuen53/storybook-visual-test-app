@@ -32,7 +32,6 @@ defineProps<{
 <style scoped lang="scss">
 th {
   background: var(--p-content-background);
-  color: var(--p-panel-header-color);
   font-weight: bold;
 }
 

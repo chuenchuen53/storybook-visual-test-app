@@ -91,26 +91,20 @@
             </div>
           </ScrollPanel>
         </div>
-        <div
-          v-else-if="currentSelectedSet.type === 'comparison'"
-          id="saved-set-page-comparison-content-container"
-          class="size-full"
-        >
+        <div v-else-if="currentSelectedSet.type === 'comparison'" class="size-full">
           <div class="mt-4">
             <div class="flex items-center justify-between px-6">
-              <div class="pb-8 pt-4">
-                <div class="flex items-center gap-6">
-                  <div class="mr-4 font-bold">
-                    {{ currentSelectedSet.data.project }}
-                    <i class="pi pi-angle-right"></i>
-                    {{ currentSelectedSet.data.name }}
-                  </div>
-                  <div>{{ currentSelectedSet.data.refBranch }} / {{ currentSelectedSet.data.refSetName }}</div>
-                  <i class="pi pi-arrow-right-arrow-left"></i>
-                  <div>{{ currentSelectedSet.data.testBranch }} / {{ currentSelectedSet.data.testSetName }}</div>
+              <div id="saved-set-page-comparison-header" class="flex items-center gap-6 pb-8 pt-4">
+                <div class="mr-4 font-bold">
+                  {{ currentSelectedSet.data.project }}
+                  <i class="pi pi-angle-right"></i>
+                  {{ currentSelectedSet.data.name }}
                 </div>
+                <div>{{ currentSelectedSet.data.refBranch }} / {{ currentSelectedSet.data.refSetName }}</div>
+                <i class="pi pi-arrow-right-arrow-left"></i>
+                <div>{{ currentSelectedSet.data.testBranch }} / {{ currentSelectedSet.data.testSetName }}</div>
               </div>
-              <div id="saved-set-page-right-btn-group" class="flex gap-2">
+              <div class="flex gap-2">
                 <IconButton
                   v-if="comparisonSetSummary && comparisonImageState.type === null"
                   v-tooltip.left="'Save as image'"
@@ -125,6 +119,7 @@
             <ScrollPanel class="scroll-panel-height w-full overflow-hidden">
               <ComparisonSummary
                 v-if="comparisonSetSummary && comparisonImageState.type === null"
+                id="saved-page-comparison-summary"
                 class="p-6"
                 :data="comparisonSetSummary"
                 :diff="comparisonSetSummaryImgs.diff"
@@ -160,7 +155,6 @@ import Button from "primevue/button";
 import { useConfirm } from "primevue/useconfirm";
 import Menu from "primevue/menu";
 import ScrollPanel from "primevue/scrollpanel";
-import html2canvas from "html2canvas";
 import StoryTreeExplorer from "../components/shared/story-explorer/StoryTreeExplorer.vue";
 import ProjectTabs from "../components/shared/ProjectTabs.vue";
 import LeftRightSplitContainer from "../components/LeftRightSplitContainer.vue";
@@ -171,6 +165,7 @@ import ComparisonResultExplorer from "../components/shared/comparison-result-exp
 import IconButton from "../components/general/IconButton.vue";
 import ComparisonImages from "../components/comparison/ComparisonImages.vue";
 import ComparisonSummary from "../components/shared/comparison-summary/ComparisonSummary.vue";
+import { screenshotComparisonResult } from "../utils/screenshot-comparison-result";
 
 const store = useSavedSetStore();
 const {
@@ -253,31 +248,16 @@ const items = ref([
 ]);
 
 const screenshot = () => {
-  let clonedElement: HTMLElement | undefined = undefined;
-  try {
-    const element = document.querySelector("#saved-set-page-comparison-content-container") as HTMLElement;
-    clonedElement = element.cloneNode(true) as HTMLElement;
-
-    document.body.appendChild(clonedElement);
-
-    clonedElement.style.width = "1920px";
-    const scrollPanel = clonedElement.querySelector(".scroll-panel-height") as HTMLElement;
-    scrollPanel.style.height = "100%";
-    const btnGroup = clonedElement.querySelector("#saved-set-page-right-btn-group") as HTMLElement;
-    btnGroup.style.display = "none";
-
-    html2canvas(clonedElement).then(canvas => {
-      const img = canvas.toDataURL("image/webp");
-      const a = document.createElement("a");
-      a.href = img;
-      a.download = "result.webp";
-      a.click();
-    });
-  } finally {
-    if (clonedElement) {
-      document.body.removeChild(clonedElement);
-    }
-  }
+  let headerNode: HTMLDivElement = document.querySelector(
+    "#saved-set-page-comparison-header",
+  ) as unknown as HTMLDivElement;
+  let summaryNode: HTMLDivElement = document.querySelector(
+    "#saved-page-comparison-summary",
+  ) as unknown as HTMLDivElement;
+  headerNode = headerNode.cloneNode(true) as unknown as HTMLDivElement;
+  summaryNode = summaryNode.cloneNode(true) as unknown as HTMLDivElement;
+  headerNode.style.margin = "0 24px";
+  screenshotComparisonResult(headerNode, summaryNode);
 };
 
 onMounted(() => {
@@ -287,6 +267,6 @@ onMounted(() => {
 
 <style scoped>
 .scroll-panel-height {
-  height: calc(100vh - 126px);
+  height: calc(100vh - 138px);
 }
 </style>

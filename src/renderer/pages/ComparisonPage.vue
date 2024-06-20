@@ -18,12 +18,16 @@
         />
       </template>
       <template #right>
-        <div id="comparison-page-right-panel" class="size-full">
+        <div class="size-full">
           <ComparisonSetting v-if="isNullResult" class="basis-full" />
           <div v-else class="mt-4">
             <div class="mx-6 mb-6 flex justify-between">
-              <ComparisonResultHeader v-if="comparisonSetSummary" :data="comparisonSetSummary" />
-              <div id="comparison-page-right-btn-group" class="flex gap-2">
+              <ComparisonResultHeader
+                v-if="comparisonSetSummary"
+                id="comparison-page-header"
+                :data="comparisonSetSummary"
+              />
+              <div class="flex gap-2">
                 <IconButton
                   v-if="!(comparisonSetSummary && comparisonImageState.type === null)"
                   v-tooltip.left="'Show summary'"
@@ -52,6 +56,7 @@
             <ScrollPanel class="scroll-panel-height w-full overflow-hidden">
               <ComparisonSummary
                 v-if="comparisonSetSummary && comparisonImageState.type === null"
+                id="comparison-page-summary"
                 class="p-6"
                 :data="comparisonSetSummary"
                 :diff="comparisonSetSummaryImgs.diff"
@@ -82,7 +87,6 @@
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import ScrollPanel from "primevue/scrollpanel";
-import html2canvas from "html2canvas";
 import IconButton from "../components/general/IconButton.vue";
 import ComparisonResultExplorer from "../components/shared/comparison-result-explorer/ComparisonResultExplorer.vue";
 import ComparisonSummary from "../components/shared/comparison-summary/ComparisonSummary.vue";
@@ -92,6 +96,7 @@ import { useComparisonStore } from "../stores/ComparisonStore";
 import SaveCompareResultDialog from "../components/comparison/SaveCompareResultDialog.vue";
 import LeftRightSplitContainer from "../components/LeftRightSplitContainer.vue";
 import ComparisonImages from "../components/comparison/ComparisonImages.vue";
+import { screenshotComparisonResult } from "../utils/screenshot-comparison-result";
 
 const store = useComparisonStore();
 const {
@@ -121,31 +126,12 @@ const {
 } = store;
 
 const screenshot = () => {
-  let clonedElement: HTMLElement | undefined = undefined;
-  try {
-    const element = document.querySelector("#comparison-page-right-panel") as HTMLElement;
-    clonedElement = element.cloneNode(true) as HTMLElement;
-
-    document.body.appendChild(clonedElement);
-
-    clonedElement.style.width = "1920px";
-    const scrollPanel = clonedElement.querySelector(".scroll-panel-height") as HTMLElement;
-    scrollPanel.style.height = "100%";
-    const btnGroup = clonedElement.querySelector("#comparison-page-right-btn-group") as HTMLElement;
-    btnGroup.style.display = "none";
-
-    html2canvas(clonedElement).then(canvas => {
-      const img = canvas.toDataURL("image/webp");
-      const a = document.createElement("a");
-      a.href = img;
-      a.download = "result.webp";
-      a.click();
-    });
-  } finally {
-    if (clonedElement) {
-      document.body.removeChild(clonedElement);
-    }
-  }
+  let headerNode: HTMLDivElement = document.querySelector("#comparison-page-header") as unknown as HTMLDivElement;
+  let summaryNode: HTMLDivElement = document.querySelector("#comparison-page-summary") as unknown as HTMLDivElement;
+  headerNode = headerNode.cloneNode(true) as unknown as HTMLDivElement;
+  summaryNode = summaryNode.cloneNode(true) as unknown as HTMLDivElement;
+  headerNode.style.margin = "0 24px";
+  screenshotComparisonResult(headerNode, summaryNode);
 };
 
 onMounted(() => {

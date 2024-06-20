@@ -4,12 +4,12 @@
       <nav>
         <TabMenu :model="items" :pt="{ itemLink: { style: { height: '50px' } } }">
           <template #item="{ item, props }">
-            <router-link v-slot="{ href, navigate }" :to="item.route" custom>
+            <RouterLink v-slot="{ href, navigate }" :to="item.route" custom>
               <a :href="href" v-bind="props.action" @click="navigate">
                 <span v-bind="props.icon" />
                 <span v-bind="props.label">{{ item.label }}</span>
               </a>
-            </router-link>
+            </RouterLink>
           </template>
         </TabMenu>
       </nav>
@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import TabMenu from "primevue/tabmenu";
+import { RouterLink } from "vue-router";
 import DarkThemeSwitch from "./components/general/DarkThemeSwitch.vue";
 
 const items = ref([

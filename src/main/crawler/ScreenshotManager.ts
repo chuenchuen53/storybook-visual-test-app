@@ -160,7 +160,7 @@ export class ScreenshotManager {
         await page.screenshot({ path: filepath });
       } else {
         if (elementHeight > viewport.height) {
-          await page.setViewport({ width: viewport.width, height: elementHeight + 100 });
+          await page.setViewport({ width: viewport.width, height: elementHeight });
         }
 
         const delayBeforeCapture = story.delay;

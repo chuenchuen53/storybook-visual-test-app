@@ -139,8 +139,14 @@ export const useSavedSetStore = defineStore("savedSet", () => {
       window.savedSetApi.invoke.getAllSavedProjects(),
       window.userSettingApi.invoke.getProjectsInTab(),
     ]);
+
+    const filteredProjects = _projectsInTab.filter(x => _availableProjects.includes(x));
+    if (filteredProjects.length !== _projectsInTab.length) {
+      void updateProjectsInTab(filteredProjects);
+    }
+
     availableProjects.value = _availableProjects;
-    projectsInTab.value = _projectsInTab;
+    projectsInTab.value = filteredProjects;
 
     if (projectsInTab.value.length === 0) {
       project.value = null;
@@ -207,7 +213,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     resetComparisonImgs();
     const { metadata, storyMetadataList } = data;
     const { project, refBranch, testBranch, refSetId, testSetId, result } = metadata;
-    updateComparisonSummaryImgs({
+    await updateComparisonSummaryImgs({
       project,
       refBranch,
       refSetId,

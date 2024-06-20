@@ -82,7 +82,7 @@ export class ComparisonServiceImpl implements ComparisonService {
       testBranch,
       testSetId,
       testSetName: testSetMetadata.name,
-      viewport: refSetMetadata.viewport,
+      viewport: testSetMetadata.viewport,
       result,
     };
     await TempComparisonMetadataHelper.save(metadata);
