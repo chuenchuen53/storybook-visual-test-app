@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import PrimeVue from "primevue/config";
-import Aura from "primevue/themes/Aura";
+import Aura from "@primevue/themes/aura";
 import { createPinia } from "pinia";
 import Tooltip from "primevue/tooltip";
 import ToastService from "primevue/toastservice";
