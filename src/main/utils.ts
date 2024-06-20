@@ -49,11 +49,11 @@ export function openInExplorer(dir: string) {
   const platform = os.platform();
 
   if (platform === "darwin") {
-    // macOS
     execa("open", [dir]);
+  } else if (platform === "win32") {
+    execa("cmd", ["/c", "start", dir]);
   } else {
-    // Default to Windows if OS is not detected
-    execa("start", [dir]);
+    logger.error("Unsupported platform:", platform);
   }
 }
 
