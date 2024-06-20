@@ -56,7 +56,7 @@ const { getDefaultStorybookUrl, startScreenshot } = store;
 
 const viewportInput = ref(viewport.value.width + "x" + viewport.value.height);
 const viewportInvalid = ref(false);
-const suggestion = ref(["375x667", "1920x1080"]);
+const suggestion = ref(["375x667", "414x896", "1920x1080"]);
 const items = ref<string[]>([]);
 const nullableConcurrency = ref<number | null>(concurrency.value);
 

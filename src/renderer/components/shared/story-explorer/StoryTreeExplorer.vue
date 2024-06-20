@@ -17,6 +17,7 @@
       </div>
       <div class="flex gap-[2px]">
         <div>
+          <ExplorerShortcutTooltip />
           <IconButton icon="pi pi-filter" @click="menu.toggle($event)" />
           <Menu ref="menu" :model="items" :popup="true" :pt="{ root: { style: { transform: 'translateX(-165px)' } } }">
             <template #item="{ item, props: slotProps }">
@@ -70,6 +71,7 @@ import IconButton from "../../general/IconButton.vue";
 import StyledTree from "../../general/tree/StyledTree.vue";
 import { isLeaf } from "../../general/tree/tree-helper";
 import Tooltip from "../../general/Tooltip.vue";
+import ExplorerShortcutTooltip from "../ExplorerShortcutTooltip.vue";
 import type { StoryMetadataInScreenshotPageExplorer } from "./helper";
 import type { NodeData } from "../../general/tree/type";
 import type { StoryTypeFilter } from "../../../composables/useStoryExplorer";

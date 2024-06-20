@@ -44,9 +44,8 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     finishedStoriesCount.value = 0;
     const req: CreateNewScreenshotSetRequest = {
       storybookUrl: storybookUrl.value,
+      // do not assign viewport.value directly, as it need to drop reactive to allow object clone
       viewport: {
-        // do not assign viewport.value directly
-        // drop reactive to allow object clone
         width: viewport.value.width,
         height: viewport.value.height,
       },
@@ -55,7 +54,6 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     void window.screenshotApi.send.createNewSet(req);
   };
 
-  const selectedStory = ref<StoryMetadataInScreenshotPageExplorer | null>(null);
   const {
     searchText,
     storyTypeFilter,
@@ -63,11 +61,14 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     expandedKeys,
     treeData,
     totalStoriesCount,
+    selectedStory,
     replaceBackingData,
     getDataById,
     updateItem,
     expandAll,
     collapseAll,
+    selectPrevStory: _selectPrevStory,
+    selectNextStory: _selectNextStory,
   } = useStoryExplorer<StoryMetadataInScreenshotPageExplorer>();
 
   const { imgState, removeImg, updateImg } = useImage();
@@ -83,6 +84,14 @@ export const useScreenshotStore = defineStore("screenshot", () => {
         await updateImg(() => window.imgApi.invoke.getTempScreenshotImg(id));
       }
     }
+  };
+
+  const selectPrevStory = async () => {
+    await _selectPrevStory(handleSelectStory);
+  };
+
+  const selectNextStory = async () => {
+    await _selectNextStory(handleSelectStory);
   };
 
   const isSaving = ref(false);
@@ -212,6 +221,8 @@ export const useScreenshotStore = defineStore("screenshot", () => {
     handleSelectStory,
     getDefaultStorybookUrl,
     startScreenshot,
+    selectPrevStory,
+    selectNextStory,
     expandAll,
     collapseAll,
     openInExplorer,

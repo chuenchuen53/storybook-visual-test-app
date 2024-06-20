@@ -53,6 +53,7 @@ import Accordion from "primevue/accordion";
 import AccordionPanel from "primevue/accordionpanel";
 import AccordionHeader from "primevue/accordionheader";
 import AccordionContent from "primevue/accordioncontent";
+import { onMounted, onUnmounted } from "vue";
 import LeftRightSplitContainer from "../components/LeftRightSplitContainer.vue";
 import ScreenshotSetting from "../components/screenshot/ScreenshotSetting.vue";
 import { useScreenshotStore } from "../stores/ScreenshotStore";
@@ -65,7 +66,23 @@ import ProgressIndicator from "../components/screenshot/ProgressIndicator.vue";
 
 const store = useScreenshotStore();
 const { saveDialogOpen, treeData, expandedKeys, highlightKey, storyTypeFilter, state, searchText } = storeToRefs(store);
-const { handleSelectStory, openInExplorer, expandAll, collapseAll } = store;
+const { handleSelectStory, openInExplorer, expandAll, collapseAll, selectPrevStory, selectNextStory } = store;
+
+const handleShortcut = (e: KeyboardEvent) => {
+  if (e.key === "ArrowLeft" && e.altKey) {
+    selectPrevStory();
+  } else if (e.key === "ArrowRight" && e.altKey) {
+    selectNextStory();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener("keydown", handleShortcut);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleShortcut);
+});
 </script>
 
 <style scoped>

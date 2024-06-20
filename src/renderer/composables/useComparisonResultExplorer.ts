@@ -5,6 +5,7 @@ import {
 } from "../components/shared/comparison-result-explorer/helper";
 import { checkSingleBranchAndGetLeaf, getAllNonLeafKeys } from "../components/general/tree/tree-helper";
 import { filterNonNull } from "../utils";
+import type { ComparisonResultTreeLeaf } from "../components/shared/comparison-result-explorer/helper";
 import type { ComputedRef, Ref } from "vue";
 import type { TempComparisonMetadata, StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../shared/type";
 import type { NodeData } from "../components/general/tree/type";
@@ -28,6 +29,7 @@ export interface UseComparisonResultExplorerReturn {
   typeOptions: ComputedRef<TypeOptions>;
   selectedType: Ref<keyof StoriesDiffResult>;
   highlightKey: Ref<string | null>;
+  selectedStory: Ref<ComparisonResultTreeLeaf | null>;
   isNullResult: ComputedRef<boolean>;
   expandedKeys: Ref<Set<string>>;
   comparisonSetSummary: ComputedRef<ComparisonSetSummary | null>;
@@ -36,6 +38,9 @@ export interface UseComparisonResultExplorerReturn {
   expandAll: () => void;
   collapseAll: () => void;
   selectNode: (type: keyof StoriesDiffResult, id: string) => void;
+  selectPrevStory: (cb: (data: ComparisonResultTreeLeaf) => Promise<void>) => Promise<void>;
+  selectNextStory: (cb: (data: ComparisonResultTreeLeaf) => Promise<void>) => Promise<void>;
+  getDataById: (id: string) => ComparisonResultTreeLeaf | null;
 }
 
 export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn {
@@ -46,9 +51,10 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
   const expandedKeys = ref(new Set<string>());
   const highlightKey = ref<null | string>(null);
   const selectedType = ref<keyof StoriesDiffResult>("diff");
+  const selectedStory = ref<ComparisonResultTreeLeaf | null>(null) as Ref<ComparisonResultTreeLeaf | null>;
 
-  const treeData = computed<NodeData[] | null>(() => {
-    if (!_backingData.value) return null;
+  const _filteredData = computed<ComparisonResultTreeLeaf[]>(() => {
+    if (!_backingData.value) return [];
 
     const localResult = _backingData.value.result;
     const lowerCaseSearchText = searchText.value.toLowerCase();
@@ -60,9 +66,11 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
         ? { ...data, type: selectedType.value }
         : null;
     });
-    const nunNullDataOfType = filterNonNull(dataOfType);
+    return filterNonNull(dataOfType);
+  });
 
-    return getCompareResultTreeData(generateResultTreeFromList(nunNullDataOfType));
+  const treeData = computed<NodeData[] | null>(() => {
+    return getCompareResultTreeData(generateResultTreeFromList(_filteredData.value));
   });
 
   const typeOptions = computed<TypeOptions>(() => {
@@ -136,10 +144,52 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     _backingData.value = null;
   };
 
-  const selectNode = (type: keyof StoriesDiffResult, id: string) => {
+  const _storyInFilteredData = (id: string): boolean => {
+    return _filteredData.value.some(x => x.id === id);
+  };
+
+  const _getFirstStory = (): ComparisonResultTreeLeaf | null => {
+    if (_filteredData.value.length === 0) return null;
+    return _filteredData.value[0];
+  };
+
+  const _getPrevStory = (curStoryId: string): ComparisonResultTreeLeaf | null => {
+    const curIndex = _filteredData.value.findIndex(x => x.id === curStoryId);
+    if (curIndex === -1) return null;
+    const prevIndex = curIndex - 1;
+    if (prevIndex < 0) return null;
+    return _filteredData.value[prevIndex];
+  };
+
+  const _getNextStory = (curStoryId: string): ComparisonResultTreeLeaf | null => {
+    const curIndex = _filteredData.value.findIndex(x => x.id === curStoryId);
+    if (curIndex === -1) return null;
+    const nextIndex = curIndex + 1;
+    if (nextIndex >= _filteredData.value.length) return null;
+    return _filteredData.value[nextIndex];
+  };
+
+  const getDataById = (id: string): ComparisonResultTreeLeaf | null => {
     const data = _storyMetadataMap.get(id);
+    if (!data) return null;
+    if (!_backingData.value) return null;
+
+    let type: keyof StoriesDiffResult | null = null;
+    for (const x in _backingData.value.result) {
+      const typedType = x as keyof typeof _backingData.value.result;
+      if (_backingData.value.result[typedType].includes(id)) {
+        type = typedType;
+        break;
+      }
+    }
+    if (type === null) return null;
+    return { type, ...data };
+  };
+
+  const selectNode = (type: keyof StoriesDiffResult, id: string) => {
+    const data = getDataById(id);
     if (data) {
-      const tree = getCompareResultTreeData(generateResultTreeFromList([{ type, ...data }]));
+      const tree = getCompareResultTreeData(generateResultTreeFromList([{ ...data }]));
       const leaf = checkSingleBranchAndGetLeaf(tree[0]);
       if (leaf.isSingleBranch) {
         selectedType.value = type;
@@ -148,7 +198,43 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
         for (const key of allNonLeafKeys) {
           expandedKeys.value.add(key);
         }
+        selectedStory.value = data;
       }
+    }
+  };
+
+  const _selectFirstStory = async (cb: (data: ComparisonResultTreeLeaf) => Promise<void>) => {
+    const first = _getFirstStory();
+    if (first) {
+      const id = first.id;
+      selectNode(selectedType.value, id);
+      await cb(first);
+    }
+  };
+
+  const selectPrevStory = async (cb: (data: ComparisonResultTreeLeaf) => Promise<void>) => {
+    if (selectedStory.value && _storyInFilteredData(selectedStory.value.id)) {
+      const prev = _getPrevStory(selectedStory.value.id);
+      if (prev) {
+        const id = prev.id;
+        selectNode(selectedType.value, id);
+        await cb(prev);
+      }
+    } else {
+      await _selectFirstStory(cb);
+    }
+  };
+
+  const selectNextStory = async (cb: (data: ComparisonResultTreeLeaf) => Promise<void>) => {
+    if (selectedStory.value && _storyInFilteredData(selectedStory.value.id)) {
+      const next = _getNextStory(selectedStory.value.id);
+      if (next) {
+        const id = next.id;
+        selectNode(selectedType.value, id);
+        await cb(next);
+      }
+    } else {
+      await _selectFirstStory(cb);
     }
   };
 
@@ -158,6 +244,7 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     typeOptions,
     selectedType,
     highlightKey,
+    selectedStory,
     expandedKeys,
     isNullResult,
     comparisonSetSummary,
@@ -166,5 +253,8 @@ export function useComparisonResultExplorer(): UseComparisonResultExplorerReturn
     expandAll,
     collapseAll,
     selectNode,
+    selectPrevStory,
+    selectNextStory,
+    getDataById,
   };
 }

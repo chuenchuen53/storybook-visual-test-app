@@ -19,7 +19,7 @@
             :open-in-explorer="openScreenshotSetInExplorer"
             :expand-all="screenshotExpandAll"
             :collapse-all="screenshotCollapseAll"
-            :handle-select-story="updateScreenshotDisplayingImg"
+            :handle-select-story="handleSelectScreenshotStory"
           >
             <template #story-display="slotProps">
               <div class="flex gap-2">
@@ -44,7 +44,7 @@
             :expand-all="comparisonExpandAll"
             :collapse-all="comparisonCollapseAll"
             :type-options="comparisonTypeOptions"
-            :handle-select-story="updateComparisonDisplayImg"
+            :handle-select-story="handleSelectComparisonStory"
           />
         </div>
       </template>
@@ -93,8 +93,8 @@
         </div>
         <div v-else-if="currentSelectedSet.type === 'comparison'" class="size-full">
           <div class="mt-4">
-            <div class="flex items-center justify-between px-6">
-              <div id="saved-set-page-comparison-header" class="flex items-center gap-6 pb-8 pt-4">
+            <div class="mx-6 mb-6 flex items-center justify-between">
+              <div id="saved-set-page-comparison-header" class="flex items-center gap-6">
                 <div class="mr-4 font-bold">
                   {{ currentSelectedSet.data.project }}
                   <i class="pi pi-angle-right"></i>
@@ -147,7 +147,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import IconField from "primevue/iconfield";
@@ -196,9 +196,7 @@ const {
   refreshData,
   updateProject,
   updateProjectsInTab,
-  updateScreenshotDisplayingImg,
   closeSavedSet,
-  updateComparisonDisplayImg,
   screenshotExpandAll,
   screenshotCollapseAll,
   comparisonExpandAll,
@@ -206,7 +204,13 @@ const {
   openScreenshotSetInExplorer,
   openComparisonSetInExplorer,
   deleteProject,
+  handleSelectScreenshotStory,
+  selectPrevScreenshotStory,
+  selectNextScreenshotStory,
   handleClickComparisonSummaryTitle,
+  handleSelectComparisonStory,
+  selectPrevComparisonStory,
+  selectNextComparisonStory,
 } = store;
 
 const confirm = useConfirm();
@@ -260,13 +264,34 @@ const screenshot = () => {
   screenshotComparisonResult(headerNode, summaryNode);
 };
 
+const handleShortcut = (e: KeyboardEvent) => {
+  if (currentSelectedSet.value?.type === "screenshot") {
+    if (e.key === "ArrowLeft" && e.altKey) {
+      selectPrevScreenshotStory();
+    } else if (e.key === "ArrowRight" && e.altKey) {
+      selectNextScreenshotStory();
+    }
+  } else if (currentSelectedSet.value?.type === "comparison") {
+    if (e.key === "ArrowLeft" && e.altKey) {
+      selectPrevComparisonStory();
+    } else if (e.key === "ArrowRight" && e.altKey) {
+      selectNextComparisonStory();
+    }
+  }
+};
+
 onMounted(() => {
   refreshData();
+  window.addEventListener("keydown", handleShortcut);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleShortcut);
 });
 </script>
 
 <style scoped>
 .scroll-panel-height {
-  height: calc(100vh - 138px);
+  height: calc(100vh - 151px);
 }
 </style>

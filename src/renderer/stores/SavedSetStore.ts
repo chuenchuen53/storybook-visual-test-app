@@ -89,11 +89,15 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     storyTypeFilter: screenshotStoryTypeFilter,
     highlightKey: screenshotHighlightKey,
     expandedKeys: screenshotExpandedKeys,
+    selectedStory: _selectedScreenshotStory,
     treeData: screenshotTreeData,
     reset: screenshotReset,
     replaceBackingData: screenshotReplaceBackingData,
+    getDataById: _getScreenshotDataById,
     expandAll: screenshotExpandAll,
     collapseAll: screenshotCollapseAll,
+    selectPrevStory: _selectPrevScreenshotStory,
+    selectNextStory: _selectNextScreenshotStory,
   } = useStoryExplorer<StoryMetadataWithRenderStatus>();
   const { imgState: screenshotImgState, removeImg: screenshotRemoveImg, updateImg: screenshotUpdateImg } = useImage();
 
@@ -103,6 +107,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     typeOptions: comparisonTypeOptions,
     selectedType: comparisonSelectedType,
     highlightKey: comparisonHighlightKey,
+    selectedStory: _selectedComparisonStory,
     expandedKeys: comparisonExpandedKeys,
     comparisonSetSummary,
     reset: comparisonReset,
@@ -110,6 +115,9 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     expandAll: comparisonExpandAll,
     collapseAll: comparisonCollapseAll,
     selectNode,
+    selectPrevStory: _selectPrevComparisonStory,
+    selectNextStory: _selectNextComparisonStory,
+    getDataById: _getComparisonDataById,
   } = useComparisonResultExplorer();
   const {
     comparisonImageState,
@@ -235,7 +243,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     await refreshData();
   };
 
-  const updateScreenshotDisplayingImg = async (id: string) => {
+  const _updateScreenshotDisplayingImg = async (id: string) => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type === "comparison") return;
     const { project, branch, id: setId } = currentSelectedSet.value.data;
     await screenshotUpdateImg(() =>
@@ -246,6 +254,21 @@ export const useSavedSetStore = defineStore("savedSet", () => {
         id,
       }),
     );
+  };
+
+  const handleSelectScreenshotStory = async (id: string) => {
+    const story = _getScreenshotDataById(id);
+    if (!story) return;
+    await _updateScreenshotDisplayingImg(id);
+    _selectedScreenshotStory.value = story;
+  };
+
+  const selectPrevScreenshotStory = async () => {
+    await _selectPrevScreenshotStory(handleSelectScreenshotStory);
+  };
+
+  const selectNextScreenshotStory = async () => {
+    await _selectNextScreenshotStory(handleSelectScreenshotStory);
   };
 
   const _updateComparisonDisplayImg = async (type: keyof StoriesDiffResult, id: string) => {
@@ -296,15 +319,27 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     }
   };
 
-  const updateComparisonDisplayImg = async (data: ComparisonResultTreeLeaf) => {
+  const handleSelectComparisonStory = async (data: ComparisonResultTreeLeaf) => {
     if (currentSelectedSet.value === null || currentSelectedSet.value.type !== "comparison") return;
     await _updateComparisonDisplayImg(data.type, data.id);
+    _selectedComparisonStory.value = data;
   };
 
   const handleClickComparisonSummaryTitle = async (type: keyof StoriesDiffResult, id: string) => {
     if (type === "skip" || type === "same") return;
-    selectNode(type, id);
-    await _updateComparisonDisplayImg(type, id);
+    const data = _getComparisonDataById(id);
+    if (data) {
+      selectNode(type, id);
+      await _updateComparisonDisplayImg(type, id);
+    }
+  };
+
+  const selectPrevComparisonStory = async () => {
+    await _selectPrevComparisonStory(handleSelectComparisonStory);
+  };
+
+  const selectNextComparisonStory = async () => {
+    await _selectNextComparisonStory(handleSelectComparisonStory);
   };
 
   const openScreenshotSetInExplorer = () => {
@@ -426,10 +461,14 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     updateProjectsInTab,
     getAllSavedSets,
     openScreenshotSet,
-    updateScreenshotDisplayingImg,
     openComparisonSet,
-    updateComparisonDisplayImg,
+    handleSelectScreenshotStory,
+    selectPrevScreenshotStory,
+    selectNextScreenshotStory,
     handleClickComparisonSummaryTitle,
+    handleSelectComparisonStory,
+    selectPrevComparisonStory,
+    selectNextComparisonStory,
     openScreenshotSetInExplorer,
     openComparisonSetInExplorer,
     deleteScreenshotSet,

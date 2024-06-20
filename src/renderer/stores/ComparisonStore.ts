@@ -48,6 +48,7 @@ export const useComparisonStore = defineStore("comparison", () => {
     typeOptions,
     selectedType,
     highlightKey,
+    selectedStory,
     expandedKeys,
     isNullResult,
     comparisonSetSummary,
@@ -56,6 +57,9 @@ export const useComparisonStore = defineStore("comparison", () => {
     expandAll,
     collapseAll,
     selectNode,
+    selectPrevStory: _selectPrevStory,
+    selectNextStory: _selectNextStory,
+    getDataById,
   } = useComparisonResultExplorer();
 
   const { comparisonImageState, resetImgs, setSameImg, setAddedImg, setRemovedImg, setDiffImg, setSkipImg } =
@@ -280,19 +284,37 @@ export const useComparisonStore = defineStore("comparison", () => {
 
   const handleNodeSelect = async (data: ComparisonResultTreeLeaf) => {
     if (!comparisonSetSummary.value) return;
+    selectedStory.value = data;
     await _updateImg(data.type, data.id);
   };
 
   const handleClickSummaryTitle = async (type: keyof StoriesDiffResult, id: string) => {
     if (type === "skip" || type === "same") return;
-    selectNode(type, id);
-    await _updateImg(type, id);
+    const data = getDataById(id);
+    if (data) {
+      selectNode(type, id);
+      await handleNodeSelect(data);
+    }
+  };
+
+  const selectPrevStory = async () => {
+    await _selectPrevStory(handleNodeSelect);
+  };
+
+  const selectNextStory = async () => {
+    await _selectNextStory(handleNodeSelect);
+  };
+
+  const showComparisonSummary = () => {
+    resetImgs();
+    selectedStory.value = null;
   };
 
   const removeCurrentResult = () => {
     resetExplorerData();
     resetImgs();
     resetComparisonSummaryImgs();
+    selectedStory.value = null;
   };
 
   const saveScreenshot = async () => {
@@ -356,7 +378,9 @@ export const useComparisonStore = defineStore("comparison", () => {
     collapseAll,
     updateProjectsInTab,
     removeCurrentResult,
-    resetImgs,
+    showComparisonSummary,
+    selectPrevStory,
+    selectNextStory,
     handleClickSummaryTitle,
   };
 });

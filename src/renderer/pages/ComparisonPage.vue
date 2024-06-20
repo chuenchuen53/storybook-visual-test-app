@@ -21,7 +21,7 @@
         <div class="size-full">
           <ComparisonSetting v-if="isNullResult" class="basis-full" />
           <div v-else class="mt-4">
-            <div class="mx-6 mb-6 flex justify-between">
+            <div class="mx-6 mb-6 flex items-center justify-between">
               <ComparisonResultHeader
                 v-if="comparisonSetSummary"
                 id="comparison-page-header"
@@ -34,7 +34,7 @@
                   icon="pi pi-info-circle"
                   :wrapper-size="40"
                   :icon-size="16"
-                  @click="resetImgs"
+                  @click="showComparisonSummary"
                 />
                 <IconButton
                   v-else
@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import ScrollPanel from "primevue/scrollpanel";
 import IconButton from "../components/general/IconButton.vue";
 import ComparisonResultExplorer from "../components/shared/comparison-result-explorer/ComparisonResultExplorer.vue";
@@ -121,7 +121,9 @@ const {
   collapseAll,
   handleNodeSelect,
   removeCurrentResult,
-  resetImgs,
+  selectPrevStory,
+  selectNextStory,
+  showComparisonSummary,
   handleClickSummaryTitle,
 } = store;
 
@@ -134,8 +136,21 @@ const screenshot = () => {
   screenshotComparisonResult(headerNode, summaryNode);
 };
 
+const handleShortcut = (e: KeyboardEvent) => {
+  if (e.key === "ArrowLeft" && e.altKey) {
+    selectPrevStory();
+  } else if (e.key === "ArrowRight" && e.altKey) {
+    selectNextStory();
+  }
+};
+
 onMounted(() => {
   refreshData();
+  window.addEventListener("keydown", handleShortcut);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleShortcut);
 });
 </script>
 

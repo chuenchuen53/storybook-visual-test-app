@@ -16,6 +16,7 @@
         </Tooltip>
       </div>
       <div class="flex gap-[2px]">
+        <ExplorerShortcutTooltip />
         <IconButton icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" @click="expandAll" />
         <IconButton icon="pi pi-arrow-down-left-and-arrow-up-right-to-center" @click="collapseAll" />
       </div>
@@ -80,6 +81,7 @@ import Tooltip from "../../general/Tooltip.vue";
 import StyledTree from "../../general/tree/StyledTree.vue";
 import IconButton from "../../general/IconButton.vue";
 import { isLeaf } from "../../general/tree/tree-helper";
+import ExplorerShortcutTooltip from "../ExplorerShortcutTooltip.vue";
 import type { TypeOptions } from "../../../composables/useComparisonResultExplorer";
 import type { ComparisonResultTreeLeaf } from "./helper";
 import type { StoriesDiffResult } from "../../../../shared/type";
