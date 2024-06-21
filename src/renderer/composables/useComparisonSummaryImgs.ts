@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { generateSrcFromBase64Png } from "./useImage";
-import type { StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../shared/type";
+import type { GetImgResponse, StoriesDiffResult, StoryMetadataWithRenderStatus } from "../../shared/type";
 import type { ComparisonSummaryImgsProps } from "../components/shared/comparison-summary/type";
 
 interface UpdateParams {
@@ -11,6 +11,11 @@ interface UpdateParams {
   testSetId: string;
   storyMetadataList: StoryMetadataWithRenderStatus[];
   result: Record<keyof StoriesDiffResult, string[]>;
+  /**
+   *  if "saved" will be string
+   *  if "temp" will be null
+   *  */
+  setId: string | null;
 }
 
 export function useComparisonSummaryImgs() {
@@ -29,7 +34,7 @@ export function useComparisonSummaryImgs() {
   };
 
   const update = async (params: UpdateParams) => {
-    const { project, refBranch, refSetId, testBranch, testSetId, storyMetadataList, result } = params;
+    const { project, refBranch, refSetId, testBranch, testSetId, storyMetadataList, result, setId } = params;
 
     const getRefImgFn = (id: string) =>
       window.imgApi.invoke.getSavedScreenshotImg({
@@ -45,7 +50,14 @@ export function useComparisonSummaryImgs() {
         setId: testSetId,
         id,
       });
-
+    const getDiffImgFn = (id: string): Promise<GetImgResponse> =>
+      setId === null
+        ? window.imgApi.invoke.getTempComparisonDiffImg(id)
+        : window.imgApi.invoke.getSavedComparisonDiffImg({
+            project,
+            setId,
+            id,
+          });
     const map = new Map<string, StoryMetadataWithRenderStatus>();
     storyMetadataList.forEach(x => map.set(x.id, x));
 
@@ -63,8 +75,9 @@ export function useComparisonSummaryImgs() {
     comparisonSetSummaryImgs.value.diff = result.diff.map(x => ({
       id: x,
       title: getTitle(x),
-      leftImg: initImgState(),
-      rightImg: initImgState(),
+      refImg: initImgState(),
+      testImg: initImgState(),
+      diffImg: initImgState(),
     }));
     comparisonSetSummaryImgs.value.added = result.added.map(x => ({
       id: x,
@@ -79,17 +92,23 @@ export function useComparisonSummaryImgs() {
 
     await Promise.all(
       comparisonSetSummaryImgs.value.diff.map(async (x, i) => {
-        const left = await getRefImgFn(x.id);
-        const right = await getTestImgFn(x.id);
-        comparisonSetSummaryImgs.value.diff[i].leftImg = {
+        const refImg = await getRefImgFn(x.id);
+        const testImg = await getTestImgFn(x.id);
+        const diffImg = await getDiffImgFn(x.id);
+        comparisonSetSummaryImgs.value.diff[i].refImg = {
           loading: false,
-          isExist: left.isExist,
-          src: left.base64 ? generateSrcFromBase64Png(left.base64) : null,
+          isExist: refImg.isExist,
+          src: generateSrcFromBase64Png(refImg.base64),
         };
-        comparisonSetSummaryImgs.value.diff[i].rightImg = {
+        comparisonSetSummaryImgs.value.diff[i].testImg = {
           loading: false,
-          isExist: right.isExist,
-          src: right.base64 ? generateSrcFromBase64Png(right.base64) : null,
+          isExist: testImg.isExist,
+          src: generateSrcFromBase64Png(testImg.base64),
+        };
+        comparisonSetSummaryImgs.value.diff[i].diffImg = {
+          loading: false,
+          isExist: testImg.isExist,
+          src: generateSrcFromBase64Png(diffImg.base64),
         };
       }),
     );

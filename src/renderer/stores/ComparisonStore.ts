@@ -113,6 +113,7 @@ export const useComparisonStore = defineStore("comparison", () => {
           testSetId,
           storyMetadataList,
           result,
+          setId: null,
         });
       } else {
         _toast.add({

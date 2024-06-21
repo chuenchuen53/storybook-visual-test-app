@@ -5,9 +5,10 @@
       <button class="mb-4 cursor-pointer hover:underline" @click="$emit('clickTitle', 'diff', x.id)">
         {{ x.title }}
       </button>
-      <div class="grid grid-cols-2 grid-rows-1 gap-4">
-        <StyledImg :img="x.leftImg" alt="screenshot" class="justify-self-end" />
-        <StyledImg :img="x.rightImg" alt="screenshot" />
+      <div class="grid grid-cols-2 grid-rows-2 gap-4">
+        <StyledImg :img="x.refImg" alt="screenshot" class="justify-self-end" />
+        <StyledImg :img="x.testImg" alt="screenshot" />
+        <StyledImg class="col-start-2" :img="x.diffImg" alt="screenshot" />
       </div>
     </div>
   </section>

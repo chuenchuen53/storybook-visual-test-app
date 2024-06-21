@@ -220,7 +220,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
     comparisonReplaceBackingData(data.metadata, data.storyMetadataList);
     resetComparisonImgs();
     const { metadata, storyMetadataList } = data;
-    const { project, refBranch, testBranch, refSetId, testSetId, result } = metadata;
+    const { project, id, refBranch, testBranch, refSetId, testSetId, result } = metadata;
     await updateComparisonSummaryImgs({
       project,
       refBranch,
@@ -229,6 +229,7 @@ export const useSavedSetStore = defineStore("savedSet", () => {
       testSetId,
       storyMetadataList,
       result,
+      setId: id,
     });
   };
 

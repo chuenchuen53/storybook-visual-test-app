@@ -3,8 +3,9 @@ import type { ImageState } from "../../../composables/useImage";
 interface DiffInfo {
   id: string;
   title: string;
-  leftImg: ImageState;
-  rightImg: ImageState;
+  refImg: ImageState;
+  testImg: ImageState;
+  diffImg: ImageState;
 }
 
 interface SimpleImgInfo {
